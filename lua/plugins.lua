@@ -101,6 +101,7 @@ return packer.startup(function(use)
 	use("rafamadriz/friendly-snippets") -- a bunch of snippets to use
 
 	-- custom plugins
+	use("tridactyl/vim-tridactyl") -- VIM syntax plugin for Tridactyl configuration files
   -- motion
   use {
     'phaazon/hop.nvim',
