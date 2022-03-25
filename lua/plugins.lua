@@ -102,6 +102,42 @@ return packer.startup(function(use)
 
 	-- custom plugins
 	use("tridactyl/vim-tridactyl") -- VIM syntax plugin for Tridactyl configuration files
+  use("elkowar/yuck.vim")
+  use {
+        'RRethy/vim-hexokinase',
+        run = 'make hexokinase',
+        config = function()
+            vim.g.Hexokinase_highlighters = {'backgroundfull'}
+            vim.g.Hexokinase_optInPatterns = {
+                'full_hex', 'rgb', 'rgba', 'hsl', 'hsla'
+            }
+        end
+    }
+
+  -- use "norcalli/nvim-colorizer.lua"
+  use({
+    "mvllow/modes.nvim",
+    config=function ()
+      require('modes').setup({
+        colors = {
+          copy = "#f5c359",
+          delete = "#c75c6a",
+          insert = "#78ccc5",
+          visual = "#9745be",
+        },
+
+  -- Cursorline highlight opacity
+  line_opacity = 0.1,
+
+  -- Highlight cursor
+  set_cursor = true,
+
+  -- Highlight in active window only
+  focus_only = false
+})
+    end
+
+  })
   -- motion
   use {
     'phaazon/hop.nvim',
