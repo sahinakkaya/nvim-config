@@ -87,7 +87,18 @@ local mappings = {
     q = {":Bdelete<CR>", "Delete buffer"}
   },
   ["<tab>"] = { "<C-^>", "Alternate file" },
-  ['r'] = { ':set invrelativenumber<CR>', 'Toggle relative number' },
+  -- ['r'] = { ':set invrelativenumber<CR>', 'Toggle relative number' },
+  ['r'] = {
+    name = "Rotate windows",
+    ["h"] = { "<C-W>H", "Move window to far left" },
+    ["l"] = { "<C-W>L", "Move window to far right" },
+    ["j"] = { "<C-W>J", "Move window to very top" },
+    ["k"] = { "<C-W>K", "Move window to very bottom" },
+    ["r"] = { "<C-W>r", "Rotate windows to down/right" },
+    ["R"] = { "<C-W>R", "Rotate windows to up/left" },
+    ["s"] = { "<C-W>x", "Swap with closest to right" },
+
+  },
   ['\\'] = {':vnew<CR>', 'vsplit'},
   ['-'] = {':new<CR>', 'hsplit'},
   ["e"] = { ":NvimTreeToggle<CR>", "Explorer" },
