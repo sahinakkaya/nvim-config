@@ -142,6 +142,13 @@ return packer.startup(function(use)
   --     'glacambre/firenvim',
   --     run = function() vim.fn['firenvim#install'](0) end 
   -- }
+  use {
+    'iamcco/markdown-preview.nvim',
+    run = 'cd app && npm install',
+    ft = 'markdown',
+    cmd = 'MarkdownPreview',
+    config = function() vim.g.mkdp_auto_start = 1 end
+  }
   -- motion
   use {
     'phaazon/hop.nvim',
