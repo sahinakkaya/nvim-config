@@ -35,6 +35,8 @@ return packer.startup(function(use)
 	use {
 	  "lewis6991/impatient.nvim",
 	}
+  use {"mbbill/undotree"}
+
 
 	use("wbthomason/packer.nvim") -- Have packer manage itself
 	use("nvim-lua/popup.nvim") -- An implementation of the Popup API from vim in Neovim
