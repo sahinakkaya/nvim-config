@@ -1,3 +1,4 @@
+require("impatient").enable_profile()
 require "options"
 require "lsp"
 require "keymaps"
