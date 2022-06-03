@@ -50,7 +50,9 @@ require'nvim-tree'.setup {
     preserve_window_proportions = false,
     mappings = {
       custom_only = false,
-      list = {}
+      list = {
+        { key = "C", action = "cd" },
+      }
     },
     number = true,
     relativenumber = true,
