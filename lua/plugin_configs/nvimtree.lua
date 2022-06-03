@@ -6,7 +6,6 @@ require'nvim-tree'.setup {
   open_on_setup        = true, -- default false
   ignore_buffer_on_setup = false,
   ignore_ft_on_setup   = {},
-  auto_close           = true, -- autoclose nvim if tree is last buffer
   auto_reload_on_write = true,
   open_on_tab          = false,
   hijack_cursor        = true, -- keep the cursor on the file name
