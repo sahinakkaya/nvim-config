@@ -205,7 +205,6 @@ keymap("i", '<C-s>', '<c-g>u<Esc>[s1z=`]a<c-g>u', opts)
 -- autocommands
 local M = {}
 M.autocmds = {}
-
 M.autocmds.last_location = {
   { "BufReadPost", "*", callback=function()
     if vim.fn.line("'\"") > 0 and vim.fn.line("'\"") <= vim.fn.line("$") then
@@ -213,6 +212,7 @@ M.autocmds.last_location = {
       vim.api.nvim_feedkeys('zz', 'n', true)
     end
   end }, -- start where you left off
+  { "BufWritePost", os.getenv('HOME') .. "/.config/kitty/kitty.conf", "silent !kill -SIGUSR1 $(pgrep kitty)"}, -- reload kitty when config changes
 }
 
 -- creates group if not exists, deletes group if it exists
