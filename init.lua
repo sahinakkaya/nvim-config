@@ -212,7 +212,11 @@ M.autocmds.last_location = {
       vim.api.nvim_feedkeys('zz', 'n', true)
     end
   end }, -- start where you left off
-  { "BufWritePost", os.getenv('HOME') .. "/.config/kitty/kitty.conf", "silent !kill -SIGUSR1 $(pgrep kitty)"}, -- reload kitty when config changes
+}
+
+M.autocmds.auto_reload_config = { -- reload programs when their config changes
+  { "BufWritePost", os.getenv('HOME') .. "/.config/kitty/kitty.conf", "silent !kill -SIGUSR1 $(pgrep kitty)"},
+  { "BufWritePost", os.getenv('HOME') .. "/.config/tmux/tmux.conf", "silent !tmux source-file ~/.config/tmux/tmux.conf"},
 }
 
 -- creates group if not exists, deletes group if it exists
