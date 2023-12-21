@@ -366,6 +366,13 @@ require("lazy").setup({
       vim.api.nvim_command("runtime macros/sandwich/keymap/surround.vim")
     end,
   },
+  {
+    "windwp/nvim-autopairs",
+    event = "InsertEnter",
+    config = function()
+      -- require("plugin_configs.autopairs")
+    end,
+  },
 })
 
 
