@@ -1,6 +1,10 @@
+-- vim:fileencoding=utf-8:foldmethod=marker
+
+
 vim.g.transparent_enabled = false
 local fn = vim.fn
 
+-- Options {{{
 local options = {
   backup = true,                          -- creates a backup file
   backupdir = os.getenv('HOME') .. '/.cache/nvim/backup',
@@ -66,8 +70,9 @@ for _, path in pairs(vim.api.nvim_list_runtime_paths()) do
 end
 
 -- vim.api.cmd('set formatoptions-=cro') -- TODO: this doesn't seem to work
---
+--: }}}
 
+-- {{{ Keymaps
 local opts = { noremap = true, silent = true }
 
 -- local term_opts = { silent = true }
@@ -202,8 +207,9 @@ keymap("i", '<C-k>', '<C-o>d$', opts)
 keymap("i", '<C-u>', '<C-o>d^', opts)
 keymap("i", '<C-s>', '<c-g>u<Esc>[s1z=`]a<c-g>u', opts)
 
+--: }}}
 
--- autocommands
+-- {{{ Autocommands
 local M = {}
 M.autocmds = {}
 M.autocmds.last_location = {
@@ -258,10 +264,9 @@ end
 
 M.define_augroups(M.autocmds)
 
--- autocommands
+-- }}}
 
-
-
+-- {{{ Plugins
 
 local lazypath = fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not vim.loop.fs_stat(lazypath) then
@@ -283,7 +288,18 @@ require("lazy").setup({
     priority = 1000, -- make sure to load this before all the other start plugins
     config = function()
       -- load the colorscheme here
+      -- require("plugin_configs.colorscheme")
       vim.cmd([[colorscheme tokyonight]])
+    end,
+  },
+  "JoosepAlviste/nvim-ts-context-commentstring",
+ 	{
+    "numToStr/Comment.nvim",
+    keys = {"gc", "gb"},
+    config = function()
+      require("Comment").setup({
+        pre_hook = require("ts_context_commentstring.integrations.comment_nvim").create_pre_hook(),
+      })
     end,
   },
  	{
@@ -298,3 +314,6 @@ require("lazy").setup({
   { "folke/neoconf.nvim", cmd = "Neoconf" },
   "folke/neodev.nvim",
 })
+
+
+-- }}}
