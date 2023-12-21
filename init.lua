@@ -371,7 +371,34 @@ require("lazy").setup({
     "windwp/nvim-autopairs",
     event = "InsertEnter",
     config = function()
-      -- require("plugin_configs.autopairs")
+      require("nvim-autopairs").setup {
+        check_ts = true,
+        disable_in_macro=true,
+        -- ts_config = {
+        --   lua = { "string", "source" },
+        --   javascript = { "string", "template_string" },
+        --   java = false,
+        -- },
+        disable_filetype = {"TelescopePrompt", "spectre_panel"},
+
+        fast_wrap = {
+          map = '<C-j>',
+          chars = { '{', '[', '(', '"', "'" },
+          pattern = [=[[%'%"%)%>%]%)%}%,]]=],
+          end_key = 'l',
+          keys = 'jk;uiopynmasdfgqwertzxcvb',
+          check_comma = true,
+          highlight = 'IncSearch',
+          highlight_grey='Comment'
+        },
+      }
+
+      -- local cmp_autopairs = require "nvim-autopairs.completion.cmp"
+      -- local cmp_status_ok, cmp = pcall(require, "cmp")
+      -- if not cmp_status_ok then
+      --   return
+      -- end
+      -- cmp.event:on("confirm_done", cmp_autopairs.on_confirm_done())
     end,
   },
 })
