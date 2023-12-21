@@ -3,11 +3,14 @@
 
 vim.g.transparent_enabled = false
 local fn = vim.fn
+local home = os.getenv('HOME')
+local config = home .. '/.config/'
+local nconf = config .. 'nvim/'
 
 -- Options {{{
 local options = {
   backup = true,                          -- creates a backup file
-  backupdir = os.getenv('HOME') .. '/.cache/nvim/backup',
+  backupdir = home .. '/.cache/nvim/backup',
 
   undofile = true,                         -- enable persistent undo
   swapfile = false,                        -- creates a swapfile
@@ -231,8 +234,8 @@ M.autocmds.last_location = {
 }
 
 M.autocmds.auto_reload_config = { -- reload programs when their config changes
-  { "BufWritePost", os.getenv('HOME') .. "/.config/kitty/kitty.conf", "silent !kill -SIGUSR1 $(pgrep kitty)"},
-  { "BufWritePost", os.getenv('HOME') .. "/.config/tmux/tmux.conf", "silent !tmux source-file ~/.config/tmux/tmux.conf"},
+  { "BufWritePost", config .. "kitty/kitty.conf", "silent !kill -SIGUSR1 $(pgrep kitty)"},
+  { "BufWritePost", config .. "tmux/tmux.conf", "silent !tmux source-file ~/.config/tmux/tmux.conf"},
 }
 
 
