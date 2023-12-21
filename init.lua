@@ -212,6 +212,15 @@ keymap("i", '<C-s>', '<c-g>u<Esc>[s1z=`]a<c-g>u', opts)
 -- {{{ Autocommands
 local M = {}
 M.autocmds = {}
+
+
+M.autocmds.general_settings = {
+  { 
+    "TextYankPost",
+    "*",
+    "silent!lua require('vim.highlight').on_yank({higroup = 'Visual', timeout = 200}) ",
+  },-- flash what is yanked
+}
 M.autocmds.last_location = {
   { "BufReadPost", "*", callback=function()
     if fn.line("'\"") > 0 and fn.line("'\"") <= fn.line("$") then
@@ -224,6 +233,15 @@ M.autocmds.last_location = {
 M.autocmds.auto_reload_config = { -- reload programs when their config changes
   { "BufWritePost", os.getenv('HOME') .. "/.config/kitty/kitty.conf", "silent !kill -SIGUSR1 $(pgrep kitty)"},
   { "BufWritePost", os.getenv('HOME') .. "/.config/tmux/tmux.conf", "silent !tmux source-file ~/.config/tmux/tmux.conf"},
+}
+
+
+M.autocmds.cursorline = {
+  { {"VimEnter","WinEnter","BufWinEnter", "BufEnter"}, "*", "setlocal cursorline" },
+  { {"VimLeave","WinLeave","BufWinLeave", "BufLeave"}, "*", "setlocal nocursorline" },
+
+  -- {"InsertLeave", "*", "highlight CursorLine guibg=#c4c8da"},
+  -- {"InsertEnter", "*", "highlight CursorLine guibg=none"},
 }
 
 -- creates group if not exists, deletes group if it exists
