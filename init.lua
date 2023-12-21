@@ -314,7 +314,7 @@ require("lazy").setup({
     end,
   },
   "JoosepAlviste/nvim-ts-context-commentstring",
- 	{
+  {
     "numToStr/Comment.nvim",
     keys = {
       {"gc", mode={"n", "v"}}, 
@@ -326,15 +326,27 @@ require("lazy").setup({
       })
     end,
   },
- 	{
- 		"christoomey/vim-tmux-navigator",
+  {
+    "christoomey/vim-tmux-navigator",
     keys = {"<C-l>", "<C-h>", "<C-j>", "<C-k>"},
- 		config = function()
- 			vim.g.tmux_navigator_disable_when_zoomed = 1
- 			vim.g.tmux_navigator_no_wrap = 1
- 		end,
- 	},
-  "folke/which-key.nvim",
+    config = function()
+      vim.g.tmux_navigator_disable_when_zoomed = 1
+      vim.g.tmux_navigator_no_wrap = 1
+    end,
+  },
+  {
+    "folke/which-key.nvim",
+    event = "VeryLazy",
+    init = function()
+      vim.o.timeout = true
+      vim.o.timeoutlen = 300
+    end,
+    opts = {
+      -- your configuration comes here
+      -- or leave it empty to use the default settings
+      -- refer to the configuration section below
+    }
+  },
   -- require("plugin_configs.whichkey")
  
   { "folke/neoconf.nvim", cmd = "Neoconf" },
