@@ -311,8 +311,25 @@ require("lazy").setup({
  		end,
  	},
   "folke/which-key.nvim",
+  -- require("plugin_configs.whichkey")
+ 
   { "folke/neoconf.nvim", cmd = "Neoconf" },
   "folke/neodev.nvim",
+
+  {
+    -- https://github.com/machakann/vim-sandwich/issues/115#issuecomment-940869113
+    "machakann/vim-sandwich",
+    keys = {
+      {"ds"}, 
+      {"ys"},
+      {"yS"},
+      {"cs"},
+      {"S", mode="v"},
+    },
+    config = function()
+      vim.api.nvim_command("runtime macros/sandwich/keymap/surround.vim")
+    end,
+  },
 })
 
 
