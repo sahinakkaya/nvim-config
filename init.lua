@@ -339,7 +339,7 @@ require("lazy").setup({
     event = "VeryLazy",
     init = function()
       vim.o.timeout = true
-      vim.o.timeoutlen = 300
+      vim.o.timeoutlen = 500
     end,
     opts = {
       -- your configuration comes here
@@ -351,6 +351,7 @@ require("lazy").setup({
  
   { "folke/neoconf.nvim", cmd = "Neoconf" },
   "folke/neodev.nvim",
+  {"mbbill/undotree", cmd={"UndotreeToggle", "UndotreeShow"}}, 
 
   {
     -- https://github.com/machakann/vim-sandwich/issues/115#issuecomment-940869113
