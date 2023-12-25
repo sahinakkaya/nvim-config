@@ -11,6 +11,7 @@ local nconf = config .. 'nvim/'
 local options = {
   backup = true,                          -- creates a backup file
   backupdir = home .. '/.cache/nvim/backup',
+  background = 'dark',
 
   undofile = true,                         -- enable persistent undo
   swapfile = false,                        -- creates a swapfile
@@ -239,6 +240,15 @@ M.autocmds.auto_reload_config = { -- reload programs when their config changes
 }
 
 
+M.autocmds.filetype_specific = {
+  {
+    "FileType",
+    "gitcommit,markdown,plaintex,text",
+    "setlocal wrap | setlocal spell",
+  },
+}
+
+
 M.autocmds.cursorline = {
   { {"VimEnter","WinEnter","BufWinEnter", "BufEnter"}, "*", "setlocal cursorline" },
   { {"VimLeave","WinLeave","BufWinLeave", "BufLeave"}, "*", "setlocal nocursorline" },
@@ -341,18 +351,25 @@ require("lazy").setup({
       vim.o.timeout = true
       vim.o.timeoutlen = 500
     end,
-    opts = {
-      -- your configuration comes here
-      -- or leave it empty to use the default settings
-      -- refer to the configuration section below
-    }
+    config = function()
+      require("config.whichkey")
+    end,
   },
-  -- require("plugin_configs.whichkey")
  
   { "folke/neoconf.nvim", cmd = "Neoconf" },
   "folke/neodev.nvim",
-  {"mbbill/undotree", cmd={"UndotreeToggle", "UndotreeShow"}}, 
-
+  {
+      "nvim-neo-tree/neo-tree.nvim",
+      cmd={"Neotree"},
+      branch = "v3.x",
+      dependencies = {
+        "nvim-lua/plenary.nvim",
+        "nvim-tree/nvim-web-devicons", -- not strictly required, but recommended
+        "MunifTanjim/nui.nvim",
+        -- "3rd/image.nvim", -- Optional image support in preview window: See `# Preview Mode` for more information
+      }
+  },
+  {"mbbill/undotree", cmd={"UndotreeToggle", "UndotreeShow"}},
   {
     -- https://github.com/machakann/vim-sandwich/issues/115#issuecomment-940869113
     "machakann/vim-sandwich",
@@ -401,7 +418,16 @@ require("lazy").setup({
       -- cmp.event:on("confirm_done", cmp_autopairs.on_confirm_done())
     end,
   },
-})
+
+  -- specific filetype plugins
+  {
+    "tridactyl/vim-tridactyl",
+    ft = "tridactyl"
+  },
+}, { 
+  install = {
+    colorscheme = {"tokyonight", "habamax" },
+  },})
 
 
 -- }}}
