@@ -9,16 +9,9 @@ local data = home .. '/.local/share/'
 local nconf = config .. 'nvim/'
 
 
-
-
-function os.capture(cmd)
-  local f = assert(io.popen(cmd, "r"))
-  local s = assert(f:read("*a"))
-  f:close()
-  s = string.gsub(s, "^%s+", "")
-  s = string.gsub(s, "%s+$", "")
-  s = string.gsub(s, "[\n\r]+", " ")
-  return s
+local function get_output(cmd)
+  local f = vim.fn.system(cmd)
+  return string.lower(f:gsub("%s+", ""))
 end
 
 -- Options {{{
@@ -334,7 +327,7 @@ require("lazy").setup({
     config = function()
       -- load the colorscheme here
       -- require("plugin_configs.colorscheme")
-      vim.o.background = os.capture("darkman get")
+      vim.o.background = get_output("darkman get")
       vim.cmd([[colorscheme tokyonight]])
     end,
   },
