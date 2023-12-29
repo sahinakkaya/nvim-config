@@ -5,6 +5,7 @@ vim.g.transparent_enabled = false
 local fn = vim.fn
 local home = os.getenv('HOME')
 local config = home .. '/.config/'
+local data = home .. '/.local/share/'
 local nconf = config .. 'nvim/'
 
 -- Options {{{
@@ -323,6 +324,18 @@ require("lazy").setup({
       vim.cmd([[colorscheme tokyonight]])
     end,
   },
+  {
+      'vimwiki/vimwiki',
+      ft='vimwiki',
+      keys = {"<Space>ww"},
+  },
+  {
+    "tools-life/taskwiki", 
+    ft="vimwiki", 
+    config = function()
+      vim.g.taskwiki_taskrc_location = config .. 'task/taskrc'
+      vim.g.taskwiki_data_location = data .. 'task'
+    end},
   "JoosepAlviste/nvim-ts-context-commentstring",
   {
     "numToStr/Comment.nvim",

@@ -92,16 +92,16 @@ local mappings = {
   ["-"] = { ":new<CR>", "hsplit" },
   e = { ":Neotree toggle<CR>", "Explorer" },
   u = { ":UndotreeToggle<CR>", "Toggle undotree" },
-  w = {
-    name = "windows",
-    h = { "<C-W>H", "Move window to far left" },
-    l = { "<C-W>L", "Move window to far right" },
-    j = { "<C-W>J", "Move window to very top" },
-    k = { "<C-W>K", "Move window to very bottom" },
-    s = { "<C-W>x", "Swap with closest to right" },
-    w = { "<C-W>r", "Rotate windows to down/right" },
-    W = { "<C-W>R", "Rotate windows to up/left" },
-  },
+  -- w = {
+  --   name = "windows",
+  --   h = { "<C-W>H", "Move window to far left" },
+  --   l = { "<C-W>L", "Move window to far right" },
+  --   j = { "<C-W>J", "Move window to very top" },
+  --   k = { "<C-W>K", "Move window to very bottom" },
+  --   s = { "<C-W>x", "Swap with closest to right" },
+  --   w = { "<C-W>r", "Rotate windows to down/right" },
+  --   W = { "<C-W>R", "Rotate windows to up/left" },
+  -- },
 }
 
 whichkey.register(mappings, opts)
