@@ -6,24 +6,19 @@ local fn = vim.fn
 local home = os.getenv('HOME')
 local config = home .. '/.config/'
 local data = home .. '/.local/share/'
-local nconf = config .. 'nvim/'
+local nconf = fn.stdpath("config")
 
-
-local function get_output(cmd)
-  local f = vim.fn.system(cmd)
-  return string.lower(f:gsub("%s+", ""))
-end
 
 -- Options {{{
 local options = {
-  backup = true,                          -- creates a backup file
+  backup = true, -- creates a backup file
   backupdir = home .. '/.cache/nvim/backup',
   background = 'dark',
 
-  undofile = true,                         -- enable persistent undo
-  swapfile = false,                        -- creates a swapfile
-  writebackup = false,                     -- if a file is being edited by another program (or was written to file while editing with another program), it is not allowed to be edited
-  termguicolors = true,                    -- set term gui colors (most terminals support this)
+  undofile = true,      -- enable persistent undo
+  swapfile = false,     -- creates a swapfile
+  writebackup = false,  -- if a file is being edited by another program (or was written to file while editing with another program), it is not allowed to be edited
+  termguicolors = true, -- set term gui colors (most terminals support this)
   mousemoveevent = true,
 
   spell = false,
@@ -37,34 +32,40 @@ local options = {
   ignorecase = true,                       -- ignore case in search patterns
   mouse = "a",                             -- allow the mouse to be used in neovim
   pumheight = 10,                          -- pop up menu height
-  pumblend = 0,                           -- pop up menu transparency
+  pumblend = 0,                            -- pop up menu transparency
   -- winblend = 10,
   showmode = false,                        -- we don't need to see things like -- INSERT -- anymore
   showtabline = 2,                         -- always show tabs
   smartcase = true,                        -- smart case
   -- smartindent = true,                      -- make indenting smarter again
-  splitbelow = true,                       -- force all horizontal splits to go below current window
-  splitright = true,                       -- force all vertical splits to go to the right of current window
+  splitbelow = false,                       -- force all horizontal splits to go below current window
+  splitright = false,                       -- force all vertical splits to go to the right of current window
   timeoutlen = 500,                        -- time to wait for a mapped sequence to complete (in milliseconds)
   updatetime = 300,                        -- faster completion (4000ms default)
   expandtab = true,                        -- convert tabs to spaces
   shiftwidth = 2,                          -- the number of spaces inserted for each indentation
   tabstop = 2,                             -- insert 2 spaces for a tab
-  cursorline = false,                       -- highlight the current line
+  cursorline = false,                      -- highlight the current line
   number = true,                           -- set numbered lines
-  relativenumber = true,                  -- set relative numbered lines
+  relativenumber = true,                   -- set relative numbered lines
   numberwidth = 4,                         -- set number column width to 2 {default 4}
   signcolumn = "yes",                      -- always show the sign column, otherwise it would shift the text each time
-  wrap = true,                            -- display lines in multiple lines
-  scrolloff = 4,                           -- show at least n number of lines before after cursor
+  wrap = true,                             -- display lines in multiple lines
+  scrolloff = 999,                         -- show at least n number of lines before after cursor
   sidescrolloff = 6,
   guifont = "monospace:h17",               -- the font used in graphical neovim applications
-  -- foldmethod = "expr",
-  -- foldlevelstart = 99,
-  -- foldexpr = "nvim_treesitter#foldexpr()",
+  foldmethod = "expr",
+  foldlevelstart = 4,
+  foldenable = false,
+  foldexpr = "nvim_treesitter#foldexpr()",
+
+  virtualedit = "block",
+  inccommand = "split"
+
   -- foldclose = 'all',
   -- foldopen = 'all',
 
+  -- mousescroll = "ver:1,hor:6"
 }
 
 vim.opt.shortmess:append "c"
@@ -97,11 +98,13 @@ vim.g.maplocalleader = "\\"
 
 keymap("n", vim.g.maplocalleader, "<cmd>lua require'which-key'.show('\\\\', {mode='n'})<cr>", opts)
 keymap("n", "<C-s>", ":w | echo 'do not forget to remove me' | luafile %<CR>", opts)
-keymap("n", ";", ":", {noremap=true})
-keymap("n", ":", ";", {noremap=true})
-keymap("v", ";", ":", {noremap=true})
-keymap("v", ":", ";", {noremap=true})
+-- keymap("n", ";", ":", {noremap=true})
+-- keymap("n", ":", ";", {noremap=true})
+-- keymap("v", ";", ":", {noremap=true})
+-- keymap("v", ":", ";", {noremap=true})
 
+keymap("n", "<leader>;", ":", {noremap=true})
+keymap("v", "<leader>;", ":", {noremap=true})
 
 -- Increment/decrement
 keymap('n', '+', '<C-a>', opts)
@@ -121,8 +124,10 @@ keymap('n', '<C-a>', 'ggVG', opts)
 -- Normal --
 -- Go to the repo under cursor
 -- Ex: press gr -> "sahinakkayadev/dotfiles"
--- for complete urls, press gx. 
-keymap("n", "gr", ':let url = "https://github.com/" . split(expand("<cWORD>"), "\\"")[0]  | exe "silent! ! xdg-open " . url | echo "Visit repo: " . url <CR>', opts)
+-- for complete urls, press gx.
+keymap("n", "gr",
+  ':let url = "https://github.com/" . split(expand("<cWORD>"), "\\"")[0]  | exe "silent! ! xdg-open " . url | echo "Visit repo: " . url <CR>',
+  opts)
 
 -- Resize with arrows
 keymap("n", "<C-Up>", ":resize -2<CR>", opts)
@@ -133,9 +138,9 @@ keymap("n", "<C-Right>", ":vertical resize +2<CR>", opts)
 
 -- When text is wrapped, move by terminal rows, not lines, unless a count is provided
 keymap('n', 'j', '(v:count == 0 ? "gj" : "j")',
-                        {noremap = true, expr = true, silent = true})
+  { noremap = true, expr = true, silent = true })
 keymap('n', 'k', '(v:count == 0 ? "gk" : "k")',
-                        {noremap = true, expr = true, silent = true})
+  { noremap = true, expr = true, silent = true })
 
 
 -- noremap gf :call CreateFile(expand("<cfile>"))<CR>
@@ -168,12 +173,6 @@ keymap("i", "jk", "<ESC>", opts)
 keymap("i", "JK", "<ESC>", opts)
 -- keymap("i", "<ESC>", "<NOP>", opts) -- disable esc to get used to above mappings
 
-
--- vim sandwich keymaps
-vim.keymap.set('x', 'is', '<Plug>(textobj-sandwich-query-i)')
-vim.keymap.set('x', 'as', '<Plug>(textobj-sandwich-query-a)')
-vim.keymap.set('o', 'is', '<Plug>(textobj-sandwich-query-i)')
-vim.keymap.set('o', 'as', '<Plug>(textobj-sandwich-query-a)')
 
 -- Visual --
 -- Stay in indent mode
@@ -226,24 +225,30 @@ M.autocmds = {}
 
 
 M.autocmds.general_settings = {
-  { 
-    "TextYankPost",
-    "*",
-    "silent!lua require('vim.highlight').on_yank({higroup = 'Visual', timeout = 200}) ",
-  },-- flash what is yanked
+  { "FileType", "qf,help,man,lspinfo,fugitive,notify,checkhealth", "nnoremap <silent> <buffer> q :close<CR> " },
+  -- {
+  --   "TextYankPost",
+  --   "*",
+  --   "silent!lua require('vim.highlight').on_yank({higroup = 'Visual', timeout = 200}) ",
+  --
+  -- },-- flash what is yanked
 }
 M.autocmds.last_location = {
-  { "BufReadPost", "*", callback=function()
-    if fn.line("'\"") > 0 and fn.line("'\"") <= fn.line("$") then
-      fn.setpos('.', fn.getpos("'\""))
-      vim.api.nvim_feedkeys('zz', 'n', true)
+  {
+    "BufReadPost",
+    "*",
+    callback = function()
+      if fn.line("'\"") > 0 and fn.line("'\"") <= fn.line("$") then
+        fn.setpos('.', fn.getpos("'\""))
+        vim.api.nvim_feedkeys('zz', 'n', true)
+      end
     end
-  end }, -- start where you left off
+  }, -- start where you left off
 }
 
 M.autocmds.auto_reload_config = { -- reload programs when their config changes
-  { "BufWritePost", config .. "kitty/kitty.conf", "silent !kill -SIGUSR1 $(pgrep kitty)"},
-  { "BufWritePost", config .. "tmux/tmux.conf", "silent !tmux source-file ~/.config/tmux/tmux.conf"},
+  { "BufWritePost", config .. "kitty/kitty.conf", "silent !kill -SIGUSR1 $(pgrep kitty)" },
+  { "BufWritePost", config .. "tmux/tmux.conf",   "silent !tmux source-file ~/.config/tmux/tmux.conf" },
 }
 
 
@@ -253,12 +258,14 @@ M.autocmds.filetype_specific = {
     "gitcommit,markdown,plaintex,text",
     "setlocal wrap | setlocal spell",
   },
+
+  { "BufReadPost", "*.wiki", "set filetype=vimwiki" },
 }
 
 
 M.autocmds.cursorline = {
-  { {"VimEnter","WinEnter","BufWinEnter", "BufEnter"}, "*", "setlocal cursorline" },
-  { {"VimLeave","WinLeave","BufWinLeave", "BufLeave"}, "*", "setlocal nocursorline" },
+  { { "VimEnter", "WinEnter", "BufWinEnter", "BufEnter" }, "*", "setlocal cursorline" },
+  { { "VimLeave", "WinLeave", "BufWinLeave", "BufLeave" }, "*", "setlocal nocursorline" },
 
   -- {"InsertLeave", "*", "highlight CursorLine guibg=#c4c8da"},
   -- {"InsertEnter", "*", "highlight CursorLine guibg=none"},
@@ -281,7 +288,6 @@ function M.toggle_group(group_name, notify)
       else
         vim.api.nvim_create_autocmd(event, { group = id, pattern = pattern, callback = callback })
       end
-
     end
   else
     if notify then
@@ -289,22 +295,19 @@ function M.toggle_group(group_name, notify)
     end
     vim.api.nvim_clear_autocmds({ group = group_name })
   end
-
-
 end
 
 function M.define_augroups(definitions)
   for group_name, _ in pairs(definitions) do
     M.toggle_group(group_name, false)
   end
-
 end
 
 M.define_augroups(M.autocmds)
 
 -- }}}
 
--- {{{ Plugins
+
 
 local lazypath = fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not vim.loop.fs_stat(lazypath) then
@@ -320,134 +323,39 @@ end
 vim.opt.rtp:prepend(lazypath)
 
 require("lazy").setup({
-  {
-    "folke/tokyonight.nvim",
-    lazy = false, -- make sure we load this during startup if it is your main colorscheme
-    priority = 1000, -- make sure to load this before all the other start plugins
-    config = function()
-      -- load the colorscheme here
-      -- require("plugin_configs.colorscheme")
-      vim.o.background = get_output("darkman get")
-      vim.cmd([[colorscheme tokyonight]])
-    end,
-  },
-  {
-      'vimwiki/vimwiki',
-      ft='vimwiki',
-      keys = {"<Space>ww"},
-  },
-  {
-    "tools-life/taskwiki", 
-    ft="vimwiki", 
-    config = function()
-      vim.g.taskwiki_taskrc_location = config .. 'task/taskrc'
-      vim.g.taskwiki_data_location = data .. 'task'
-    end},
-  "JoosepAlviste/nvim-ts-context-commentstring",
-  {
-    "numToStr/Comment.nvim",
-    keys = {
-      {"gc", mode={"n", "v"}}, 
-      {"gb", mode={"n", "v"}}, 
-    },
-    config = function()
-      require("Comment").setup({
-        pre_hook = require("ts_context_commentstring.integrations.comment_nvim").create_pre_hook(),
-      })
-    end,
-  },
-  {
-    "christoomey/vim-tmux-navigator",
-    keys = {"<C-l>", "<C-h>", "<C-j>", "<C-k>"},
-    config = function()
-      vim.g.tmux_navigator_disable_when_zoomed = 1
-      vim.g.tmux_navigator_no_wrap = 1
-    end,
-  },
-  {
-    "folke/which-key.nvim",
-    event = "VeryLazy",
-    init = function()
-      vim.o.timeout = true
-      vim.o.timeoutlen = 500
-    end,
-    config = function()
-      require("config.whichkey")
-    end,
-  },
- 
-  { "folke/neoconf.nvim", cmd = "Neoconf" },
-  "folke/neodev.nvim",
-  {
-      "nvim-neo-tree/neo-tree.nvim",
-      cmd={"Neotree"},
-      branch = "v3.x",
-      dependencies = {
-        "nvim-lua/plenary.nvim",
-        "nvim-tree/nvim-web-devicons", -- not strictly required, but recommended
-        "MunifTanjim/nui.nvim",
-        -- "3rd/image.nvim", -- Optional image support in preview window: See `# Preview Mode` for more information
-      }
-  },
-  {"mbbill/undotree", cmd={"UndotreeToggle", "UndotreeShow"}},
-  {
-    -- https://github.com/machakann/vim-sandwich/issues/115#issuecomment-940869113
-    "machakann/vim-sandwich",
-    keys = {
-      {"ds"}, 
-      {"ys"},
-      {"yS"},
-      {"cs"},
-      {"S", mode="v"},
-    },
-    config = function()
-      vim.api.nvim_command("runtime macros/sandwich/keymap/surround.vim")
-    end,
-  },
-  {
-    "windwp/nvim-autopairs",
-    event = "InsertEnter",
-    config = function()
-      require("nvim-autopairs").setup {
-        check_ts = true,
-        disable_in_macro=true,
-        -- ts_config = {
-        --   lua = { "string", "source" },
-        --   javascript = { "string", "template_string" },
-        --   java = false,
-        -- },
-        disable_filetype = {"TelescopePrompt", "spectre_panel"},
+    { import = "plugins" },
 
-        fast_wrap = {
-          map = '<C-j>',
-          chars = { '{', '[', '(', '"', "'" },
-          pattern = [=[[%'%"%)%>%]%)%}%,]]=],
-          end_key = 'l',
-          keys = 'jk;uiopynmasdfgqwertzxcvb',
-          check_comma = true,
-          highlight = 'IncSearch',
-          highlight_grey='Comment'
+  },
+  {
+    defaults = {
+      lazy = true,
+    },
+    install = {
+      colorscheme = {"kanagawa", "tokyonight", "habamax" },
+    },
+
+    performance = {
+      cache = {
+        enabled = true,
+      },
+      reset_packpath = true,
+      rtp = {
+        reset = true,
+        disabled_plugins = {
+          "gzip",
+          "matchit",
+          "matchparen",
+          "netrwPlugin",
+          "tarPlugin",
+          "tohtml",
+          "tutor",
+          "zipPlugin",
+          "man",
+          "shada",
+          "osc52",
         },
-      }
-
-      -- local cmp_autopairs = require "nvim-autopairs.completion.cmp"
-      -- local cmp_status_ok, cmp = pcall(require, "cmp")
-      -- if not cmp_status_ok then
-      --   return
-      -- end
-      -- cmp.event:on("confirm_done", cmp_autopairs.on_confirm_done())
-    end,
-  },
-
-  -- specific filetype plugins
-  {
-    "tridactyl/vim-tridactyl",
-    ft = "tridactyl"
-  },
-}, { 
-  install = {
-    colorscheme = {"tokyonight", "habamax" },
-  },})
+      },
+    },
+  })
 
 
--- }}}
