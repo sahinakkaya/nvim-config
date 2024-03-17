@@ -14,7 +14,7 @@ return {
     config = function()
       -- load the colorscheme here
       -- require("plugin_configs.colorscheme")
-      vim.o.background = get_output("darkman get")
+      vim.o.background = get_output('cat $HOME/.theme')
       vim.cmd([[colorscheme tokyonight]])
     end,
   },
@@ -25,7 +25,7 @@ return {
     config = function()
       -- load the colorscheme here
       -- require("plugin_configs.colorscheme")
-      vim.o.background = get_output("darkman get")
+      vim.o.background = get_output('cat $HOME/.theme')
       vim.cmd([[colorscheme kanagawa]])
     end,
 
