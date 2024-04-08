@@ -42,6 +42,7 @@ M.on_attach = function(client, bufnr)
   --   print("yes")
   -- end
     vim.lsp.inlay_hint.enable(bufnr, true)
+  print('helloooo')
 
   -- Mappings.
   -- See `:help vim.lsp.*` for documentation on any of the below functions
