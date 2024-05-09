@@ -1,5 +1,7 @@
 -- vim:fileencoding=utf-8:foldmethod=marker
+--
 
+vim.env.PYENV_VERSION = vim.fn.system('pyenv version'):match('(%S+)%s+%(.-%)')
 
 vim.g.transparent_enabled = false
 local fn = vim.fn
@@ -8,6 +10,7 @@ local config = home .. '/.config/'
 local data = home .. '/.local/share/'
 local nconf = fn.stdpath("config")
 
+vim.g.python3_host_prog = home .. "/.pyenv/shims/python3"
 -- Options {{{
 local options = {
   backup = true, -- creates a backup file
@@ -37,8 +40,8 @@ local options = {
   showtabline = 2,                         -- always show tabs
   smartcase = true,                        -- smart case
   -- smartindent = true,                      -- make indenting smarter again
-  splitbelow = false,                       -- force all horizontal splits to go below current window
-  splitright = false,                       -- force all vertical splits to go to the right of current window
+  splitbelow = true,                       -- force all horizontal splits to go below current window
+  splitright = true,                       -- force all vertical splits to go to the right of current window
   timeoutlen = 500,                        -- time to wait for a mapped sequence to complete (in milliseconds)
   updatetime = 300,                        -- faster completion (4000ms default)
   expandtab = true,                        -- convert tabs to spaces
@@ -57,6 +60,8 @@ local options = {
   foldlevelstart = 4,
   foldenable = false,
   foldexpr = "nvim_treesitter#foldexpr()",
+  fillchars = [[eob: ,fold: ,foldopen:,foldsep: ,foldclose:]],
+  foldcolumn = '1',
 
   virtualedit = "block",
   inccommand = "split"
@@ -109,6 +114,8 @@ keymap("v", "<leader>;", ":", {noremap=true})
 keymap('n', '+', '<C-a>', opts)
 keymap('n', '-', '<C-x>', opts)
 
+-- substitute plugin overwrites x
+vim.keymap.set("n", "<leader>x", "x", { noremap = true })
 
 -- Select all
 keymap('n', '<C-a>', 'ggVG', opts)
@@ -232,6 +239,7 @@ M.autocmds.general_settings = {
   --
   -- },-- flash what is yanked
 }
+
 M.autocmds.last_location = {
   {
     "BufReadPost",
@@ -246,7 +254,7 @@ M.autocmds.last_location = {
 }
 
 M.autocmds.auto_reload_config = { -- reload programs when their config changes
-  { "BufWritePost", config .. "kitty/kitty.conf", "silent !kill -SIGUSR1 $(pgrep kitty)" },
+  { "BufWritePost", config .. "kitty/kitty.conf", "silent !kill -SIGUSR1 $(pgrep -f kitty)" },
   { "BufWritePost", config .. "tmux/tmux.conf",   "silent !tmux source-file ~/.config/tmux/tmux.conf" },
 }
 
@@ -342,7 +350,7 @@ require("lazy").setup({
           "gzip",
           "matchit",
           "matchparen",
-          "netrwPlugin",
+          -- "netrwPlugin",
           "tarPlugin",
           "tohtml",
           "tutor",

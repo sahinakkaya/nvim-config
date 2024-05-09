@@ -24,7 +24,7 @@ M.mkcaps = function(extra)
       dynamicRegistration = false,
     }
 
-    capabilities.general.positionEncodings = { "utf-8" }
+    -- capabilities.general.positionEncodings = { "utf-8" }
 
     capabilities.offsetEncoding = "utf-8"
   end
@@ -36,21 +36,30 @@ M.mkcaps = function(extra)
 
   return capabilities
 end
-
 M.on_attach = function(client, bufnr)
+  if client.name == 'ruff_lsp' then
+    -- Disable hover in favor of Pyright
+    client.server_capabilities.hoverProvider = false
+  end
   -- if client.server_capabilities.inlayHintProvider then
   --   print("yes")
   -- end
-    vim.lsp.inlay_hint.enable(bufnr, true)
+  vim.lsp.inlay_hint.enable(bufnr, true)
 
   -- Mappings.
   -- See `:help vim.lsp.*` for documentation on any of the below functions
   local bufopts = { noremap = true, silent = true, buffer = bufnr }
-  vim.keymap.set('n', 'gD', ":Trouble lsp_type_definitions<CR>", bufopts)
-  vim.keymap.set('n', 'gd', ":Trouble lsp_definitions<CR>", bufopts)
-  -- vim.keymap.set('n', 'K', vim.lsp.buf.hover, bufopts)
-  vim.keymap.set('n', 'gi', ":Trouble lsp_implementations<CR>", bufopts)
+  -- vim.keymap.set('n', 'gD', vim.lsp.buf.declaration, bufopts)
+  vim.keymap.set('n', 'gD', function() require("trouble").toggle("lsp_type_definitions") end, bufopts)
+  -- vim.keymap.set('n', 'gd', vim.lsp.buf.definition, bufopts)
+  vim.keymap.set('n', 'gd', function() require("trouble").toggle("lsp_definitions") end, bufopts)
+  vim.keymap.set('n', 'K', vim.lsp.buf.hover, bufopts)
+  -- vim.keymap.set('n', 'gi', vim.lsp.buf.implementation, buf_opts)
+  vim.keymap.set('n', 'gi', function() require("trouble").toggle("lsp_implementations") end, bufopts)
+  -- vim.keymap.set('n', 'gr', vim.lsp.buf.references, bufopts)
+  vim.keymap.set('n', 'gr', function() require("trouble").toggle("lsp_references") end, bufopts)
   -- vim.keymap.set('n', '<C-k>', vim.lsp.buf.signature_help, bufopts)
+  vim.keymap.set('n', '<C-m>', vim.lsp.buf.signature_help, bufopts)
   -- vim.keymap.set('n', '<space>wa', vim.lsp.buf.add_workspace_folder, bufopts)
   -- vim.keymap.set('n', '<space>wr', vim.lsp.buf.remove_workspace_folder, bufopts)
   -- vim.keymap.set('n', '<space>wl', function()
@@ -59,7 +68,6 @@ M.on_attach = function(client, bufnr)
   -- vim.keymap.set('n', '<space>D', vim.lsp.buf.type_definition, bufopts)
   -- vim.keymap.set('n', '<space>rn', vim.lsp.buf.rename, bufopts)
   -- vim.keymap.set('n', '<space>ca', vim.lsp.buf.code_action, bufopts)
-  vim.keymap.set('n', 'gr', ":Trouble lsp_references<CR>", bufopts)
   -- vim.keymap.set('n', '<space>f', function() vim.lsp.buf.format { async = true } end, bufopts)
 end
 

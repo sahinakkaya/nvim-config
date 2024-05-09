@@ -7,6 +7,12 @@ return {
       "hrsh7th/cmp-path",
       "hrsh7th/cmp-cmdline",
       "hrsh7th/cmp-nvim-lsp",
+      {
+        "zbirenbaum/copilot-cmp",
+        config = function ()
+          require("copilot_cmp").setup()
+        end
+      },
       "saadparwaiz1/cmp_luasnip",
       {
         "L3MON4D3/LuaSnip",
@@ -103,6 +109,7 @@ return {
             end, { "i", "s" }),
             }),
           sources = cmp.config.sources({
+            { name = "copilot", group_index = 2 },
             { name = 'nvim_lsp', max_item_count = 40 },
             { name = 'luasnip', max_item_count = 40 },
             { name = 'path'}

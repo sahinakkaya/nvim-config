@@ -1,4 +1,3 @@
-
 local util = require("configs.lsp.util")
 require("mason").setup()
 
@@ -12,7 +11,6 @@ require("configs.editor.neodev")
 require("mason-lspconfig").setup({
   -- ensure_installed = { "tsserver", "lua_ls", "pyright", "yamlls", "bashls" },
 })
-
 
 require("mason-lspconfig").setup_handlers({
   function(server_name)
@@ -30,6 +28,24 @@ require("mason-lspconfig").setup_handlers({
       filetypes = { "c", "cpp", "h", "hpp" },
       offsetEncoding = { "utf-8" },
       client_encoding = "utf-8",
+    })
+  end,
+  pyright = function()
+    require('lspconfig').pyright.setup({
+      capabilities = capabilities,
+      on_attach = on_attach,
+      settings = {
+        pyright = {
+          -- Using Ruff's import organizer
+          disableOrganizeImports = true,
+        },
+        python = {
+          analysis = {
+            -- Ignore all files for analysis to exclusively use Ruff for linting
+            -- ignore = { '*' },
+          },
+        },
+      },
     })
   end,
   lua_ls = function()
@@ -56,36 +72,50 @@ require("mason-lspconfig").setup_handlers({
   tsserver = function()
     -- don't need this as we are using typescript-tools now.
     -- but we are still using tsserver bin from mason so don't delete it.
-  --   require('lspconfig').tsserver.setup({
-  --     capabilities = mkcaps(true),
-  --     attach = on_attach,
-  --     settings = {
-  --       javascript = {
-  --         inlayHints = {
-  --           includeInlayEnumMemberValueHints = true,
-  --           includeInlayFunctionLikeReturnTypeHints = true,
-  --           includeInlayFunctionParameterTypeHints = true,
-  --           includeInlayParameterNameHints = "all",   -- 'none' | 'literals' | 'all';
-  --           includeInlayParameterNameHintsWhenArgumentMatchesName = true,
-  --           includeInlayPropertyDeclarationTypeHints = true,
-  --           includeInlayVariableTypeHints = true,
-  --         },
-  --       },
-  --       typescript = {
-  --         inlayHints = {
-  --           includeInlayEnumMemberValueHints = true,
-  --           includeInlayFunctionLikeReturnTypeHints = true,
-  --           includeInlayFunctionParameterTypeHints = true,
-  --           includeInlayParameterNameHints = "all",   -- 'none' | 'literals' | 'all';
-  --           includeInlayParameterNameHintsWhenArgumentMatchesName = true,
-  --           includeInlayPropertyDeclarationTypeHints = true,
-  --           includeInlayVariableTypeHints = true,
-  --         },
-  --       },
-  --     }
-  --   })
+    --   require('lspconfig').tsserver.setup({
+    --     capabilities = mkcaps(true),
+    --     attach = on_attach,
+    --     settings = {
+    --       javascript = {
+    --         inlayHints = {
+    --           includeInlayEnumMemberValueHints = true,
+    --           includeInlayFunctionLikeReturnTypeHints = true,
+    --           includeInlayFunctionParameterTypeHints = true,
+    --           includeInlayParameterNameHints = "all",   -- 'none' | 'literals' | 'all';
+    --           includeInlayParameterNameHintsWhenArgumentMatchesName = true,
+    --           includeInlayPropertyDeclarationTypeHints = true,
+    --           includeInlayVariableTypeHints = true,
+    --         },
+    --       },
+    --       typescript = {
+    --         inlayHints = {
+    --           includeInlayEnumMemberValueHints = true,
+    --           includeInlayFunctionLikeReturnTypeHints = true,
+    --           includeInlayFunctionParameterTypeHints = true,
+    --           includeInlayParameterNameHints = "all",   -- 'none' | 'literals' | 'all';
+    --           includeInlayParameterNameHintsWhenArgumentMatchesName = true,
+    --           includeInlayPropertyDeclarationTypeHints = true,
+    --           includeInlayVariableTypeHints = true,
+    --         },
+    --       },
+    --     }
+    --   })
   end
-})
+}
+)
 
+require('lspconfig').ruff_lsp.setup {
+  on_attach = on_attach,
+  init_options = {
+    settings = {
+      -- Any extra CLI arguments for `ruff` go here.
+      args = {},
+      lint = {
+        -- Disable all linters in favor of Pyright
+        enable = false,
+      },
+    }
+  }
+}
 -- required to trigger lspattach
 vim.api.nvim_exec_autocmds("FileType", {})

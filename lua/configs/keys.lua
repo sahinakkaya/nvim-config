@@ -42,7 +42,8 @@ M.dial = {
 }
 
 M.substitute = {
-  { "s", mode = { "n", "v" } },
+  { "x", mode = { "n", "v" } },
+  { "X", mode = {"n"} },
 }
 
 M.harpoon = { "<Up>", "Down", "<leader>j", "<leader>a" }

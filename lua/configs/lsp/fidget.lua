@@ -12,7 +12,7 @@ fidget.setup({
     override_vim_notify = false,
 
     window = {
-      align = "bottom",           -- How to align the notification window
+      align = "top",           -- How to align the notification window
     }
   }
 })

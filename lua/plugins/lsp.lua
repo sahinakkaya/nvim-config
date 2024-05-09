@@ -5,6 +5,10 @@ return {
     cmd="Mason",
     dependencies = {
       "williamboman/mason-lspconfig.nvim",
+      {
+        'stevearc/dressing.nvim',
+        opts = {},
+      }
     },
   },
   {

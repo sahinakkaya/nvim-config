@@ -5,6 +5,7 @@ end
 
 local keys = require('configs.keys')
 
+vim.g.wordmotion_nomap = 1
 
 return {
   {
@@ -33,6 +34,7 @@ return {
   {
     "folke/which-key.nvim",
     keys = keys.which_key,
+    lazy = false, -- uncomment this line if you are facing a problem with telescope frecency extension
     init = function()
       vim.o.timeout = true
       vim.o.timeoutlen = 500
@@ -53,7 +55,12 @@ return {
       -- OPTIONAL:
       --   `nvim-notify` is only needed, if you want to use the notification view.
       --   If not available, we use `mini` as the fallback
-      "rcarriga/nvim-notify",
+      {
+        "rcarriga/nvim-notify",
+        config = function()
+          require("configs.ui.notify")
+        end
+      },
     }
   },
   --  {
@@ -65,11 +72,12 @@ return {
   -- },
   {
     "j-hui/fidget.nvim",
-    event = "LspAttach",
+    event = "VeryLazy",
     config = function()
       require("configs.lsp.fidget")
     end,
   },
+
   {
     "petertriho/nvim-scrollbar",
     dependencies = {
@@ -96,24 +104,25 @@ return {
       "nvim-tree/nvim-web-devicons", -- not strictly required, but recommended
       "MunifTanjim/nui.nvim",
       "mrbjarksen/neo-tree-diagnostics.nvim",
-      "3rd/image.nvim", -- Optional image support in preview window: See `# Preview Mode` for more information
+      -- "3rd/image.nvim", -- Optional image support in preview window: See `# Preview Mode` for more information
     },
     cmd = "Neotree",
+    lazy = false,
     config = function()
       require("configs.ui.neotree")
     end,
   },
 
-  {
-    "3rd/image.nvim",
-    ft = { "markdown", "vimwiki" },
-    config = function()
-      -- Example for configuring Neovim to load user-installed installed Lua rocks:
-      package.path = package.path .. ";" .. vim.fn.expand("$HOME") .. "/.luarocks/share/lua/5.1/?/init.lua;"
-      package.path = package.path .. ";" .. vim.fn.expand("$HOME") .. "/.luarocks/share/lua/5.1/?.lua;"
-      require("image").setup({ editor_only_render_when_focused = true,  window_overlap_clear_enabled = true,tmux_show_only_in_active_window = true })
-    end
-  }, -- Optional image support in preview window: See `# Preview Mode` for more information
+  -- {
+  --   "3rd/image.nvim",
+  --   -- ft = { "markdown", "vimwiki" },
+  --   config = function()
+  --     -- Example for configuring Neovim to load user-installed installed Lua rocks:
+  --     package.path = package.path .. ";" .. vim.fn.expand("$HOME") .. "/.luarocks/share/lua/5.1/?/init.lua;"
+  --     package.path = package.path .. ";" .. vim.fn.expand("$HOME") .. "/.luarocks/share/lua/5.1/?.lua;"
+  --     require("image").setup({ editor_only_render_when_focused = true,  window_overlap_clear_enabled = true,tmux_show_only_in_active_window = true })
+  --   end
+  -- }, -- Optional image support in preview window: See `# Preview Mode` for more information
   {
     'nvim-telescope/telescope.nvim',
     tag = '0.1.5',
@@ -186,4 +195,29 @@ return {
       require("neoscroll").setup()
     end
   },
+
+  {
+    "nvimtools/hydra.nvim",
+    event = "VeryLazy",
+    dependencies = {
+      { "anuvyklack/vim-smartword" },
+      {
+        "chaoren/vim-wordmotion",
+        config = function()
+          -- vim.g.wordmotion_prefix = ","
+        end,
+      }
+    },
+    config = function()
+      require("configs.ui.hydra_config")
+    end,
+  },
+  {
+    "smjonas/inc-rename.nvim",
+    -- keys = { "<leader>rn", mode = "n"},
+    lazy = false,
+    config = function()
+      require("inc_rename").setup()
+    end,
+  }
 }

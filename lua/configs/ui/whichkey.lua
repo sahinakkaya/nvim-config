@@ -1,6 +1,25 @@
 
 local harpoon = require("harpoon")
 local whichkey = require("which-key")
+
+
+local hydra = require("hydra")
+local hydras = require("configs.ui.hydra_config")
+local function activate_hydra(h)
+  return function()
+    hydra.activate(h)
+  end
+end
+
+local function activate_debug_hydra()
+  local session = require("dap").session()
+  if session == nil then
+    activate_hydra(hydras.debug)()
+  else
+    activate_hydra(hydras.debug2)()
+  end
+end
+
 whichkey.setup({
   plugins = {
     marks = true,     -- shows a list of your marks on ' and `
@@ -56,7 +75,7 @@ whichkey.setup({
     spacing = 3,                                                        -- spacing between columns
     align = "left",                                                     -- align columns left, center or right
   },
-  ignore_missing = true,                                                -- enable this to hide mappings for which you didn't specify a label
+  ignore_missing = false,                                                -- enable this to hide mappings for which you didn't specify a label
   hidden = { "<silent>", ":", ":", "<CR>", "call", "lua", "^:", "^ " }, -- hide mapping boilerplate
   show_help = true,                                                     -- show help message on the command line when the popup is visible
   triggers = "auto",                                                    -- automatically setup triggers
@@ -85,10 +104,28 @@ local opts = {
 local mappings = {
   ["<tab>"] = { "<C-^>", "Alternate file" },
   ["<space>"] = { ":Telescope frecency workspace=CWD<CR>", "Frecent files" },
-  -- ["\\"] = { ":vnew<CR>", "vsplit" },
-  -- ["-"] = { ":new<CR>", "hsplit" },
+  ["\\"] = { ":vnew<CR>", "vsplit" },
+  ["-"] = { ":new<CR>", "hsplit" },
   a = { function() harpoon:list():append() end, "Harpoon add" },
-  e = { ":Neotree toggle reveal right<CR>", "Explorer" },
+  e = { ":Neotree toggle reveal right last<CR>", "Explorer" },
+
+  d = {
+    name = "Debug",
+    t = { "<cmd>lua require'dap'.toggle_breakpoint()<cr>", "Toggle Breakpoint" },
+    b = { "<cmd>lua require'dap'.step_back()<cr>", "Step Back" },
+    c = { "<cmd>lua require'dap'.continue()<cr>", "Continue" },
+    C = { "<cmd>lua require'dap'.run_to_cursor()<cr>", "Run To Cursor" },
+    d = { "<cmd>lua require'dap'.disconnect()<cr>", "Disconnect" },
+    g = { "<cmd>lua require'dap'.session()<cr>", "Get Session" },
+    i = { "<cmd>lua require'dap'.step_into()<cr>", "Step Into" },
+    o = { "<cmd>lua require'dap'.step_over()<cr>", "Step Over" },
+    u = { "<cmd>lua require'dap'.step_out()<cr>", "Step Out" },
+    p = { "<cmd>lua require'dap'.pause()<cr>", "Pause" },
+    r = { "<cmd>lua require'dap'.repl.toggle()<cr>", "Toggle Repl" },
+    s = { "<cmd>lua require'dap'.continue()<cr>", "Start" },
+    q = { "<cmd>lua require'dap'.close()<cr>", "Quit" },
+    U = { "<cmd>lua require'dapui'.toggle()<cr>", "Toggle UI" },
+  },
   u = { ":UndotreeToggle<CR>", "Toggle undotree" },
   f = {
     name = "Find",
@@ -143,6 +180,16 @@ local mappings = {
       "Checkout commit(for current file)",
     },
   },
+  h = {
+    name = "Hydra",
+    d = { activate_debug_hydra, "Debug" },
+    g = { activate_hydra(hydras.git), "Git" },
+    i = { activate_hydra(hydras.draw_diagram), "Draw diagram" },
+    h = { activate_hydra(hydras.history), "History" },
+    o = { activate_hydra(hydras.options), "Options" },
+    t = { activate_hydra(hydras.toggle), "Toggle" },
+    -- t = { ":TSContextToggle<CR>", "Toggle TSContext" },
+  },
 
   j = {
     name = "Jump",
@@ -157,15 +204,16 @@ local mappings = {
     name = "LSP",
     a = { vim.lsp.buf.code_action, "Code Action" },
     c = { vim.lsp.codelens.run, "CodeLens Action" },
-    d = { vim.lsp.buf.declaration, "Go to declaration" },
-    F = { vim.lsp.buf.definition, "Go to definition" },
+    d = { vim.lsp.buf.definition, "Go to definition" },
+    D = { vim.lsp.buf.declaration, "Go to declaration" },
     f = { function() vim.lsp.buf.format { async = true } end, "Format" },
-    i = { function()
+    I = { function()
       local enabled = vim.lsp.inlay_hint.is_enabled()
       vim.lsp.inlay_hint.enable(0, not enabled)
     end, "Toggle inlay hints" },
-    I = { vim.lsp.buf.implementation, "Go to implementation" },
+    i = { vim.lsp.buf.implementation, "Go to implementation" },
     h = { vim.lsp.buf.hover, "Hover info" },
+    H = { vim.lsp.buf.signature_help, "Signature help" },
     n = { ":LspInfo<CR>", "Info" },
     j = { vim.diagnostic.goto_next, "Next Diagnostic" },
     k = { vim.diagnostic.goto_prev, "Prev Diagnostic" },
@@ -182,7 +230,7 @@ local mappings = {
     q = { vim.diagnostic.setloclist, "Quickfix" },
     r = {
       name = "Refactor",
-      n = { vim.lsp.buf.rename, "Rename" },
+      n = { ":IncRename ", "Rename" },
       e = { ":lua require('refactoring').refactor('Extract Block')<CR>", "Extract block" },
       f = { ":lua require('refactoring').refactor('Extract Block To File')<CR>", "Extract block to file" },
       i = { ":lua require('refactoring').refactor('Inline Variable')<CR>", "Inline variable" },
@@ -195,6 +243,20 @@ local mappings = {
     v = { function() require('refactoring').debug.print_var({ below = true }) end, "Print var" },
     p = { function() require('refactoring').debug.printf({ below = true }) end, "Debug statement" },
     s = { vim.lsp.buf.signature_help, "Signature help" },
+    w = { 
+      name = "Workspace",
+      a = { vim.lsp.buf.add_workspace_folder, "Add workspace folder" },
+      r = { vim.lsp.buf.remove_workspace_folder, "Remove workspace folder" },
+      l = { function()
+        print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
+      end, "List workspace folders" },
+    }
+  },
+
+  n = {
+    name = "Notifications",
+    d = { function() require('notify').dismiss({pending=false, silent=false }) end, "Dismiss notifications" },
+    n = { ":Fidget history<CR>", "Notifications" },
   },
 
   s = {
@@ -217,6 +279,7 @@ local mappings = {
   },
   t = {
     name = "Trouble",
+    D = { ":DBUI<CR>", "DBUI" },
     d = { function() require("trouble").toggle("document_diagnostics") end, "Document Diagnostics" },
     f = { function() require("trouble").toggle("lsp_definitions") end, "Lsp Definitions" },
     l = { function() require("trouble").toggle("loclist") end, "Location List" },

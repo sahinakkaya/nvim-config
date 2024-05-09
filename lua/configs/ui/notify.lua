@@ -1,7 +1,9 @@
 local notify = require("notify")
 notify.setup({
-  -- render = "compact",
-  timeout = 5000,
+  render = "minimal",
+
+  timeout = 2000,
+
   stages = "slide",
   -- stages = anim(Dir.TOP_DOWN),
 })
