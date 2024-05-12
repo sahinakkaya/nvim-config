@@ -652,7 +652,7 @@ require("lazy").setup({
         keys = keys.hydra,
         config = function()
           require('hydra').setup {}
-          require("configs.ui.hydra_config")
+          require("configs.initialize_hydras")
         end,
       },
       {

@@ -528,7 +528,7 @@ M.which_key = function()
 
 
   local hydra = require("hydra")
-  local hydras = require("configs.ui.hydra_config")
+  local hydras = require("configs.initialize_hydras")
   local function activate_hydra(h)
     return function()
       hydra.activate(h)
