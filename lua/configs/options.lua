@@ -46,12 +46,12 @@ local options = {
   scrolloff = 999,                         -- show at least n number of lines before after cursor
   sidescrolloff = 6,
   guifont = "monospace:h17",               -- the font used in graphical neovim applications
-  foldmethod = "expr",
-  foldlevelstart = 4,
-  foldenable = false,
-  foldexpr = "nvim_treesitter#foldexpr()",
-  fillchars = [[eob: ,fold: ,foldopen:,foldsep: ,foldclose:]],
-  foldcolumn = '1',
+  -- foldmethod = "expr",
+  -- foldlevelstart = 4,
+  -- foldenable = false,
+  -- foldexpr = "nvim_treesitter#foldexpr()",
+  -- fillchars = [[eob: ,fold: ,foldopen:,foldsep: ,foldclose:]],
+  -- foldcolumn = '1',
 
   virtualedit = "block",
   inccommand = "split"
@@ -76,6 +76,29 @@ end
 for _, path in pairs(vim.api.nvim_list_runtime_paths()) do
   vim.opt.path:append(path .. '/lua')
 end
+
+M.indent_blankline = {
+  indent = {
+    char = "│",
+    tab_char = "│",
+  },
+  scope = { enabled = true },
+  exclude = {
+    filetypes = {
+      "help",
+      "alpha",
+      "dashboard",
+      "neo-tree",
+      "Trouble",
+      "trouble",
+      "lazy",
+      "mason",
+      "notify",
+      "toggleterm",
+      "lazyterm",
+    },
+  },
+}
 
 M.ultimate_pairs = {
   cmap = false,     --cmap stands for cmd-line map
@@ -221,7 +244,7 @@ M.trouble = {
   indent_lines = true,                                                                  -- add an indent guide below the fold icons
   win_config = { border = "single" },                                                   -- window configuration for floating windows. See |nvim_open_win()|.
   auto_open = false,                                                                    -- automatically open the list when you have diagnostics
-  auto_close = true,                                                                   -- automatically close the list when you have no diagnostics
+  auto_close = true,                                                                    -- automatically close the list when you have no diagnostics
   auto_preview = true,                                                                  -- automatically preview the location of the diagnostic. <esc> to close preview and go back to last window
   auto_fold = false,                                                                    -- automatically fold a file trouble list at creation
   auto_jump = { "lsp_definitions" },                                                    -- for the given modes, automatically jump if there is only a single result

@@ -1,4 +1,4 @@
--- vim:fileencoding=utf-8:foldmethod=marker
+-- vim:fileencoding=utf-8
 --
 
 vim.env.PYENV_VERSION = vim.fn.system('pyenv version'):match('(%S+)%s+%(.-%)')
@@ -17,7 +17,6 @@ end
 
 vim.g.python3_host_prog = home .. "/.pyenv/shims/python3"
 
--- {{{ Keymaps
 local opts = { noremap = true, silent = true }
 
 -- local term_opts = { silent = true }
@@ -152,9 +151,7 @@ keymap("i", '<C-k>', '<C-o>d$', opts)
 keymap("i", '<C-u>', '<C-o>d^', opts)
 keymap("i", '<C-s>', '<c-g>u<Esc>[s1z=`]a<c-g>u', opts)
 
---: }}}
 
--- {{{ Autocommands
 local M = {}
 M.autocmds = {}
 
@@ -241,7 +238,6 @@ end
 
 M.define_augroups(M.autocmds)
 
--- }}}
 
 local keys = require("configs.keys")
 local options = require("configs.options")
@@ -261,17 +257,37 @@ if not vim.loop.fs_stat(lazypath) then
 end
 vim.opt.rtp:prepend(lazypath)
 require("lazy").setup({
-    { import = "plugins" },
+    -- { import = "plugins" }, I have deleted the plugins folder, i don't need this now
     {
       "folke/neodev.nvim",
       { "folke/neoconf.nvim", cmd = "Neoconf" }, -- don't quite understand this
       {
         "numToStr/Comment.nvim",
-        dependencies = {
-          "JoosepAlviste/nvim-ts-context-commentstring",
-        },
+        dependencies = { "JoosepAlviste/nvim-ts-context-commentstring", },
         keys = keys.comment,
         config = setup_plugins.comment,
+      },
+      {
+        'kevinhwang91/nvim-ufo',
+        dependencies = 'kevinhwang91/promise-async',
+        event = "VeryLazy",
+        init = function()
+          vim.o.foldcolumn = '1' -- '0' is not bad
+          vim.o.foldlevel = 99   -- Using ufo provider need a large value, feel free to decrease the value
+          vim.o.foldlevelstart = 99
+          vim.o.foldenable = true
+          vim.o.fillchars = [[eob: ,fold: ,foldopen:,foldsep: ,foldclose:]]
+          vim.keymap.set('n', 'zR', require('ufo').openAllFolds)
+          vim.keymap.set('n', 'zM', require('ufo').closeAllFolds)
+        end,
+        config = function()
+          -- require('ufo').setup({
+          --   provider_selector = function(bufnr, filetype, buftype)
+          --     return { 'treesitter', 'indent' }
+          --   end
+          -- })
+          require('ufo').setup()
+        end
       },
 
 
@@ -479,21 +495,15 @@ require("lazy").setup({
       {
         "folke/which-key.nvim",
         keys = keys.which_key,
-        lazy = true, -- uncomment this line if you are facing a problem with telescope frecency extension
         init = function()
           vim.o.timeout = true
           vim.o.timeoutlen = 500
         end,
-        config = function()
-          require("configs.ui.whichkey")
-        end,
+        config = setup_plugins.which_key,
       },
       {
         "folke/noice.nvim",
         event = "VeryLazy",
-        config = function()
-          require("configs.ui.noice")
-        end,
         dependencies = {
           -- if you lazy-load any plugin below, make sure to add proper `module="..."` entries
           "MunifTanjim/nui.nvim",
@@ -502,44 +512,31 @@ require("lazy").setup({
           --   If not available, we use `mini` as the fallback
           {
             "rcarriga/nvim-notify",
-            config = function()
-              require("configs.ui.notify")
-            end
+            config = setup_plugins.notify
           },
-        }
+        },
+        config = setup_plugins.noice,
       },
-      --  {
-      -- 	"rcarriga/nvim-notify",
-      --    event="VeryLazy",
-      -- 	config = function()
-      -- 		require("configs.ui.notify")
-      -- 	end,
-      -- },
       {
         "j-hui/fidget.nvim",
         event = "VeryLazy",
-        config = function()
-          require("configs.lsp.fidget")
-        end,
+        config = setup_plugins.fidget,
       },
 
-      {
+      { -- i almost never use this. maybe i can delete it
         "petertriho/nvim-scrollbar",
         dependencies = {
           "kevinhwang91/nvim-hlslens",
           "lewis6991/gitsigns.nvim",
         },
         event = "VeryLazy",
-        config = function()
-          require("configs.ui.sidebars")
-        end,
+        config = setup_plugins.scrollbar,
       },
       {
         "lewis6991/gitsigns.nvim",
-        -- config = function ()
-        --   require("configs.ui.sidebars")
-        -- end
+        -- config = setup_plugins.scrollbar,
       },
+      -- {"sindrets/diffview.nvim", lazy = false}, -- a confusing git diff plugin. need to check later
 
       {
         "nvim-neo-tree/neo-tree.nvim",
@@ -552,10 +549,7 @@ require("lazy").setup({
           -- "3rd/image.nvim", -- Optional image support in preview window: See `# Preview Mode` for more information
         },
         cmd = "Neotree",
-        lazy = false,
-        config = function()
-          require("configs.ui.neotree")
-        end,
+        config = setup_plugins.neotree,
       },
 
       -- {
@@ -570,7 +564,7 @@ require("lazy").setup({
       -- }, -- Optional image support in preview window: See `# Preview Mode` for more information
       {
         'nvim-telescope/telescope.nvim',
-        tag = '0.1.5',
+        tag = '0.1.6',
         -- or, branch = '0.1.x',
         dependencies = {
           'nvim-lua/plenary.nvim',
@@ -587,35 +581,12 @@ require("lazy").setup({
           }
         },
         -- event = "VeryLazy",
-        config = function()
-          require("configs.ui.telescope")
-        end
+        config = setup_plugins.telescope,
       },
       { -- there is also integration with rainbow-delimiters. check read me if you want
         "lukas-reineke/indent-blankline.nvim",
         event = "VeryLazy",
-        opts = {
-          indent = {
-            char = "│",
-            tab_char = "│",
-          },
-          scope = { enabled = true },
-          exclude = {
-            filetypes = {
-              "help",
-              "alpha",
-              "dashboard",
-              "neo-tree",
-              "Trouble",
-              "trouble",
-              "lazy",
-              "mason",
-              "notify",
-              "toggleterm",
-              "lazyterm",
-            },
-          },
-        },
+        opts = options.indent_blankline,
         main = "ibl",
       },
       {
@@ -623,7 +594,32 @@ require("lazy").setup({
         dependencies = "nvim-treesitter/nvim-treesitter",
         event = "VeryLazy",
         config = function()
-          require("configs.ui.rainbow-delimiters")
+          -- This module contains a number of default definitions
+          local rainbow_delimiters = require 'rainbow-delimiters'
+
+          vim.g.rainbow_delimiters = {
+            strategy = {
+              [''] = rainbow_delimiters.strategy['global'],
+              vim = rainbow_delimiters.strategy['local'],
+            },
+            query = {
+              [''] = 'rainbow-delimiters',
+              lua = 'rainbow-blocks',
+            },
+            priority = {
+              [''] = 110,
+              lua = 210,
+            },
+            highlight = {
+              'RainbowDelimiterRed',
+              'RainbowDelimiterYellow',
+              'RainbowDelimiterBlue',
+              'RainbowDelimiterOrange',
+              'RainbowDelimiterGreen',
+              'RainbowDelimiterViolet',
+              'RainbowDelimiterCyan',
+            },
+          }
         end
       },
       {
@@ -655,6 +651,7 @@ require("lazy").setup({
         },
         keys = keys.hydra,
         config = function()
+          require('hydra').setup {}
           require("configs.ui.hydra_config")
         end,
       },
@@ -665,7 +662,249 @@ require("lazy").setup({
         config = function()
           require("inc_rename").setup()
         end,
-      }
+      },
+      {
+        "hrsh7th/nvim-cmp",
+        event = { "InsertEnter", "CmdlineEnter" },
+        dependencies = {
+          "hrsh7th/cmp-buffer",
+          "hrsh7th/cmp-path",
+          "hrsh7th/cmp-cmdline",
+          "hrsh7th/cmp-nvim-lsp",
+          {
+            "zbirenbaum/copilot-cmp",
+            config = function()
+              require("copilot_cmp").setup()
+            end
+          },
+          "saadparwaiz1/cmp_luasnip",
+          {
+            "L3MON4D3/LuaSnip",
+            -- follow latest release.
+            version = "v2.*", -- Replace <CurrentMajor> by the latest released major (first number of latest release)
+            -- install jsregexp (optional!).
+            build = "make install_jsregexp",
+            dependencies = { "rafamadriz/friendly-snippets" },
+            config = function()
+              require("luasnip.loaders.from_vscode").lazy_load()
+              local ls = require("luasnip")
+              vim.keymap.set({ "i" }, "<C-j>", function()
+                if ls.expand_or_jumpable() then
+                  ls.expand_or_jump()
+                end
+              end, { silent = true })
+              vim.keymap.set({ "i", "s" }, "<C-E>", function()
+                if ls.choice_active() then
+                  ls.change_choice(1)
+                end
+              end, { silent = true })
+            end
+          },
+          -- "dmitmel/cmp-cmdline-history",
+          -- "rcarriga/cmp-dap",
+          "petertriho/cmp-git",
+        },
+        config = function()
+          local cmp = require('cmp')
+          local luasnip = require("luasnip")
+          -- local cmp_select = { behavior = cmp.SelectBehavior.Select }
+
+          local icons = require('sahinakkaya.icons')
+
+
+          local has_words_before = function()
+            unpack = unpack or table.unpack
+            local line, col = unpack(vim.api.nvim_win_get_cursor(0))
+            return col ~= 0 and vim.api.nvim_buf_get_lines(0, line - 1, line, true)[1]:sub(col, col):match("%s") == nil
+          end
+
+
+          -- local format = {
+          --   fields = { "kind", "abbr", "menu" },
+          --   format = function(_, vim_item)
+          --     local kind = vim_item.kind
+          --     local icon = (icons.kinds[kind] or ""):gsub("%s+", "")
+          --     vim_item.kind = " " .. icon
+          --     vim_item.menu = kind
+          --     local text = vim_item.abbr
+          --     local max = math.floor(math.max(vim.o.columns / 4, 50))
+          --     if vim.fn.strcharlen(text) > max then
+          --       vim_item.abbr = vim.fn.strcharpart(text, -1, max - 1)
+          --         .. icons.misc.ellipse
+          --     end
+          --     return vim_item
+          --   end,
+          -- }
+
+          -- local cmp_autopairs = require "nvim-autopairs.completion.cmp"
+          -- cmp.event:on("confirm_done", cmp_autopairs.on_confirm_done())
+          cmp.setup({
+            snippet = {
+              expand = function(args)
+                luasnip.lsp_expand(args.body)
+              end,
+            },
+            -- formatting = format,
+            window = {
+              completion = cmp.config.window.bordered(),
+              documentation = cmp.config.window.bordered(),
+            },
+            mapping = cmp.mapping.preset.insert({
+              ['<C-b>'] = cmp.mapping.scroll_docs(-4),
+              ['<C-f>'] = cmp.mapping.scroll_docs(4),
+              ['<C-n>'] = cmp.mapping.select_next_item(),
+              ['<C-p>'] = cmp.mapping.select_prev_item(),
+              ['<C-Space>'] = cmp.mapping.complete(),
+              ['<C-e>'] = cmp.mapping.abort(),
+              ['<CR>'] = cmp.mapping.confirm({ select = true }), -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items
+              ["<Tab>"] = cmp.mapping(function(fallback)
+                if cmp.visible() then
+                  cmp.select_next_item()
+                elseif luasnip.jumpable() then
+                  luasnip.jump()
+                  -- You could replace the expand_or_jumpable() calls with expand_or_locally_jumpable()
+                  -- that way you will only jump inside the snippet region
+                  -- elseif has_words_before() then
+                  --   cmp.complete()
+                else
+                  fallback()
+                end
+              end, { "i", "s" }),
+              ["<S-Tab>"] = cmp.mapping(function(fallback)
+                if cmp.visible() then
+                  cmp.select_prev_item()
+                elseif luasnip.jumpable(-1) then
+                  luasnip.jump(-1)
+                else
+                  fallback()
+                end
+              end, { "i", "s" }),
+            }),
+            sources = cmp.config.sources({
+                { name = 'luasnip',  max_item_count = 40 },
+                { name = "copilot",  group_index = 2 },
+                { name = 'nvim_lsp', max_item_count = 40 },
+                { name = 'path' }
+              },
+              {
+                { name = 'buffer' },
+              })
+          })
+
+          -- Set configuration for specific filetype.
+          cmp.setup.filetype('gitcommit', {
+            sources = cmp.config.sources({
+              { name = 'git' }, -- You can specify the `git` source if [you were installed it](https://github.com/petertriho/cmp-git).
+            }, {
+              { name = 'buffer' },
+            })
+          })
+
+
+          cmp.setup.filetype("harpoon", {
+            sources = cmp.config.sources({
+              { name = "path" },
+            }),
+            -- formatting = format,
+          })
+
+          -- Use buffer source for `/` and `?` (if you enabled `native_menu`, this won't work anymore).
+          cmp.setup.cmdline({ '/', '?' }, {
+            mapping = cmp.mapping.preset.cmdline(),
+            sources = {
+              { name = 'buffer' }
+            }
+          })
+
+          -- Use cmdline & path source for ':' (if you enabled `native_menu`, this won't work anymore).
+          cmp.setup.cmdline(':', {
+            mapping = cmp.mapping.preset.cmdline(),
+            sources = cmp.config.sources({
+              { name = 'path' }
+            }, {
+              { name = 'cmdline' }
+            })
+          })
+
+          require('tabout').setup {}
+        end,
+      },
+
+      {
+        "MunsMan/kitty-navigator.nvim",
+        build = function()
+          vim.fn.system("cp navigate_kitty.py ~/.config/kitty")
+          vim.fn.system("cp pass_keys.py ~/.config/kitty")
+        end,
+        keys = {
+          { "<C-h>", function() require("kitty-navigator").navigateLeft() end,  desc = "Move left a Split",  mode = { "n" } },
+          { "<C-j>", function() require("kitty-navigator").navigateDown() end,  desc = "Move down a Split",  mode = { "n" } },
+          { "<C-k>", function() require("kitty-navigator").navigateUp() end,    desc = "Move up a Split",    mode = { "n" } },
+          { "<C-l>", function() require("kitty-navigator").navigateRight() end, desc = "Move right a Split", mode = { "n" } }
+        }
+      },
+      {
+        'mikesmithgh/kitty-scrollback.nvim',
+        cmd = { 'KittyScrollbackGenerateKittens', 'KittyScrollbackCheckHealth' },
+        event = { 'User KittyScrollbackLaunch' },
+        -- version = '*', -- latest stable version, may have breaking changes if major version changed
+        -- version = '^4.0.0', -- pin major version, include fixes and features that do not have breaking changes
+        config = function()
+          require('kitty-scrollback').setup({
+            {
+              paste_window = { yank_register = 'a' },
+            },
+
+            callbacks = function()
+              vim.keymap.set('n', '<C-a>', 'ggVG', {})
+              vim.keymap.set({ 'n' }, 'q', '<Plug>(KsbCloseOrQuitAll)', {})
+              vim.keymap.set({ 'n', 't', 'i' }, 'ZZ', '<Plug>(KsbQuitAll)', {})
+
+              vim.keymap.set({ 'n' }, '<tab>', '<Plug>(KsbToggleFooter)', {})
+              -- vim.keymap.set({ 'n', 'i' }, '<cr>', '<Plug>(KsbExecuteCmd)', {})
+              -- vim.keymap.set({ 'n', 'i' }, '<c-v>', '<Plug>(KsbPasteCmd)', {})
+
+
+              vim.keymap.set({ 'v' }, 'Y', '<Plug>(KsbVisualYankLine)', {})
+              vim.keymap.set({ 'v' }, 'y', '<Plug>(KsbVisualYank)', {})
+              vim.keymap.set({ 'n' }, 'Y', '<Plug>(KsbNormalYankEnd)', {})
+              vim.keymap.set({ 'n' }, 'y', '<Plug>(KsbNormalYank)', {})
+              vim.keymap.set({ 'n' }, 'yy', '<Plug>(KsbYankLine)', {})
+
+              vim.keymap.set({ 'v' }, '<leader>Y', '"aY', {})
+              vim.keymap.set({ 'v' }, '<leader>y', '"ay', {})
+              vim.keymap.set({ 'n' }, '<leader>Y', '"ay$', {})
+              vim.keymap.set({ 'n' }, '<leader>y', '"ay', {})
+              vim.keymap.set({ 'n' }, '<leader>yy', '"ayy', {})
+            end,
+          })
+        end,
+      },
+
+      { "mbbill/undotree", cmd = { "UndotreeToggle", "UndotreeShow" } },
+      {
+        "tris203/hawtkeys.nvim",
+        cmd = { "Hawtkeys", "HawtkeysAll", "HawtkeysDupes" },
+        config = true,
+      },
+      {
+        "tpope/vim-abolish",
+        event = "InsertEnter",
+        config = function()
+          vim.cmd("Abolish {despa,sepe}rat{e,es,ed,ing,ely,ion,ions,or}  {despe,sepa}rat{}")
+          vim.cmd 'Abolish cosnt const'
+          vim.cmd 'Abolish conts const'
+          vim.cmd 'Abolish reutrn return'
+          vim.cmd 'Abolish retunr return'
+          vim.cmd 'Abolish reutnr return'
+          vim.cmd 'Abolish retrun return'
+          vim.cmd 'Abolish improt import'
+          vim.cmd 'Abolish ipmort import'
+          vim.cmd 'Abolish impotr import'
+          vim.cmd 'Abolish iopmrt import'
+          vim.cmd 'Abolish iomprt import'
+        end
+      },
     }
   },
   {
