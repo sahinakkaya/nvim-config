@@ -360,7 +360,7 @@ require("lazy").setup({
         branch = "harpoon2",
         keys = keys.harpoon,
         config = setup_plugins.harpoon,
-        dependencies = {  "nvim-lua/plenary.nvim"  }
+        dependencies = { "nvim-lua/plenary.nvim" }
       },
       {
         'nvim-pack/nvim-spectre',
@@ -672,12 +672,12 @@ require("lazy").setup({
           "hrsh7th/cmp-path",
           "hrsh7th/cmp-cmdline",
           "hrsh7th/cmp-nvim-lsp",
-          {
-            "zbirenbaum/copilot-cmp",
-            config = function()
-              require("copilot_cmp").setup()
-            end
-          },
+          -- {
+          --   "zbirenbaum/copilot-cmp",
+          --   config = function()
+          --     require("copilot_cmp").setup()
+          --   end
+          -- },
           "saadparwaiz1/cmp_luasnip",
           {
             "L3MON4D3/LuaSnip",
@@ -710,6 +710,7 @@ require("lazy").setup({
           local luasnip = require("luasnip")
           -- local cmp_select = { behavior = cmp.SelectBehavior.Select }
 
+
           local icons = require('sahinakkaya.icons')
 
 
@@ -720,22 +721,6 @@ require("lazy").setup({
           end
 
 
-          -- local format = {
-          --   fields = { "kind", "abbr", "menu" },
-          --   format = function(_, vim_item)
-          --     local kind = vim_item.kind
-          --     local icon = (icons.kinds[kind] or ""):gsub("%s+", "")
-          --     vim_item.kind = " " .. icon
-          --     vim_item.menu = kind
-          --     local text = vim_item.abbr
-          --     local max = math.floor(math.max(vim.o.columns / 4, 50))
-          --     if vim.fn.strcharlen(text) > max then
-          --       vim_item.abbr = vim.fn.strcharpart(text, -1, max - 1)
-          --         .. icons.misc.ellipse
-          --     end
-          --     return vim_item
-          --   end,
-          -- }
 
           -- local cmp_autopairs = require "nvim-autopairs.completion.cmp"
           -- cmp.event:on("confirm_done", cmp_autopairs.on_confirm_done())
@@ -781,9 +766,26 @@ require("lazy").setup({
                 end
               end, { "i", "s" }),
             }),
+
+            formatting = {
+              fields = { "kind", "abbr", "menu" },
+              format = function(_, vim_item)
+                local kind = vim_item.kind
+                local icon = (icons.kinds[kind] or ""):gsub("%s+", "")
+                vim_item.menu = icon .. " "
+                vim_item.kind = ""
+                local text = vim_item.abbr
+                local max = math.floor(math.max(vim.o.columns / 4, 50))
+                if vim.fn.strcharlen(text) > max then
+                  vim_item.abbr = vim.fn.strcharpart(text, -1, max - 1)
+                      .. icons.misc.ellipse
+                end
+                return vim_item
+              end,
+            },
             sources = cmp.config.sources({
                 { name = 'luasnip',  max_item_count = 40 },
-                { name = "copilot",  group_index = 2 },
+                -- { name = "copilot",  group_index = 2 },
                 { name = 'nvim_lsp', max_item_count = 40 },
                 { name = 'path' }
               },

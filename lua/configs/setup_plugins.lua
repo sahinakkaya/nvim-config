@@ -519,6 +519,27 @@ M.scrollbar = function()
   vim.keymap.set({ "n", "x", "o" }, "]h", next_hunk_repeat, { desc = "Next git hunk" })
   vim.keymap.set({ "n", "x", "o" }, "[h", prev_hunk_repeat, { desc = "Prev git hunk" })
 end
+
+
+M.repeatable_moves = function()
+  local N = {}
+  local cp = require("copilot.panel")
+  local gs = require("gitsigns")
+  local ts_repeat_move = require "nvim-treesitter.textobjects.repeatable_move"
+  -- make sure forward function comes first
+  local next_hunk_repeat, prev_hunk_repeat = ts_repeat_move.make_repeatable_move_pair(gs.next_hunk, gs.prev_hunk)
+  local next_suggestion, prev_suggestion = ts_repeat_move.make_repeatable_move_pair(cp.jump_next, cp.jump_prev)
+  -- Or, use `make_repeatable_move` or `set_last_move` functions for more control. See the code for instructions.
+  N.next_hunk = function()
+    next_hunk_repeat()
+  end
+  N.prev_hunk = function()
+    prev_hunk_repeat()
+  end
+  N.next_suggestion = next_suggestion
+  N.prev_suggestion = prev_suggestion
+  return N
+end
 M.which_key = function()
   local whichkey = require("which-key")
 
@@ -544,21 +565,6 @@ M.which_key = function()
     end
   end
 
-  local function repeatable_moves()
-    local M = {}
-    local gs = require("gitsigns")
-    local ts_repeat_move = require "nvim-treesitter.textobjects.repeatable_move"
-    -- make sure forward function comes first
-    local next_hunk_repeat, prev_hunk_repeat = ts_repeat_move.make_repeatable_move_pair(gs.next_hunk, gs.prev_hunk)
-    -- Or, use `make_repeatable_move` or `set_last_move` functions for more control. See the code for instructions.
-    M.next_hunk = function()
-      next_hunk_repeat()
-    end
-    M.prev_hunk = function()
-      prev_hunk_repeat()
-    end
-    return M
-  end
 
   whichkey.setup({
     plugins = {
@@ -693,13 +699,13 @@ M.which_key = function()
       name = "Git",
       -- g = { require("plugin_configs.terminal").lazygit_toggle, "Lazygit" },
       g = { ":Git<CR>", "Fugitive" },
-      j = { repeatable_moves().next_hunk, "Next Hunk" },
+      j = { M.repeatable_moves().next_hunk, "Next Hunk" },
 
       d = { function()
         require("gitsigns").diffthis('~')
       end, "Diff this" },
       e = { require("gitsigns").toggle_deleted, "Toggle Deleted" },
-      k = { repeatable_moves().prev_hunk, "Prev Hunk" },
+      k = { M.repeatable_moves().prev_hunk, "Prev Hunk" },
       l = { require("gitsigns").toggle_current_line_blame, "Blame line" },
       b = { function()
         require("gitsigns").blame_line({ full = true })
@@ -1560,9 +1566,47 @@ M.harpoon = function()
 end
 
 M.copilot = function()
-  require("copilot").setup({
-    suggestion = { enabled = false },
-    panel = { enabled = false },
+  local cp = require("copilot")
+  local cs = require("copilot.suggestion")
+  vim.api.nvim_set_hl(0, "CopilotSuggestion", { fg = "#83a598" })
+  vim.keymap.set("n", "gps", M.repeatable_moves().prev_suggestion)
+  vim.keymap.set("n", "gns", M.repeatable_moves().next_suggestion)
+  vim.keymap.set("i", "<C-f>", function()
+    if cs.is_visible() then
+      cs.accept_word()
+    else
+      vim.cmd [[normal! w]]
+    end
+  end, { noremap = true })
+  cp.setup({
+    panel = {
+      enabled = true,
+      auto_refresh = true,
+      keymap = {
+        -- jump_prev = false,
+        -- jump_next = false,
+        accept = "<CR>", -- clashing with nvim-treesitter related thing
+        refresh = "gr",
+        open = "<M-CR>"  -- doesn't work for some reason
+      },
+      layout = {
+        position = "bottom", -- | top | left | right
+        ratio = 0.4
+      },
+    },
+    suggestion = {
+      enabled = true,
+      auto_trigger = true,
+      debounce = 75,
+      keymap = {
+        accept = "<C-;>",
+        accept_word = false,
+        accept_line = "<C-g>",
+        next = "<M-n>",
+        prev = "<M-p>",
+        dismiss = "<C-c>",
+      },
+    },
     filetypes = {
       yaml = false,
       markdown = false,
