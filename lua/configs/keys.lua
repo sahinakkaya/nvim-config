@@ -68,7 +68,7 @@ M.substitute = {
   { "X", mode = { "n" } },
 }
 
-M.harpoon = { "<Up>", "Down", "<leader>j", "<leader>a" }
+M.harpoon = { "<Up>", "<Down>", "<leader>j", "<leader>a" }
 
 M.yanky = {
   { "<leader>p", function() require("telescope").extensions.yank_history.yank_history({}) end, desc = "Open Yank History" },

@@ -360,7 +360,7 @@ require("lazy").setup({
         branch = "harpoon2",
         keys = keys.harpoon,
         config = setup_plugins.harpoon,
-        dependencies = { { "nvim-lua/plenary.nvim" } }
+        dependencies = {  "nvim-lua/plenary.nvim"  }
       },
       {
         'nvim-pack/nvim-spectre',
@@ -495,6 +495,7 @@ require("lazy").setup({
       {
         "folke/which-key.nvim",
         keys = keys.which_key,
+        lazy = false, -- uncomment this line if you are facing a problem with frecency plugin. it inserts an A character if database is not up to date
         init = function()
           vim.o.timeout = true
           vim.o.timeoutlen = 500
