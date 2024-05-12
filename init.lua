@@ -10,83 +10,12 @@ local config = home .. '/.config/'
 local data = home .. '/.local/share/'
 local nconf = fn.stdpath("config")
 
+local function get_output(cmd)
+  local f = vim.fn.system(cmd)
+  return string.lower(f:gsub("%s+", ""))
+end
+
 vim.g.python3_host_prog = home .. "/.pyenv/shims/python3"
--- Options {{{
-local options = {
-  backup = true, -- creates a backup file
-  backupdir = home .. '/.cache/nvim/backup',
-  background = 'dark',
-
-  undofile = true,      -- enable persistent undo
-  swapfile = false,     -- creates a swapfile
-  writebackup = false,  -- if a file is being edited by another program (or was written to file while editing with another program), it is not allowed to be edited
-  termguicolors = true, -- set term gui colors (most terminals support this)
-  mousemoveevent = true,
-
-  spell = false,
-  spelllang = 'en,tr',
-  clipboard = "unnamedplus",               -- allows neovim to access the system clipboard
-  cmdheight = 2,                           -- more space in the neovim command line for displaying messages
-  completeopt = { "menuone", "noselect" }, -- mostly just for cmp
-  conceallevel = 1,                        -- default 0, so that `` is visible in markdown files
-  fileencoding = "utf-8",                  -- the encoding written to a file
-  hlsearch = true,                         -- highlight all matches on previous search pattern
-  ignorecase = true,                       -- ignore case in search patterns
-  mouse = "a",                             -- allow the mouse to be used in neovim
-  pumheight = 10,                          -- pop up menu height
-  pumblend = 0,                            -- pop up menu transparency
-  -- winblend = 10,
-  showmode = false,                        -- we don't need to see things like -- INSERT -- anymore
-  showtabline = 2,                         -- always show tabs
-  smartcase = true,                        -- smart case
-  -- smartindent = true,                      -- make indenting smarter again
-  splitbelow = true,                       -- force all horizontal splits to go below current window
-  splitright = true,                       -- force all vertical splits to go to the right of current window
-  timeoutlen = 500,                        -- time to wait for a mapped sequence to complete (in milliseconds)
-  updatetime = 300,                        -- faster completion (4000ms default)
-  expandtab = true,                        -- convert tabs to spaces
-  shiftwidth = 2,                          -- the number of spaces inserted for each indentation
-  tabstop = 2,                             -- insert 2 spaces for a tab
-  cursorline = false,                      -- highlight the current line
-  number = true,                           -- set numbered lines
-  relativenumber = true,                   -- set relative numbered lines
-  numberwidth = 4,                         -- set number column width to 2 {default 4}
-  signcolumn = "yes",                      -- always show the sign column, otherwise it would shift the text each time
-  wrap = true,                             -- display lines in multiple lines
-  scrolloff = 999,                         -- show at least n number of lines before after cursor
-  sidescrolloff = 6,
-  guifont = "monospace:h17",               -- the font used in graphical neovim applications
-  foldmethod = "expr",
-  foldlevelstart = 4,
-  foldenable = false,
-  foldexpr = "nvim_treesitter#foldexpr()",
-  fillchars = [[eob: ,fold: ,foldopen:,foldsep: ,foldclose:]],
-  foldcolumn = '1',
-
-  virtualedit = "block",
-  inccommand = "split"
-
-  -- foldclose = 'all',
-  -- foldopen = 'all',
-
-  -- mousescroll = "ver:1,hor:6"
-}
-
-vim.opt.shortmess:append "c"
-vim.opt.whichwrap:append "<,>,[,]"
-vim.opt.iskeyword:append "-"
-
-for k, v in pairs(options) do
-  vim.opt[k] = v
-end
-
-
-for _, path in pairs(vim.api.nvim_list_runtime_paths()) do
-  vim.opt.path:append(path .. '/lua')
-end
-
--- vim.api.cmd('set formatoptions-=cro') -- TODO: this doesn't seem to work
---: }}}
 
 -- {{{ Keymaps
 local opts = { noremap = true, silent = true }
@@ -107,8 +36,8 @@ keymap("n", "<C-s>", ":w | echo 'do not forget to remove me' | luafile %<CR>", o
 -- keymap("v", ";", ":", {noremap=true})
 -- keymap("v", ":", ";", {noremap=true})
 
-keymap("n", "<leader>;", ":", {noremap=true})
-keymap("v", "<leader>;", ":", {noremap=true})
+keymap("n", "<leader>;", ":", { noremap = true })
+keymap("v", "<leader>;", ":", { noremap = true })
 
 -- Increment/decrement
 keymap('n', '+', '<C-a>', opts)
@@ -314,7 +243,10 @@ M.define_augroups(M.autocmds)
 
 -- }}}
 
-
+local keys = require("configs.keys")
+local options = require("configs.options")
+local setup_plugins = require('configs.setup_plugins')
+local init = require("configs.init")
 
 local lazypath = fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not vim.loop.fs_stat(lazypath) then
@@ -330,13 +262,418 @@ end
 vim.opt.rtp:prepend(lazypath)
 require("lazy").setup({
     { import = "plugins" },
+    {
+      "folke/neodev.nvim",
+      { "folke/neoconf.nvim", cmd = "Neoconf" }, -- don't quite understand this
+      {
+        "numToStr/Comment.nvim",
+        dependencies = {
+          "JoosepAlviste/nvim-ts-context-commentstring",
+        },
+        keys = keys.comment,
+        config = setup_plugins.comment,
+      },
+
+
+      -- Add/change/delete surrounding delimiter pairs with ease. Written with ❤️ in Lua.
+      -- ✨ Features
+      --     Add/delete/change surrounding pairs
+      --         Function calls and HTML tags out-of-the-box
+      --     Dot-repeat previous actions
+      --     Set buffer-local mappings and surrounds
+      --     Jump to the nearest surrounding pair for modification
+      --     Use a single character as an alias for several text-objects
+      --         E.g. q is aliased to `,',", so csqb replaces the nearest set of quotes with parentheses
+      --     Surround using powerful pairs that depend on user input
+      --     Modify custom surrounds
+      --         First-class support for Vim motions, Lua patterns, and Tree-sitter nodes
+      --     Highlight selections for visual feedback
+      {
+        "kylechui/nvim-surround",
+        keys = keys.nvim_surround,
+        opts = options.nvim_surround
+      },
+      -- {
+      --   "windwp/nvim-autopairs",
+      --   config = function()
+      --     require("configs.editor.autopairs")
+      --
+      --   end,
+      --   event = "InsertEnter",
+      -- },
+      {
+        'altermo/ultimate-autopair.nvim',
+        event = { 'InsertEnter', 'CmdlineEnter' },
+        branch = 'v0.6', --recomended as each new version will have breaking changes
+        opts = options.ultimate_pairs,
+      },
+      {
+        "gbprod/substitute.nvim",
+        keys = keys.substitute,
+        config = setup_plugins.substitute,
+      },
+      {
+        "monaqa/dial.nvim",
+        keys = keys.dial,
+        config = setup_plugins.dial,
+      },
+
+      {
+        "nvim-treesitter/nvim-treesitter",
+        event = "VeryLazy",
+        build = ":TSUpdate",
+        dependencies = {
+          "nvim-treesitter/nvim-treesitter-textobjects",
+          "chrisgrieser/nvim-various-textobjs",
+          -- "RRethy/nvim-treesitter-textsubjects", tested it, not worth using
+          {
+            "windwp/nvim-ts-autotag",
+            config = function() require("nvim-ts-autotag").setup() end,
+          }
+        },
+        config = setup_plugins.treesitter,
+
+      },
+      {
+        "gbprod/yanky.nvim",
+        opts = options.yanky,
+        keys = keys.yanky,
+      },
+      {
+        "ThePrimeagen/harpoon",
+        branch = "harpoon2",
+        keys = keys.harpoon,
+        config = setup_plugins.harpoon,
+        dependencies = { { "nvim-lua/plenary.nvim" } }
+      },
+      {
+        'nvim-pack/nvim-spectre',
+        cmd = "Spectre",
+        keys = keys.spectre
+      },
+      {
+        "johmsalas/text-case.nvim",
+        dependencies = { "nvim-telescope/telescope.nvim" },
+        config = setup_plugins.text_case,
+        keys = keys.text_case,
+      },
+      { "tpope/vim-fugitive", cmd = { "G", "Git", "Gedit", "Gsplit", "Gread", "Gwrite", "Ggrep", "GMove", "GRename", "GDelete", "GBrowse" } },
+      {
+        "zbirenbaum/copilot.lua",
+        cmd = "Copilot",
+        event = "InsertEnter",
+        config = setup_plugins.copilot,
+      },
+      {
+        'kristijanhusak/vim-dadbod-ui',
+        dependencies = {
+          { 'tpope/vim-dadbod',                     lazy = true },
+          { 'pbogut/vim-dadbod-ssh',                lazy = true,                      commit = "e4fbabb21a3d737510193c3d9f124a566e7f5910" },
+          { 'kristijanhusak/vim-dadbod-completion', ft = { 'sql', 'mysql', 'plsql' }, lazy = true },
+        },
+        cmd = { 'DBUI', 'DBUIToggle', 'DBUIAddConnection', 'DBUIFindBuffer' },
+        init = init.dadbod_ui,
+      },
+
+      {
+        "rcarriga/nvim-dap-ui",
+        config = setup_plugins.dapui,
+        dependencies = { "mfussenegger/nvim-dap", "nvim-neotest/nvim-nio", 'theHamsta/nvim-dap-virtual-text' }
+      },
+      {
+        "mfussenegger/nvim-dap-python",
+        keys = keys.nvim_dap_python,
+        dependencies = { "mfussenegger/nvim-dap" },
+        config = setup_plugins.nvim_dap_python,
+      },
+
+      {
+        "ggandor/leap.nvim",
+        dependencies = { "tpope/vim-repeat" },
+        lazy = false,
+        config = setup_plugins.leap,
+      },
+      {
+        "junegunn/vim-easy-align",
+        keys = keys.vim_easy_align,
+        config = setup_plugins.vim_easy_align,
+      },
+      { "wellle/targets.vim",  init = init.targets, lazy = false }, -- aa --> around argument. i already have this with tree sitter. need to check later
+
+
+      -- {
+      --   "jay-babu/mason-nvim-dap.nvim",
+      --   dependencies = {
+      --     "williamboman/mason.nvim",
+      --     "mfussenegger/nvim-dap",
+      --   }
+      -- }
+      --
+      --
+      -- filetype specific plugins
+      {
+        "tridactyl/vim-tridactyl",
+        ft = "tridactyl"
+      },
+      -- {
+      -- 'vimwiki/vimwiki',
+      -- ft = 'vimwiki',
+      -- keys = keys.vimwiki,
+      -- },
+      {
+        "tools-life/taskwiki",
+        ft = "vimwiki",
+        init = init.taskwiki
+      },
+      -- filetype specific plugins end
+      -- lsp related plugins
+      {
+        "williamboman/mason.nvim",
+        cmd = "Mason",
+        dependencies = {
+          "williamboman/mason-lspconfig.nvim",
+          {
+            'stevearc/dressing.nvim',
+            opts = {},
+          }
+        },
+      },
+      {
+        "neovim/nvim-lspconfig",
+        event = "VeryLazy",
+        config = setup_plugins.lsp_config,
+
+      },
+      {
+        "pmizio/typescript-tools.nvim",
+        dependencies = { "nvim-lua/plenary.nvim", "neovim/nvim-lspconfig" },
+        ft = { "javascript", "javascriptreact", "javascript.jsx", "typescript", "typescriptreact", "typescript.tsx" },
+        config = setup_plugins.typescript_tools,
+      },
+      {
+        "folke/trouble.nvim",
+        dependencies = "nvim-tree/nvim-web-devicons",
+        opts = options.trouble,
+      },
+      {
+        "ThePrimeagen/refactoring.nvim",
+        dependencies = {
+          "nvim-lua/plenary.nvim",
+          "nvim-treesitter/nvim-treesitter",
+        },
+        config = setup_plugins.refactoring,
+      },
+      -- lsp plugins end
+
+      { "abecodes/tabout.nvim" },
+      {
+        "rebelot/kanagawa.nvim",
+        lazy = false,    -- make sure we load this during startup if it is your main colorscheme
+        priority = 1000, -- make sure to load this before all the other start plugins
+        config = function()
+          vim.o.background = get_output('cat $HOME/.theme')
+          vim.cmd([[colorscheme kanagawa]])
+        end,
+
+      },
+      {
+        "folke/which-key.nvim",
+        keys = keys.which_key,
+        lazy = true, -- uncomment this line if you are facing a problem with telescope frecency extension
+        init = function()
+          vim.o.timeout = true
+          vim.o.timeoutlen = 500
+        end,
+        config = function()
+          require("configs.ui.whichkey")
+        end,
+      },
+      {
+        "folke/noice.nvim",
+        event = "VeryLazy",
+        config = function()
+          require("configs.ui.noice")
+        end,
+        dependencies = {
+          -- if you lazy-load any plugin below, make sure to add proper `module="..."` entries
+          "MunifTanjim/nui.nvim",
+          -- OPTIONAL:
+          --   `nvim-notify` is only needed, if you want to use the notification view.
+          --   If not available, we use `mini` as the fallback
+          {
+            "rcarriga/nvim-notify",
+            config = function()
+              require("configs.ui.notify")
+            end
+          },
+        }
+      },
+      --  {
+      -- 	"rcarriga/nvim-notify",
+      --    event="VeryLazy",
+      -- 	config = function()
+      -- 		require("configs.ui.notify")
+      -- 	end,
+      -- },
+      {
+        "j-hui/fidget.nvim",
+        event = "VeryLazy",
+        config = function()
+          require("configs.lsp.fidget")
+        end,
+      },
+
+      {
+        "petertriho/nvim-scrollbar",
+        dependencies = {
+          "kevinhwang91/nvim-hlslens",
+          "lewis6991/gitsigns.nvim",
+        },
+        event = "VeryLazy",
+        config = function()
+          require("configs.ui.sidebars")
+        end,
+      },
+      {
+        "lewis6991/gitsigns.nvim",
+        -- config = function ()
+        --   require("configs.ui.sidebars")
+        -- end
+      },
+
+      {
+        "nvim-neo-tree/neo-tree.nvim",
+        branch = "v3.x",
+        dependencies = {
+          "nvim-lua/plenary.nvim",
+          "nvim-tree/nvim-web-devicons", -- not strictly required, but recommended
+          "MunifTanjim/nui.nvim",
+          "mrbjarksen/neo-tree-diagnostics.nvim",
+          -- "3rd/image.nvim", -- Optional image support in preview window: See `# Preview Mode` for more information
+        },
+        cmd = "Neotree",
+        lazy = false,
+        config = function()
+          require("configs.ui.neotree")
+        end,
+      },
+
+      -- {
+      --   "3rd/image.nvim",
+      --   -- ft = { "markdown", "vimwiki" },
+      --   config = function()
+      --     -- Example for configuring Neovim to load user-installed installed Lua rocks:
+      --     package.path = package.path .. ";" .. vim.fn.expand("$HOME") .. "/.luarocks/share/lua/5.1/?/init.lua;"
+      --     package.path = package.path .. ";" .. vim.fn.expand("$HOME") .. "/.luarocks/share/lua/5.1/?.lua;"
+      --     require("image").setup({ editor_only_render_when_focused = true,  window_overlap_clear_enabled = true,tmux_show_only_in_active_window = true })
+      --   end
+      -- }, -- Optional image support in preview window: See `# Preview Mode` for more information
+      {
+        'nvim-telescope/telescope.nvim',
+        tag = '0.1.5',
+        -- or, branch = '0.1.x',
+        dependencies = {
+          'nvim-lua/plenary.nvim',
+          'nvim-telescope/telescope-ui-select.nvim',
+          "nvim-treesitter/nvim-treesitter",
+          "nvim-tree/nvim-web-devicons",
+          "nvim-telescope/telescope-frecency.nvim",
+          "nvim-telescope/telescope-file-browser.nvim",
+          "nvim-telescope/telescope-project.nvim",
+          {
+            'nvim-telescope/telescope-fzf-native.nvim',
+            build =
+            'cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release && cmake --build build --config Release && cmake --install build --prefix build'
+          }
+        },
+        -- event = "VeryLazy",
+        config = function()
+          require("configs.ui.telescope")
+        end
+      },
+      { -- there is also integration with rainbow-delimiters. check read me if you want
+        "lukas-reineke/indent-blankline.nvim",
+        event = "VeryLazy",
+        opts = {
+          indent = {
+            char = "│",
+            tab_char = "│",
+          },
+          scope = { enabled = true },
+          exclude = {
+            filetypes = {
+              "help",
+              "alpha",
+              "dashboard",
+              "neo-tree",
+              "Trouble",
+              "trouble",
+              "lazy",
+              "mason",
+              "notify",
+              "toggleterm",
+              "lazyterm",
+            },
+          },
+        },
+        main = "ibl",
+      },
+      {
+        "hiphish/rainbow-delimiters.nvim",
+        dependencies = "nvim-treesitter/nvim-treesitter",
+        event = "VeryLazy",
+        config = function()
+          require("configs.ui.rainbow-delimiters")
+        end
+      },
+      {
+        'NvChad/nvim-colorizer.lua',
+        cmd = { "ColorizerAttachToBuffer", "ColorizerToggle" },
+        config = function()
+          require('colorizer').setup()
+        end
+      },
+      {
+        "karb94/neoscroll.nvim",
+        keys = keys.neoscroll,
+        config = function()
+          require("neoscroll").setup()
+        end
+      },
+
+      {
+        "nvimtools/hydra.nvim",
+        dependencies = {
+          { "anuvyklack/vim-smartword" },
+          {
+            "chaoren/vim-wordmotion",
+            init = function()
+              vim.g.wordmotion_nomap = 1
+              -- vim.g.wordmotion_prefix = ","
+            end,
+          }
+        },
+        keys = keys.hydra,
+        config = function()
+          require("configs.ui.hydra_config")
+        end,
+      },
+      {
+        "smjonas/inc-rename.nvim",
+        -- keys = { "<leader>rn", mode = "n"},
+        lazy = false,
+        config = function()
+          require("inc_rename").setup()
+        end,
+      }
+    }
   },
   {
     defaults = {
       lazy = true,
     },
     install = {
-      colorscheme = {"kanagawa", "tokyonight", "habamax" },
+      colorscheme = { "kanagawa", "tokyonight", "habamax" },
     },
 
     performance = {
@@ -362,5 +699,3 @@ require("lazy").setup({
       },
     },
   })
-
-

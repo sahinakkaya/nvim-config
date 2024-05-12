@@ -24,9 +24,9 @@ M.mkcaps = function(extra)
       dynamicRegistration = false,
     }
 
-    -- capabilities.general.positionEncodings = { "utf-8" }
+    capabilities.general.positionEncodings = { "utf-8" }
 
-    capabilities.offsetEncoding = "utf-8"
+    -- capabilities.offsetEncoding = "utf-8"
   end
 
   ---@diagnostic disable-next-line: missing-fields
@@ -44,7 +44,7 @@ M.on_attach = function(client, bufnr)
   -- if client.server_capabilities.inlayHintProvider then
   --   print("yes")
   -- end
-  vim.lsp.inlay_hint.enable(bufnr, true)
+  vim.lsp.inlay_hint.enable(true, {0})
 
   -- Mappings.
   -- See `:help vim.lsp.*` for documentation on any of the below functions
@@ -60,6 +60,8 @@ M.on_attach = function(client, bufnr)
   vim.keymap.set('n', 'gr', function() require("trouble").toggle("lsp_references") end, bufopts)
   -- vim.keymap.set('n', '<C-k>', vim.lsp.buf.signature_help, bufopts)
   vim.keymap.set('n', '<C-m>', vim.lsp.buf.signature_help, bufopts)
+  vim.keymap.set('i', '<C-m>', vim.lsp.buf.signature_help, bufopts)
+  vim.keymap.set('i', '<C-k>', vim.lsp.buf.signature_help, bufopts)
   -- vim.keymap.set('n', '<space>wa', vim.lsp.buf.add_workspace_folder, bufopts)
   -- vim.keymap.set('n', '<space>wr', vim.lsp.buf.remove_workspace_folder, bufopts)
   -- vim.keymap.set('n', '<space>wl', function()

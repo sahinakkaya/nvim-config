@@ -1,6 +1,8 @@
-
-local harpoon = require("harpoon")
 local whichkey = require("which-key")
+
+local harpoon = function()
+  return require("harpoon")
+end
 
 
 local hydra = require("hydra")
@@ -20,6 +22,22 @@ local function activate_debug_hydra()
   end
 end
 
+local function repeatable_moves()
+  local M = {}
+  local gs = require("gitsigns")
+  local ts_repeat_move = require "nvim-treesitter.textobjects.repeatable_move"
+  -- make sure forward function comes first
+  local next_hunk_repeat, prev_hunk_repeat = ts_repeat_move.make_repeatable_move_pair(gs.next_hunk, gs.prev_hunk)
+  -- Or, use `make_repeatable_move` or `set_last_move` functions for more control. See the code for instructions.
+  M.next_hunk = function()
+    next_hunk_repeat()
+  end
+  M.prev_hunk = function()
+    prev_hunk_repeat()
+  end
+  return M
+end
+
 whichkey.setup({
   plugins = {
     marks = true,     -- shows a list of your marks on ' and `
@@ -31,8 +49,8 @@ whichkey.setup({
     -- the presets plugin, adds help for a bunch of default keybindings in Neovim
     -- No actual key bindings are created
     presets = {
-      operators = true,   -- adds help for operators like d, y, ... and registers them for motion / text object completion
-      motions = true,     -- adds help for motions
+      operators = true,    -- adds help for operators like d, y, ... and registers them for motion / text object completion
+      motions = true,      -- adds help for motions
       text_objects = true, -- help for text objects triggered after entering an operator
       windows = true,      -- default bindings on <c-w>
       nav = true,          -- misc bindings to work with windows
@@ -75,7 +93,7 @@ whichkey.setup({
     spacing = 3,                                                        -- spacing between columns
     align = "left",                                                     -- align columns left, center or right
   },
-  ignore_missing = false,                                                -- enable this to hide mappings for which you didn't specify a label
+  ignore_missing = false,                                               -- enable this to hide mappings for which you didn't specify a label
   hidden = { "<silent>", ":", ":", "<CR>", "call", "lua", "^:", "^ " }, -- hide mapping boilerplate
   show_help = true,                                                     -- show help message on the command line when the popup is visible
   triggers = "auto",                                                    -- automatically setup triggers
@@ -106,7 +124,7 @@ local mappings = {
   ["<space>"] = { ":Telescope frecency workspace=CWD<CR>", "Frecent files" },
   ["\\"] = { ":vnew<CR>", "vsplit" },
   ["-"] = { ":new<CR>", "hsplit" },
-  a = { function() harpoon:list():append() end, "Harpoon add" },
+  a = { function() harpoon():list():add() end, "Harpoon add" },
   e = { ":Neotree toggle reveal right last<CR>", "Explorer" },
 
   d = {
@@ -153,12 +171,13 @@ local mappings = {
     name = "Git",
     -- g = { require("plugin_configs.terminal").lazygit_toggle, "Lazygit" },
     g = { ":Git<CR>", "Fugitive" },
-    j = { require("gitsigns").next_hunk, "Next Hunk" },
+    j = { repeatable_moves().next_hunk, "Next Hunk" },
+
     d = { function()
       require("gitsigns").diffthis('~')
     end, "Diff this" },
     e = { require("gitsigns").toggle_deleted, "Toggle Deleted" },
-    k = { require("gitsigns").prev_hunk, "Prev Hunk" },
+    k = { repeatable_moves().prev_hunk, "Prev Hunk" },
     l = { require("gitsigns").toggle_current_line_blame, "Blame line" },
     b = { function()
       require("gitsigns").blame_line({ full = true })
@@ -193,12 +212,12 @@ local mappings = {
 
   j = {
     name = "Jump",
-    ["<Space>"] = { function() harpoon:list():append() end, "Harpoon add" },
-    a = { function() harpoon:list():select(1) end, "Harpoon a" },
-    s = { function() harpoon:list():select(2) end, "Harpoon s" },
-    d = { function() harpoon:list():select(3) end, "Harpoon d" },
-    f = { function() harpoon:list():select(4) end, "Harpoon f" },
-    l = { function() harpoon.ui:toggle_quick_menu(harpoon:list()) end, "Harpoon list" },
+    ["<Space>"] = { function() harpoon():list():append() end, "Harpoon add" },
+    a = { function() harpoon():list():select(1) end, "Harpoon a" },
+    s = { function() harpoon():list():select(2) end, "Harpoon s" },
+    d = { function() harpoon():list():select(3) end, "Harpoon d" },
+    f = { function() harpoon():list():select(4) end, "Harpoon f" },
+    l = { function() harpoon().ui:toggle_quick_menu(harpoon():list()) end, "Harpoon list" },
   },
   l = {
     name = "LSP",
@@ -208,8 +227,8 @@ local mappings = {
     D = { vim.lsp.buf.declaration, "Go to declaration" },
     f = { function() vim.lsp.buf.format { async = true } end, "Format" },
     I = { function()
-      local enabled = vim.lsp.inlay_hint.is_enabled()
-      vim.lsp.inlay_hint.enable(0, not enabled)
+      local enabled = vim.lsp.inlay_hint.is_enabled(0)
+      vim.lsp.inlay_hint.enable(not enabled)
     end, "Toggle inlay hints" },
     i = { vim.lsp.buf.implementation, "Go to implementation" },
     h = { vim.lsp.buf.hover, "Hover info" },
@@ -243,7 +262,7 @@ local mappings = {
     v = { function() require('refactoring').debug.print_var({ below = true }) end, "Print var" },
     p = { function() require('refactoring').debug.printf({ below = true }) end, "Debug statement" },
     s = { vim.lsp.buf.signature_help, "Signature help" },
-    w = { 
+    w = {
       name = "Workspace",
       a = { vim.lsp.buf.add_workspace_folder, "Add workspace folder" },
       r = { vim.lsp.buf.remove_workspace_folder, "Remove workspace folder" },
@@ -255,7 +274,7 @@ local mappings = {
 
   n = {
     name = "Notifications",
-    d = { function() require('notify').dismiss({pending=false, silent=false }) end, "Dismiss notifications" },
+    d = { function() require('notify').dismiss({ pending = false, silent = false }) end, "Dismiss notifications" },
     n = { ":Fidget history<CR>", "Notifications" },
   },
 
@@ -279,7 +298,7 @@ local mappings = {
   },
   t = {
     name = "Trouble",
-    D = { ":DBUI<CR>", "DBUI" },
+    D = { ":DBUIToggle<CR>", "DBUI Toggle" },
     d = { function() require("trouble").toggle("document_diagnostics") end, "Document Diagnostics" },
     f = { function() require("trouble").toggle("lsp_definitions") end, "Lsp Definitions" },
     l = { function() require("trouble").toggle("loclist") end, "Location List" },

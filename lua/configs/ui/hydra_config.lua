@@ -1,8 +1,10 @@
+require('hydra').setup{}
 local Hydra = require("hydra")
 local gitsigns = require("gitsigns")
 local dap = require("dap")
 local dapui = require("dapui")
 local hydras = {}
+
 
 hydras.quickwors = Hydra({
 	name = "Quick words",
@@ -11,7 +13,7 @@ hydras.quickwors = Hydra({
 		hint = false,
 	},
 	mode = { "n", "x", "o" },
-	body = ",",
+	body = "\\",
 
 	heads = {
 		{ "W", "<Plug>(smartword-w)" },
@@ -48,7 +50,7 @@ hydras.draw_diagram = Hydra({
 	config = {
 		color = "pink",
 		hint = {
-			border = "rounded",
+      float_opts = { border = "rounded" },
 		},
 		on_enter = function()
 			vim.o.virtualedit = "all"
@@ -87,7 +89,7 @@ hydras.toggle = Hydra({
 	config = {
 		color = "blue",
 		hint = {
-			border = "rounded",
+      float_opts = { border = "rounded" },
 			position = "middle",
 		},
 	},
@@ -129,7 +131,7 @@ hydras.options = Hydra({
 	config = {
 		color = "blue",
 		hint = {
-			border = "rounded",
+      float_opts = { border = "rounded" },
 			position = "middle",
 			funcs = {
 				["hlsearch"] = function()
@@ -286,7 +288,7 @@ hydras.git = Hydra({
 		-- buffer = 0,
 		color = "pink",
 		hint = {
-			border = "rounded",
+      float_opts = { border = "rounded" },
 		},
 		on_enter = function()
 			vim.cmd("mkview")
@@ -369,7 +371,7 @@ hydras.debug = Hydra({
 	config = {
 		color = "pink",
 		hint = {
-			border = "rounded",
+      float_opts = { border = "rounded" },
 			position = "middle-right",
 		},
 	},
@@ -436,7 +438,7 @@ hydras.debug2 = Hydra({
 	config = {
 		color = "pink",
 		hint = {
-			border = "rounded",
+      float_opts = { border = "rounded" },
 			position = "middle-right",
 		},
 	},

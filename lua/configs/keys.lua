@@ -1,6 +1,6 @@
 local M = {}
 
---The keys property can be a string or string[] for simple normal-mode mappings, 
+--The keys property can be a string or string[] for simple normal-mode mappings,
 --or it can be a LazyKeysSpec table with the following key-value pairs:
 --     [1]: (string) lhs (required)
 --     [2]: (string|fun()) rhs (optional)
@@ -17,16 +17,29 @@ M.comment = {
 }
 
 M.spectre = {
-  {'<leader>rr', '<cmd>lua require("spectre").toggle()<CR>',  desc = "Toggle Spectre"},
-  {'<leader>rw', '<cmd>lua require("spectre").open_visual({select_word=true})<CR>',  desc = "Search current word"},
-  {'<leader>rw', '<esc><cmd>lua require("spectre").open_visual()<CR>', mode ="v",  desc = "Search current word"},
-  {'<leader>rp', '<cmd>lua require("spectre").open_file_search({select_word=true})<CR>',  desc = "Search on current file"}
+  { '<leader>rr', '<cmd>lua require("spectre").toggle()<CR>',                             desc = "Toggle Spectre" },
+  { '<leader>rw', '<cmd>lua require("spectre").open_visual({select_word=true})<CR>',      desc = "Search current word" },
+  { '<leader>rw', '<esc><cmd>lua require("spectre").open_visual()<CR>',                   mode = "v",                     desc = "Search current word" },
+  { '<leader>rp', '<cmd>lua require("spectre").open_file_search({select_word=true})<CR>', desc = "Search on current file" }
 }
 
-M.which_key = { {"<Leader>", mode = { "n", "v" }} }
-M.vimwiki = { "<Space>ww" }
-M.neoscroll = {'<C-u>', '<C-d>', '<C-b>', '<C-f>', '<C-y>', '<C-e>', 'zt', 'zz', 'zb'}
+M.nvim_dap_python = { "<leader>ds", "<leader>dt" }
 
+M.vim_easy_align = {
+  { "ga", mode = { "n", "v" } },
+}
+
+
+M.text_case = {
+  "ga",
+  { "ga.", "<cmd>TextCaseOpenTelescope<CR>", mode = { "n", "v" }, desc = "Telescope" },
+}
+
+M.which_key = { { "<Leader>", mode = { "n", "v" } } }
+M.vimwiki = { "<Space>ww" }
+M.neoscroll = { '<C-u>', '<C-d>', '<C-b>', '<C-f>', '<C-y>', '<C-e>', 'zt', 'zz', 'zb' }
+
+M.hydra = { { "\\", mode = { "n", "x", "o" } }, { "<leader>h", mode = { "n", "x", "o" } }  }
 
 M.nvim_surround = { "ds", "ys", "yS", "cs", { "S", mode = "v" } }
 
@@ -42,8 +55,8 @@ M.dial = {
 }
 
 M.substitute = {
-  { "x", mode = { "n", "v" } },
-  { "X", mode = {"n"} },
+  { "x", "X",           mode = { "n", "v" } },
+  { "X", mode = { "n" } },
 }
 
 M.harpoon = { "<Up>", "Down", "<leader>j", "<leader>a" }
@@ -67,7 +80,7 @@ M.yanky = {
   { "<P",        "<Plug>(YankyPutIndentBeforeShiftLeft)",                                      desc = "Put before and indent left" },
   { "=p",        "<Plug>(YankyPutAfterFilter)",                                                desc = "Put after applying a filter" },
   { "=P",        "<Plug>(YankyPutBeforeFilter)",                                               desc = "Put before applying a filter" },
-  { "lp",        function() require("yanky.textobj").last_put() end,                           mode = { "o", "x" },                                desc = "Last put text obj" },
+  { "P",         function() require("yanky.textobj").last_put() end,                           mode = { "o", "x" },                                desc = "Last put text obj" },
 }
 
 return M
