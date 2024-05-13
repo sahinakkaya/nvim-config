@@ -44,6 +44,9 @@ M._lsp_utils = {
       -- Disable hover in favor of Pyright
       client.server_capabilities.hoverProvider = false
     end
+    if client.server_capabilities.documentSymbolProvider then
+        require("nvim-navic").attach(client, bufnr)
+    end
     -- if client.server_capabilities.inlayHintProvider then
     --   print("yes")
     -- end
@@ -787,6 +790,7 @@ M.which_key = function()
           require('refactoring').select_refactor()
         end, "Select refactor" },
       },
+
       v = { function() require('refactoring').debug.print_var({ below = true }) end, "Print var" },
       p = { function() require('refactoring').debug.printf({ below = true }) end, "Debug statement" },
       s = { vim.lsp.buf.signature_help, "Signature help" },
@@ -806,6 +810,7 @@ M.which_key = function()
       -- n = { ":Fidget history<CR>", "Notifications" },
       n = { ":Telescope notify<CR>", "Notifications" },
     },
+    m = { ":WindowsMaximize<CR>", "Toggle maximize" },
 
     s = {
       name = "Search",
@@ -841,7 +846,25 @@ M.which_key = function()
     t = {
       name = "Toggle",
       n = { ":Telescope notify<CR>", "Notifications" },
-    }
+    },
+
+    w = {
+      name = "windows",
+      e = { ":WindowsEqualize<CR>", "Equalize windows" },
+      h = { "<C-W>H", "Move window to far left" },
+      l = { "<C-W>L", "Move window to far right" },
+      j = { "<C-W>J", "Move window to very top" },
+      k = { "<C-W>K", "Move window to very bottom" },
+      m = { ":WindowsMaximize<CR>", "Toggle maximize" },
+      ['\\'] = { ":WindowsMaximizeHorizontally<CR>", "Maximize horizontally" },
+      ['|'] = { ":WindowsMaximizeHorizontally<CR>", "Maximize horizontally" },
+      ['_'] = { ":WindowsMaximizeVertically<CR>", "Maximize vertically" },
+      ['-'] = { ":WindowsMaximizeVertically<CR>", "Maximize vertically" },
+      r = { ":lua require('smart-splits').start_resize_mode()<CR>", "Resize mode" },
+      s = { "<C-W>x", "Swap with closest to right" },
+      w = { "<C-W>r", "Rotate windows to down/right" },
+      W = { "<C-W>R", "Rotate windows to up/left" },
+    },
     -- w = {
     --   name = "windows",
     --   h = { "<C-W>H", "Move window to far left" },
@@ -869,6 +892,10 @@ M.which_key = function()
         i = { function() require('refactoring').refactor('Inline Variable') end, "Inline variable" },
         r = { function() require('telescope').extensions.refactoring.refactors() end, "Refactor" },
       },
+    },
+    d = {
+      name = "Debug",
+      e = { ":lua require('dapui').eval()<CR>", "Evaluate expression" },
     },
     g = {
       name = "Git",

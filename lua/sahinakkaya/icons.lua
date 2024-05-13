@@ -55,7 +55,8 @@ Icons.kinds = {
   -- Null          = " ",
 
   Text          = " ",
-  Snippet       = " ",
+  -- Snippet       = " ",
+  Snippet = "",
   Color         = "󰏘 ",
   File          = "󰈮 ",
   Folder        = "󰉋 ",
@@ -66,6 +67,15 @@ Icons.kinds = {
   -- TypeParameter = " ",
   Copilot       = " ",
   Cody          = " ",
+}
+
+Icons.sources = {
+  path = "",
+  buffer = "",
+  luasnip = "󱐌",
+  latex_symbols = "",
+  nvim_lua = "",
+  nvim_lsp = ""
 }
 
 Icons.diagnostics = {

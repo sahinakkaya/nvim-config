@@ -119,6 +119,15 @@ keymap("v", ">", ">gv", opts)
 keymap("v", 'y', 'myy`y', opts)
 keymap("v", 'Y', 'myY`y', opts)
 
+
+vim.keymap.set('x', 'is', '<Plug>(textobj-sandwich-query-i)')
+vim.keymap.set('x', 'as', '<Plug>(textobj-sandwich-query-a)')
+vim.keymap.set('o', 'is', '<Plug>(textobj-sandwich-query-i)')
+vim.keymap.set('o', 'as', '<Plug>(textobj-sandwich-query-a)')
+
+-- keymap("n", "j", "<NOP>", opts) -- disable j to get used to search with s
+-- keymap("n", "k", "<NOP>", opts) -- disable k to get used to search with s
+
 -- make . to work with visually selected lines
 keymap("v", '.', ':normal . <CR>', opts)
 
@@ -263,9 +272,113 @@ require("lazy").setup({
       { "folke/neoconf.nvim", cmd = "Neoconf" }, -- don't quite understand this
       {
         "numToStr/Comment.nvim",
-        dependencies = { "JoosepAlviste/nvim-ts-context-commentstring", },
+        dependencies = { {
+          "JoosepAlviste/nvim-ts-context-commentstring",
+          lazy = false,
+          config = function()
+            vim.g.skip_ts_context_commentstring_module = true
+            require('ts_context_commentstring').setup {}
+          end
+        }, },
         keys = keys.comment,
         config = setup_plugins.comment,
+      },
+
+      {
+        "anuvyklack/windows.nvim",
+        dependencies = {
+          "anuvyklack/middleclass",
+          "anuvyklack/animation.nvim",
+        },
+        cmd = { "WindowsMaximize", "WindowsMaximizeVertically", "WindowsMaximizeHorizontally", "WindowsEqualize" },
+        config = function()
+          vim.o.winwidth = 10
+          vim.o.winminwidth = 10
+          vim.o.equalalways = false
+          require("windows").setup({
+            autowidth = { --		       |windows.autowidth|
+              enable = false,
+              -- winwidth = 5, --		        |windows.winwidth|
+              -- filetype = { --	      |windows.autowidth.filetype|
+              --   help = 2,
+              -- },
+            },
+            ignore = { --			  |windows.ignore|
+              buftype = { "quickfix" },
+              filetype = { "NvimTree", "neo-tree", "undotree", "gundo" },
+            },
+            animation = {
+              enable = true,
+              duration = 100,
+              fps = 60,
+              easing = "in_out_sine",
+            },
+          })
+        end,
+      },
+      {
+        "mrjones2014/smart-splits.nvim",
+        config = function()
+          require('smart-splits').setup({
+            -- Ignored filetypes (only while resizing)
+            ignored_filetypes = {
+              'nofile',
+              'quickfix',
+              'prompt',
+            },
+            -- Ignored buffer types (only while resizing)
+            ignored_buftypes = { 'NvimTree', 'neo-tree', 'undotree' },
+            -- the default number of lines/columns to resize by at a time
+            default_amount = 3,
+            -- whether to wrap to opposite side when cursor is at an edge
+            -- e.g. by default, moving left at the left edge will jump
+            -- to the rightmost window, and vice versa, same for up/down.
+            wrap_at_edge = 'split',
+            -- when moving cursor between splits left or right,
+            -- place the cursor on the same row of the *screen*
+            -- regardless of line numbers. False by default.
+            -- Can be overridden via function parameter, see Usage.
+            move_cursor_same_row = false,
+            -- resize mode options
+            resize_mode = {
+              -- key to exit persistent resize mode
+              quit_key = '<ESC>',
+              -- keys to use for moving in resize mode
+              -- in order of left, down, up' right
+              resize_keys = { 'h', 'j', 'k', 'l' },
+              -- set to true to silence the notifications
+              -- when entering/exiting persistent resize mode
+              silent = false,
+              -- must be functions, they will be executed when
+              -- entering or exiting the resize mode
+              hooks = {
+                -- on_enter = function() vim.notify('Entering resize mode') end,
+                -- on_leave = function() vim.notify('Exiting resize mode, bye') end
+                on_enter = nil,
+                on_leave = nil
+              }
+            },
+            -- ignore these autocmd events (via :h eventignore) while processing
+            -- smart-splits.nvim computations, which involve visiting different
+            -- buffers and windows. These events will be ignored during processing,
+            -- and un-ignored on completed. This only applies to resize events,
+            -- not cursor movement events.
+            ignored_events = {
+              'BufEnter',
+              'WinEnter',
+            },
+            -- enable or disable the tmux integration
+            tmux_integration = false,
+          })
+        end,
+      },
+      {
+        "soulis-1256/eagle.nvim",
+        -- lazy = false,
+        -- config = function()
+        --   vim.o.mousemoveevent = true
+        --   require("eagle").setup({})
+        -- end
       },
       {
         'kevinhwang91/nvim-ufo',
@@ -286,8 +399,86 @@ require("lazy").setup({
           --     return { 'treesitter', 'indent' }
           --   end
           -- })
-          require('ufo').setup()
+          local handler = function(virtText, lnum, endLnum, width, truncate)
+            local newVirtText = {}
+            local suffix = ("  %d "):format(endLnum - lnum)
+            local sufWidth = vim.fn.strdisplaywidth(suffix)
+            local targetWidth = width - sufWidth
+            local curWidth = 0
+            for _, chunk in ipairs(virtText) do
+              local chunkText = chunk[1]
+              local chunkWidth = vim.fn.strdisplaywidth(chunkText)
+              if targetWidth > curWidth + chunkWidth then
+                table.insert(newVirtText, chunk)
+              else
+                chunkText = truncate(chunkText, targetWidth - curWidth)
+                local hlGroup = chunk[2]
+                table.insert(newVirtText, { chunkText, hlGroup })
+                chunkWidth = vim.fn.strdisplaywidth(chunkText)
+                -- str width returned from truncate() may less than 2nd argument, need padding
+                if curWidth + chunkWidth < targetWidth then
+                  suffix = suffix .. (" "):rep(targetWidth - curWidth - chunkWidth)
+                end
+                break
+              end
+              curWidth = curWidth + chunkWidth
+            end
+            table.insert(newVirtText, { suffix, "MoreMsg" })
+            return newVirtText
+          end
+          require('ufo').setup({
+            close_fold_kinds_for_ft = {
+              default = { 'imports', 'comment' },
+              json = { 'array' },
+              c = { 'comment', 'region' }
+            },
+            fold_virt_text_handler = handler,
+          })
         end
+      },
+      {
+        "SmiteshP/nvim-navic",
+        event = "VeryLazy",
+        dependencies = "neovim/nvim-lspconfig",
+        config = function()
+          vim.o.winbar = "%{%v:lua.require'nvim-navic'.get_location()%}"
+          require("nvim-navic").setup { -- vscode like icons
+            icons = {
+              File = ' ',
+              Module = ' ',
+              Namespace = ' ',
+              Package = ' ',
+              Class = ' ',
+              Method = ' ',
+              Property = ' ',
+              Field = ' ',
+              Constructor = ' ',
+              Enum = ' ',
+              Interface = ' ',
+              Function = ' ',
+              Variable = ' ',
+              Constant = ' ',
+              String = ' ',
+              Number = ' ',
+              Boolean = ' ',
+              Array = ' ',
+              Object = ' ',
+              Key = ' ',
+              Null = ' ',
+              EnumMember = ' ',
+              Struct = ' ',
+              Event = ' ',
+              Operator = ' ',
+              TypeParameter = ' '
+            },
+
+            highlight = true,
+            separator = " > ",
+            depth_limit = 0,
+            depth_limit_indicator = "..",
+            safe_output = true,
+          }
+        end,
       },
 
 
@@ -309,6 +500,15 @@ require("lazy").setup({
         keys = keys.nvim_surround,
         opts = options.nvim_surround
       },
+      {
+        'akinsho/toggleterm.nvim',
+        version = "*",
+        lazy = false,
+        config = function()
+          require('configs.terminal')
+        end
+      },
+      -- {"machakann/vim-sandwich"}
       -- {
       --   "windwp/nvim-autopairs",
       --   config = function()
@@ -624,6 +824,17 @@ require("lazy").setup({
         end
       },
       {
+        'stevearc/oil.nvim',
+        opts = {
+          keymaps = {
+            ["?"] = "actions.show_help",
+          }
+        },
+        lazy = false,
+        -- Optional dependencies
+        dependencies = { "nvim-tree/nvim-web-devicons" },
+      },
+      {
         'NvChad/nvim-colorizer.lua',
         cmd = { "ColorizerAttachToBuffer", "ColorizerToggle" },
         config = function()
@@ -736,13 +947,14 @@ require("lazy").setup({
               documentation = cmp.config.window.bordered(),
             },
             mapping = cmp.mapping.preset.insert({
-              ['<C-b>'] = cmp.mapping.scroll_docs(-4),
-              ['<C-f>'] = cmp.mapping.scroll_docs(4),
+              ['<C-b>'] = cmp.mapping.scroll_docs(-2),
+              ['<C-f>'] = cmp.mapping.scroll_docs(2),
               ['<C-n>'] = cmp.mapping.select_next_item(),
               ['<C-p>'] = cmp.mapping.select_prev_item(),
-              ['<C-Space>'] = cmp.mapping.complete(),
+              ['<C-t>'] = cmp.mapping.complete(),
               ['<C-e>'] = cmp.mapping.abort(),
-              ['<CR>'] = cmp.mapping.confirm({ select = true }), -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items
+              ['<CR>'] = cmp.mapping.confirm({ select = false }), -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items
+
               ["<Tab>"] = cmp.mapping(function(fallback)
                 if cmp.visible() then
                   cmp.select_next_item()
@@ -755,7 +967,7 @@ require("lazy").setup({
                 else
                   fallback()
                 end
-              end, { "i", "s" }),
+              end, { "i", "s", "c" }),
               ["<S-Tab>"] = cmp.mapping(function(fallback)
                 if cmp.visible() then
                   cmp.select_prev_item()
@@ -764,22 +976,42 @@ require("lazy").setup({
                 else
                   fallback()
                 end
-              end, { "i", "s" }),
+              end, { "i", "s", "c" }),
             }),
 
             formatting = {
-              fields = { "kind", "abbr", "menu" },
-              format = function(_, vim_item)
-                local kind = vim_item.kind
-                local icon = (icons.kinds[kind] or ""):gsub("%s+", "")
-                vim_item.menu = icon .. " "
-                vim_item.kind = ""
-                local text = vim_item.abbr
-                local max = math.floor(math.max(vim.o.columns / 4, 50))
-                if vim.fn.strcharlen(text) > max then
-                  vim_item.abbr = vim.fn.strcharpart(text, -1, max - 1)
-                      .. icons.misc.ellipse
+              -- fields are "abbr", "kind", "menu"
+              format = function(entry, vim_item)
+                -- Kind icons
+                -- vim_item.kind = string.format("%s", kind_icons[vim_item.kind])
+                vim_item.kind = string.format("%s %s", icons.kinds[vim_item.kind], vim_item.kind) -- This concatonates the icons with the name of the item kind
+
+                local function trim(text)
+                  local max = 40
+                  if text and text:len() > max then
+                    text = text:sub(1, max) .. "..."
+                  end
+                  return text
                 end
+
+                vim_item.abbr = trim(vim_item.abbr)
+
+                -- vim_item.menu = ({
+                -- 	nvim_lsp = "[LSP]",
+                -- 	luasnip = "[Snippet]",
+                -- 	buffer = "[Buffer]",
+                -- 	path = "[Path]",
+                -- 	nvim_lua = "[Lua]",
+                -- 	latex_symbols = "[Latex]",
+                -- })[entry.source.name]
+
+                local menu_name = icons.sources[entry.source.name] or ("[" .. entry.source.name .. "]")
+                vim_item.menu = menu_name .. " "
+                -- vim_item.menu = "via " .. menu_name
+                -- local item = entry:get_completion_item()
+                -- if item.detail then
+                --   vim_item.menu = item.detail
+                -- end
                 return vim_item
               end,
             },
@@ -941,3 +1173,10 @@ require("lazy").setup({
       },
     },
   })
+require("eagle").setup({
+  -- override the default values found in config.lua
+  close_on_cmd = false,
+})
+
+-- make sure mousemoveevent is enabled
+vim.o.mousemoveevent = true
