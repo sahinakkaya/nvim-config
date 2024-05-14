@@ -541,6 +541,14 @@ require("lazy").setup({
         dependencies = {
           "nvim-treesitter/nvim-treesitter-textobjects",
           "chrisgrieser/nvim-various-textobjs",
+          -- "theHamsta/nvim-treesitter-pairs",
+          {
+            'andymass/vim-matchup',
+            init = function()
+              -- may set any options here
+              vim.g.matchup_matchparen_offscreen = { method = "popup" }
+            end
+          },
           -- "RRethy/nvim-treesitter-textsubjects", tested it, not worth using
           {
             "windwp/nvim-ts-autotag",
@@ -548,12 +556,16 @@ require("lazy").setup({
           }
         },
         config = setup_plugins.treesitter,
-
       },
       {
         "gbprod/yanky.nvim",
         opts = options.yanky,
         keys = keys.yanky,
+      },
+      {
+        "Fildo7525/pretty_hover",
+        event = "LspAttach",
+      opts= {}
       },
       {
         "ThePrimeagen/harpoon",

@@ -45,7 +45,7 @@ M._lsp_utils = {
       client.server_capabilities.hoverProvider = false
     end
     if client.server_capabilities.documentSymbolProvider then
-        require("nvim-navic").attach(client, bufnr)
+      require("nvim-navic").attach(client, bufnr)
     end
     -- if client.server_capabilities.inlayHintProvider then
     --   print("yes")
@@ -59,7 +59,8 @@ M._lsp_utils = {
     vim.keymap.set('n', 'gD', function() require("trouble").toggle("lsp_type_definitions") end, bufopts)
     -- vim.keymap.set('n', 'gd', vim.lsp.buf.definition, bufopts)
     vim.keymap.set('n', 'gd', function() require("trouble").toggle("lsp_definitions") end, bufopts)
-    vim.keymap.set('n', 'K', vim.lsp.buf.hover, bufopts)
+    vim.keymap.set('n', 'K', function() require("pretty_hover").hover() end, bufopts)
+    -- vim.keymap.set('n', 'K', vim.lsp.buf.hover, bufopts)
     -- vim.keymap.set('n', 'gi', vim.lsp.buf.implementation, buf_opts)
     vim.keymap.set('n', 'gi', function() require("trouble").toggle("lsp_implementations") end, bufopts)
     -- vim.keymap.set('n', 'gr', vim.lsp.buf.references, bufopts)
@@ -762,7 +763,7 @@ M.which_key = function()
         vim.lsp.inlay_hint.enable(not enabled)
       end, "Toggle inlay hints" },
       i = { vim.lsp.buf.implementation, "Go to implementation" },
-      h = { vim.lsp.buf.hover, "Hover info" },
+      h = { function() require("pretty_hover").hover() end, "Hover info" },
       H = { vim.lsp.buf.signature_help, "Signature help" },
       n = { ":LspInfo<CR>", "Info" },
       j = { vim.diagnostic.goto_next, "Next Diagnostic" },
@@ -1297,7 +1298,11 @@ M.treesitter = function()
   require 'nvim-treesitter.configs'.setup {
     -- ensure_installed = { "c", "lua", "vim", "vimdoc", "query" },
     auto_install = true,
-
+    matchup = {
+      enable = true,           -- mandatory, false will disable the whole extension
+      -- disable = { "c", "ruby" }, -- optional, list of language that will be disabled
+      -- [options]
+    },
     highlight = {
       enable = true,
       -- NOTE: these are the names of the parsers and not the filetype. (for example if you want to
@@ -2090,7 +2095,7 @@ M.typescript_tools = function()
       -- CodeLens
       -- WARNING: Experimental feature also in VSCode, because it might hit performance of server.
       -- possible values: ("off"|"all"|"implementations_only"|"references_only")
-      code_lens = "implementations_only",
+      code_lens = "off",
       -- by default code lenses are displayed on all referencable values and for some of you it can
       -- be too much this option reduce count of them by removing member references from lenses
       disable_member_code_lens = true,
