@@ -636,6 +636,7 @@ M.which_key = function()
       -- most people should not need to change this
       i = { "j", "k" },
       v = { "j", "k" },
+      n = { "d", "y" } -- for modes.nvim to work properly
     },
   })
 

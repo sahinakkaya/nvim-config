@@ -565,7 +565,7 @@ require("lazy").setup({
       {
         "Fildo7525/pretty_hover",
         event = "LspAttach",
-      opts= {}
+        opts = {}
       },
       {
         "ThePrimeagen/harpoon",
@@ -713,6 +713,40 @@ require("lazy").setup({
           vim.o.timeoutlen = 500
         end,
         config = setup_plugins.which_key,
+      },
+
+      {
+        'mvllow/modes.nvim',
+        tag = 'v0.2.0',
+        event = "InsertEnter",
+        keys = { "v", "d", "y" },
+        config = function()
+          require('modes').setup({
+            colors = {
+              copy = "#f5c359",
+              delete = "#c75c6a",
+              insert = "#78ccc5",
+              visual = "#9745be",
+            },
+
+            -- Set opacity for cursorline and number background
+            line_opacity = 0.15,
+
+            -- Enable cursor highlights
+            set_cursor = true,
+
+            -- Enable cursorline initially, and disable cursorline for inactive windows
+            -- or ignored filetypes
+            set_cursorline = true,
+
+            -- Enable line number highlights to match cursorline
+            set_number = true,
+
+            -- Disable modes highlights in specified filetypes
+            -- Please PR commonly ignored filetypes
+            ignore_filetypes = { 'NvimTree', 'TelescopePrompt' }
+          })
+        end
       },
       {
         "folke/noice.nvim",
@@ -913,8 +947,14 @@ require("lazy").setup({
               require("luasnip.loaders.from_vscode").lazy_load()
               local ls = require("luasnip")
               vim.keymap.set({ "i" }, "<C-j>", function()
-                if ls.expand_or_jumpable() then
+                if ls.expand_or_locally_jumpable() then
                   ls.expand_or_jump()
+                end
+              end, { silent = true })
+              vim.keymap.set({ "i" }, "<space>", function()
+                if ls.expandable() then
+                  ls.expand()
+                else
                 end
               end, { silent = true })
               vim.keymap.set({ "i", "s" }, "<C-E>", function()
@@ -942,6 +982,18 @@ require("lazy").setup({
             local line, col = unpack(vim.api.nvim_win_get_cursor(0))
             return col ~= 0 and vim.api.nvim_buf_get_lines(0, line - 1, line, true)[1]:sub(col, col):match("%s") == nil
           end
+
+        local under = function(entry1, entry2)
+            local _, entry1_under = entry1.completion_item.label:find "^_+"
+            local _, entry2_under = entry2.completion_item.label:find "^_+"
+            entry1_under = entry1_under or 0
+            entry2_under = entry2_under or 0
+            if entry1_under > entry2_under then
+                return false
+            elseif entry1_under < entry2_under then
+                return true
+            end
+        end
 
 
 
@@ -992,7 +1044,7 @@ require("lazy").setup({
             }),
 
             formatting = {
-              -- fields are "abbr", "kind", "menu"
+              fields = { "menu", "abbr", "kind" },
               format = function(entry, vim_item)
                 -- Kind icons
                 -- vim_item.kind = string.format("%s", kind_icons[vim_item.kind])
@@ -1019,6 +1071,7 @@ require("lazy").setup({
 
                 local menu_name = icons.sources[entry.source.name] or ("[" .. entry.source.name .. "]")
                 vim_item.menu = menu_name .. " "
+
                 -- vim_item.menu = "via " .. menu_name
                 -- local item = entry:get_completion_item()
                 -- if item.detail then
@@ -1027,10 +1080,35 @@ require("lazy").setup({
                 return vim_item
               end,
             },
+            sorting = {
+              priority_weight = 2,
+              comparators = {
+                -- cmp.config.compare.exact,
+                -- cmp.config.compare.recently_used,
+                -- cmp.config.compare.kind,
+                -- cmp.config.compare.offset,
+                -- cmp.config.compare.score,
+                -- cmp.config.compare.sort_text,
+                -- cmp.config.compare.order,
+                -- cmp.config.compare.length,
+
+                cmp.config.compare.exact,
+                cmp.config.compare.locality,
+                cmp.config.compare.recently_used,
+                cmp.config.compare.score,
+                cmp.config.compare.sources,
+                cmp.config.compare.offset,
+                cmp.config.compare.order,
+                under,
+                cmp.config.compare.kind,
+                -- cmp.config.compare.sort_text,
+                cmp.config.compare.length,
+              },
+            },
             sources = cmp.config.sources({
+                { name = 'nvim_lsp' },
                 { name = 'luasnip',  max_item_count = 40 },
                 -- { name = "copilot",  group_index = 2 },
-                { name = 'nvim_lsp', max_item_count = 40 },
                 { name = 'path' }
               },
               {
