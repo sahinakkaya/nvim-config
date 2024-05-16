@@ -955,6 +955,7 @@ require("lazy").setup({
                 if ls.expandable() then
                   ls.expand()
                 else
+                  vim.api.nvim_feedkeys(' ', 'n', true)
                 end
               end, { silent = true })
               vim.keymap.set({ "i", "s" }, "<C-E>", function()
@@ -1096,7 +1097,7 @@ require("lazy").setup({
                 cmp.config.compare.locality,
                 cmp.config.compare.recently_used,
                 cmp.config.compare.score,
-                cmp.config.compare.sources,
+                -- cmp.config.compare.sources,
                 cmp.config.compare.offset,
                 cmp.config.compare.order,
                 under,
@@ -1113,6 +1114,7 @@ require("lazy").setup({
               },
               {
                 { name = 'buffer' },
+                { name = 'path' }
               })
           })
 

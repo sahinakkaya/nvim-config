@@ -75,7 +75,8 @@ Icons.sources = {
   luasnip = "󱐌",
   latex_symbols = "",
   nvim_lua = "",
-  nvim_lsp = ""
+  nvim_lsp = "",
+  cmdline=""
 }
 
 Icons.diagnostics = {
