@@ -65,8 +65,8 @@ M._lsp_utils = {
     vim.keymap.set('n', 'gi', function() require("trouble").toggle("lsp_implementations") end, bufopts)
     -- vim.keymap.set('n', 'gr', vim.lsp.buf.references, bufopts)
     vim.keymap.set('n', 'gr', function() require("trouble").toggle("lsp_references") end, bufopts)
-    vim.keymap.set('n', '<C-k>', vim.lsp.buf.signature_help, bufopts)
-    vim.keymap.set('n', '<C-m>', vim.lsp.buf.signature_help, bufopts)
+    vim.keymap.set('i', '<C-k>', vim.lsp.buf.signature_help, bufopts)
+    vim.keymap.set('i', '<C-m>', vim.lsp.buf.signature_help, bufopts)
     -- vim.keymap.set('i', '<C-k>', vim.lsp.buf.signature_help, bufopts)
     -- vim.keymap.set('n', '<space>wa', vim.lsp.buf.add_workspace_folder, bufopts)
     -- vim.keymap.set('n', '<space>wr', vim.lsp.buf.remove_workspace_folder, bufopts)
@@ -926,6 +926,11 @@ M.noice = function()
       progress = {
         enabled = false,
       },
+      signature = {
+        auto_open = {
+          enabled = false,
+        },
+      },
       override = {
         ["vim.lsp.util.convert_input_to_markdown_lines"] = true,
         ["vim.lsp.util.stylize_markdown"] = true,
@@ -1300,7 +1305,7 @@ M.treesitter = function()
     -- ensure_installed = { "c", "lua", "vim", "vimdoc", "query" },
     auto_install = true,
     matchup = {
-      enable = true,           -- mandatory, false will disable the whole extension
+      enable = true, -- mandatory, false will disable the whole extension
       -- disable = { "c", "ruby" }, -- optional, list of language that will be disabled
       -- [options]
     },
