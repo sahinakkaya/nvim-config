@@ -1,5 +1,9 @@
 -- vim:fileencoding=utf-8
 --
+if vim.g.neovide then
+    vim.o.guifont = "JetBrainsMono Nerd Font:h14"
+    vim.g.neovide_cursor_vfx_mode = "torpedo"
+end
 
 vim.env.PYENV_VERSION = vim.fn.system('pyenv version'):match('(%S+)%s+%(.-%)')
 
@@ -105,18 +109,6 @@ keymap("n", "<Left>", ":bprevious<CR>", opts)
 -- Insert --
 keymap("i", "jk", "<ESC>", opts)
 keymap("i", "JK", "<ESC>", opts)
--- An alternative way of saving
-vim.keymap.set("i", "jkl", function()
-  -- Save the file
-  vim.cmd("write")
-  -- Move to the right
-  vim.cmd("normal l")
-  -- Switch back to command mode after saving
-  -- 
-  vim.cmd("stopinsert")
-  -- Print the "FILE SAVED" message and the file path
-  print("FILE SAVED: " .. vim.fn.expand("%:p"))
-end, { desc = "Write current file and exit insert mode" })
 -- keymap("i", "<ESC>", "<NOP>", opts) -- disable esc to get used to above mappings
 
 

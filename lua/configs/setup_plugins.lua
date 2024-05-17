@@ -1486,14 +1486,8 @@ M.treesitter = function()
     useDefaultKeymaps = true,
 
     -- disable only some default keymaps, e.g. { "ai", "ii" }
-    disabledKeymaps = { "gc", "\\", "iq", "aq", "in", "an" },
+    disabledKeymaps = { "\\", "iq", "aq", "in", "an" },
   }
-
-  vim.keymap.set(
-    { "o" },
-    "gc",
-    "<cmd>lua require('various-textobjs').multiCommentedLines()<CR>"
-  )
 
 
   vim.keymap.set({ "o" }, "ov", "<cmd>lua require('various-textobjs').value('outer')<CR>")
