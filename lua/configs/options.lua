@@ -7,6 +7,7 @@ local options = {
   backupdir = home .. '/.cache/nvim/backup',
   background = 'dark',
 
+  laststatus = 3,       -- have a global statusline at the bottom instead of one for each window
   undofile = true,      -- enable persistent undo
   swapfile = false,     -- creates a swapfile
   writebackup = false,  -- if a file is being edited by another program (or was written to file while editing with another program), it is not allowed to be edited
@@ -45,7 +46,8 @@ local options = {
   wrap = true,                             -- display lines in multiple lines
   scrolloff = 999,                         -- show at least n number of lines before after cursor
   sidescrolloff = 6,
-  guifont = "monospace:h17",               -- the font used in graphical neovim applications
+  -- guifont = "JetBrainsMono Nerd Font:h14"
+  guifont = "FantasqueSansM Nerd Font Mono:h14", -- the font used in graphical neovim applications
   -- foldmethod = "expr",
   -- foldlevelstart = 4,
   -- foldenable = false,
@@ -67,6 +69,7 @@ local options = {
 vim.opt.shortmess:append "c"
 vim.opt.whichwrap:append "<,>,[,]"
 vim.opt.iskeyword:append "-"
+vim.opt.sessionoptions:append "globals"
 
 for k, v in pairs(options) do
   vim.opt[k] = v

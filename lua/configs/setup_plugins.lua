@@ -308,6 +308,7 @@ M.neotree = function()
       highlight = "NeoTreeModified",
     },
 
+    auto_clean_after_session_restore = true,
     close_if_last_window = true,
     open_files_do_not_replace_types = { "terminal", "trouble", "qf", "help", "man", "fugitive" }, -- when opening files, do not use windows containing these filetypes or buftypes
     window = {
@@ -658,6 +659,36 @@ M.which_key = function()
     ["-"] = { ":new<CR>", "hsplit" },
     a = { function() harpoon():list():add() end, "Harpoon add" },
     e = { ":Neotree toggle reveal right last<CR>", "Explorer" },
+    b = {
+      name = "Buffers",
+      b = {
+        ":lua require('telescope.builtin').buffers(require('telescope.themes').get_dropdown{previewer = false})<CR>",
+        "Buffers",
+      },
+      c = { ":bd!<CR>", "Close Buffer" },
+      d = {
+        "<cmd>BufferLineSortByDirectory<cr>",
+        "Sort by directory",
+      },
+      e = {
+        "<cmd>BufferLineSortByExtension<cr>",
+        "Sort by extension",
+      },
+      f = { "<cmd>Telescope buffers<cr>", "Find" },
+      h = { "<cmd>BufferLineCloseLeft<cr>", "Close all to the left" },
+      l = { "<cmd>BufferLineCloseRight<cr>", "Close all to the right" },
+      n = { "<cmd>BufferLineCycleNext<cr>", "Next" },
+      o = { "<cmd>BufferLineCloseOthers<cr>", "Close all to the right" },
+      j = { "<cmd>BufferLinePick<cr>", "Jump" },
+      p = { "<cmd>BufferLineCyclePrev<cr>", "Previous" },
+      ['.'] = { "<cmd>BufferLineMoveNext<cr>", "Move buffer" },
+      [','] = { "<cmd>BufferLineMovePrev<cr>", "Move buffer" },
+      ['>'] = { "<cmd>lua require'bufferline'.move_to(-1)<cr>", "Move buffer to last" },
+      ['<'] = { "<cmd>lua require'bufferline'.move_to(1)<cr>", "Move buffer to last" },
+      P = { "<cmd>BufferLineTogglePin<cr>", "Toggle pin" },
+      q = { ":bd!<CR>", "Close Buffer" },
+      x = { "<cmd>BufferLinePickClose<cr>", "Pick which buffer to close" },
+    },
 
     d = {
       name = "Debug",
@@ -814,7 +845,7 @@ M.which_key = function()
     m = { ":WindowsMaximize<CR>", "Toggle maximize" },
 
     s = {
-      name = "Search",
+      name = "Sessions | Search | Split",
       b = { ":Telescope git_branches<CR>", "Checkout branch" },
       c = { ":Telescope colorscheme<CR>", "Colorscheme" },
       C = { ":Telescope commands<CR>", "Commands" },
@@ -826,11 +857,14 @@ M.which_key = function()
       -- n = { ":Fidget history<CR>", "Notifications" },
       n = { ":Telescope notify<CR>", "Notifications" },
       r = { ":Telescope oldfiles<CR>", "Open Recent File" },
+      -- R = { ":Telescope registers<CR>", "Registers" },
       -- s = { ":Telescope projects<CR>", "Recent Projects" },
-      R = { ":Telescope registers<CR>", "Registers" },
       t = { ":Telescope live_grep theme=ivy<CR>", "Find Text" },
       v = { ":vnew<CR>", "vsplit" },
       s = { ":new<CR>", "hsplit" },
+      w = {":lua require('mini.sessions').write('Session.vim')<CR>", "Write session"},
+      l = {":lua require('mini.sessions').select()<CR>", "List session"},
+      R = {":lua require('mini.sessions').read('Session.vim')<CR>", "Read session"},
     },
     o = {
       name = "Open Trouble",
@@ -856,6 +890,8 @@ M.which_key = function()
       l = { "<C-W>L", "Move window to far right" },
       j = { "<C-W>J", "Move window to very top" },
       k = { "<C-W>K", "Move window to very bottom" },
+      K = { "<C-w>t<C-w>H", "Move window to very bottom" },
+
       m = { ":WindowsMaximize<CR>", "Toggle maximize" },
       ['\\'] = { ":WindowsMaximizeHorizontally<CR>", "Maximize horizontally" },
       ['|'] = { ":WindowsMaximizeHorizontally<CR>", "Maximize horizontally" },

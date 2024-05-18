@@ -56,7 +56,7 @@ Icons.kinds = {
 
   Text          = " ",
   -- Snippet       = " ",
-  Snippet = "",
+  Snippet       = "",
   Color         = "󰏘 ",
   File          = "󰈮 ",
   Folder        = "󰉋 ",
@@ -69,6 +69,9 @@ Icons.kinds = {
   Cody          = " ",
 }
 
+Icons.git = {
+}
+
 Icons.sources = {
   path = "",
   buffer = "",
@@ -76,7 +79,7 @@ Icons.sources = {
   latex_symbols = "",
   nvim_lua = "",
   nvim_lsp = "",
-  cmdline=""
+  cmdline = ""
 }
 
 Icons.diagnostics = {
@@ -84,6 +87,19 @@ Icons.diagnostics = {
   warnings = "", -- "",--
   hints = "󱐌", --"󰮔", -- 󱐌
   info = "",
+
+  BoldError = "",
+  Error = "",
+  BoldWarning = "",
+  Warning = "",
+  BoldInformation = "",
+  Information = "",
+  BoldQuestion = "",
+  Question = "",
+  BoldHint = "",
+  Hint = "",
+  Debug = "",
+  Trace = "✎",
 }
 Icons.diagnostics.Error = Icons.diagnostics.errors
 Icons.diagnostics.Warn = Icons.diagnostics.warnings
@@ -108,6 +124,21 @@ Icons.git = {
   copilot = "",
   copilot_err = "",
   copilot_warn = "",
+
+  LineAdded = "",
+  LineModified = "",
+  LineRemoved = "",
+  FileDeleted = "",
+  FileIgnored = "◌",
+  FileRenamed = "➜",
+  FileStaged = "S",
+  FileUnmerged = "",
+  FileUnstaged = "",
+  FileUntracked = "U",
+  Diff = "",
+  Repo = "",
+  Octoface = "",
+  Branch = "",
 }
 
 Icons.dap = {
@@ -172,8 +203,8 @@ Icons.menu = {
 }
 
 Icons.fold = {
-  open = "",
-  closed = "",
+  open        = "",
+  closed      = "",
   fold_closed = " ",
   fold_open   = " ",
 }
