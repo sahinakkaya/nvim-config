@@ -44,9 +44,6 @@ M._lsp_utils = {
       -- Disable hover in favor of Pyright
       client.server_capabilities.hoverProvider = false
     end
-    if client.server_capabilities.documentSymbolProvider then
-      require("nvim-navic").attach(client, bufnr)
-    end
     -- if client.server_capabilities.inlayHintProvider then
     --   print("yes")
     -- end

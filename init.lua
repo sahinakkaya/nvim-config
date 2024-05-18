@@ -441,50 +441,6 @@ require("lazy").setup({
           })
         end
       },
-      {
-        "SmiteshP/nvim-navic",
-        event = "VeryLazy",
-        dependencies = "neovim/nvim-lspconfig",
-        config = function()
-          vim.o.winbar = "%{%v:lua.require'nvim-navic'.get_location()%}"
-          require("nvim-navic").setup { -- vscode like icons
-            icons = {
-              File = '  ',
-              Module = '  ',
-              Namespace = '  ',
-              Package = '  ',
-              Class = '  ',
-              Method = '  ',
-              Property = '  ',
-              Field = '  ',
-              Constructor = '  ',
-              Enum = '  ',
-              Interface = '  ',
-              Function = '  ',
-              Variable = '  ',
-              Constant = '  ',
-              String = '  ',
-              Number = '  ',
-              Boolean = '  ',
-              Array = '  ',
-              Object = '  ',
-              Key = '  ',
-              Null = '  ',
-              EnumMember = '  ',
-              Struct = '  ',
-              Event = '  ',
-              Operator = '  ',
-              TypeParameter = '  '
-            },
-
-            highlight = true,
-            separator = " > ",
-            depth_limit = 0,
-            depth_limit_indicator = "..",
-            safe_output = true,
-          }
-        end,
-      },
 
 
       -- Add/change/delete surrounding delimiter pairs with ease. Written with ❤️ in Lua.
