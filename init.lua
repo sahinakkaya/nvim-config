@@ -628,7 +628,15 @@ require("lazy").setup({
         end,
         dependencies = "kyazdani42/nvim-web-devicons",
       },
-      -- {"machakann/vim-sandwich"}
+      -- {"machakann/vim-sandwich",
+      --    init = function()
+      -- vim.keymap.set('x', 'is', '<Plug>(textobj-sandwich-query-i)')
+      -- vim.keymap.set('x', 'as', '<Plug>(textobj-sandwich-query-a)')
+      -- vim.keymap.set('o', 'is', '<Plug>(textobj-sandwich-query-i)')
+      -- vim.keymap.set('o', 'as', '<Plug>(textobj-sandwich-query-a)')
+      --    end,
+      --
+      -- }
       -- {
       --   "windwp/nvim-autopairs",
       --   config = function()
@@ -859,7 +867,7 @@ require("lazy").setup({
       {
         "folke/which-key.nvim",
         keys = keys.which_key,
-        lazy = false, -- uncomment this line if you are facing a problem with frecency plugin. it inserts an A character if database is not up to date
+        -- lazy = false, -- uncomment this line if you are facing a problem with frecency plugin. it inserts an A character if database is not up to date
         init = function()
           vim.o.timeout = true
           vim.o.timeoutlen = 500
