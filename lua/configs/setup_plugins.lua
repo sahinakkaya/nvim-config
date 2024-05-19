@@ -526,10 +526,13 @@ M.repeatable_moves = function()
   local N = {}
   local cp = require("copilot.panel")
   local gs = require("gitsigns")
+  local dropbar_api = require('dropbar.api')
   local ts_repeat_move = require "nvim-treesitter.textobjects.repeatable_move"
   -- make sure forward function comes first
   local next_hunk_repeat, prev_hunk_repeat = ts_repeat_move.make_repeatable_move_pair(gs.next_hunk, gs.prev_hunk)
   local next_suggestion, prev_suggestion = ts_repeat_move.make_repeatable_move_pair(cp.jump_next, cp.jump_prev)
+  local next_context, prev_context = ts_repeat_move.make_repeatable_move_pair(dropbar_api.select_next_context,
+    dropbar_api.goto_context_start)
   -- Or, use `make_repeatable_move` or `set_last_move` functions for more control. See the code for instructions.
   N.next_hunk = function()
     next_hunk_repeat()
@@ -537,6 +540,8 @@ M.repeatable_moves = function()
   N.prev_hunk = function()
     prev_hunk_repeat()
   end
+  N.next_context = next_context
+  N.prev_context = prev_context
   N.next_suggestion = next_suggestion
   N.prev_suggestion = prev_suggestion
   return N
@@ -650,12 +655,12 @@ M.which_key = function()
 
 
   local mappings = {
-    ["<tab>"] = { "<C-^>", "Alternate file" },
+    ["<tab>"] = { "<C-^>", "which_key_ignore" },
     ["<space>"] = { ":Telescope frecency workspace=CWD<CR>", "Frecent files" },
-    ["\\"] = { ":vnew<CR>", "vsplit" },
-    ["-"] = { ":new<CR>", "hsplit" },
+    ["\\"] = { ":vnew<CR>", "which_key_ignore" },
+    ["-"] = { ":new<CR>", "which_key_ignore" },
     a = { function() harpoon():list():add() end, "Harpoon add" },
-    e = { ":Neotree toggle reveal right last<CR>", "Explorer" },
+    e = { ":Neotree toggle reveal right last<CR>", "which_key_ignore" },
     b = {
       name = "Buffers",
       b = {
@@ -687,6 +692,26 @@ M.which_key = function()
       x = { "<cmd>BufferLinePickClose<cr>", "Pick which buffer to close" },
     },
 
+    ['>'] = { "<cmd>BufferLineMoveNext<cr>", "which_key_ignore" },
+    ['<'] = { "<cmd>BufferLineMovePrev<cr>", "which_key_ignore" },
+    ['1'] = { "<cmd>lua require'bufferline'.go_to(1)<cr>", "which_key_ignore" },
+    ['2'] = { "<cmd>lua require'bufferline'.go_to(2)<cr>", "which_key_ignore" },
+    ['3'] = { "<cmd>lua require'bufferline'.go_to(3)<cr>", "which_key_ignore" },
+    ['4'] = { "<cmd>lua require'bufferline'.go_to(4)<cr>", "which_key_ignore" },
+    ['5'] = { "<cmd>lua require'bufferline'.go_to(5)<cr>", "which_key_ignore" },
+    ['6'] = { "<cmd>lua require'bufferline'.go_to(6)<cr>", "which_key_ignore" },
+    ['7'] = { "<cmd>lua require'bufferline'.go_to(7)<cr>", "which_key_ignore" },
+    ['8'] = { "<cmd>lua require'bufferline'.go_to(8)<cr>", "which_key_ignore" },
+    ['9'] = { "<cmd>lua require'bufferline'.go_to(9)<cr>", "which_key_ignore" },
+    ['0'] = { "<cmd>lua require'bufferline'.go_to(-1)<cr>", "which_key_ignore" },
+    ['$'] = { "<cmd>lua require'bufferline'.go_to(-1)<cr>", "which_key_ignore" },
+
+    c = {
+      name = 'Context',
+      h = { M.repeatable_moves().prev_context, "Go to context start" },
+      l = { M.repeatable_moves().next_context, "Select next context" },
+      p = { require('dropbar.api').pick, "Select next context" },
+    },
     d = {
       name = "Debug",
       t = { "<cmd>lua require'dap'.toggle_breakpoint()<cr>", "Toggle Breakpoint" },
@@ -769,6 +794,8 @@ M.which_key = function()
       t = { activate_hydra(hydras.toggle), "Toggle" },
       -- t = { ":TSContextToggle<CR>", "Toggle TSContext" },
     },
+    H = { M.repeatable_moves().prev_context, "Prev context" },
+    L = { M.repeatable_moves().next_context, "Next context" },
 
     j = {
       name = "Jump",
@@ -777,6 +804,7 @@ M.which_key = function()
       s = { function() harpoon():list():select(2) end, "Harpoon s" },
       d = { function() harpoon():list():select(3) end, "Harpoon d" },
       f = { function() harpoon():list():select(4) end, "Harpoon f" },
+      j = { "<cmd>BufferLinePick<cr>", "Jump" },
       l = { function() harpoon().ui:toggle_quick_menu(harpoon():list()) end, "Harpoon list" },
     },
     l = {
@@ -809,7 +837,7 @@ M.which_key = function()
       q = { vim.diagnostic.setloclist, "Quickfix" },
       r = {
         name = "Refactor",
-        n = { ":IncRename ", "Rename" },
+        n = { function() return ":IncRename " .. vim.fn.expand('<cword>') end, "Rename" },
         e = { ":lua require('refactoring').refactor('Extract Block')<CR>", "Extract block" },
         f = { ":lua require('refactoring').refactor('Extract Block To File')<CR>", "Extract block to file" },
         i = { ":lua require('refactoring').refactor('Inline Variable')<CR>", "Inline variable" },
@@ -859,9 +887,9 @@ M.which_key = function()
       t = { ":Telescope live_grep theme=ivy<CR>", "Find Text" },
       v = { ":vnew<CR>", "vsplit" },
       s = { ":new<CR>", "hsplit" },
-      w = {":lua require('mini.sessions').write('Session.vim')<CR>", "Write session"},
-      l = {":lua require('mini.sessions').select()<CR>", "List session"},
-      R = {":lua require('mini.sessions').read('Session.vim')<CR>", "Read session"},
+      w = { ":lua require('mini.sessions').write('Session.vim')<CR>", "Write session" },
+      l = { ":lua require('mini.sessions').select()<CR>", "List session" },
+      R = { ":lua require('mini.sessions').read('Session.vim')<CR>", "Read session" },
     },
     o = {
       name = "Open Trouble",
@@ -1578,27 +1606,28 @@ M.treesitter = function()
     vim.api.nvim_win_set_cursor(0, startPos)
   end, { desc = "Yank surrounding indentation" })
 
-  local function openURL(url)
-    local opener
-    if vim.fn.has("macunix") == 1 then
-      opener = "open"
-    elseif vim.fn.has("linux") == 1 then
-      opener = "xdg-open"
-    elseif vim.fn.has("win64") == 1 or vim.fn.has("win32") == 1 then
-      opener = "start"
+  local function openRepo()
+    require("various-textobjs").anyQuote('inner')
+    local repo = vim.fn.mode():find("v")
+    if repo then
+      vim.cmd.normal('"zy')
+      local url = "https://github.com/" .. vim.fn.getreg("z")
+      vim.ui.open(url)
+      return true
     end
-    local openCommand = string.format("%s '%s' >/dev/null 2>&1", opener, url)
-    vim.fn.system(openCommand)
+    return false
   end
 
+  vim.keymap.set("n", "gX", openRepo, { desc = "Open Repository" })
   vim.keymap.set("n", "gx", function()
     require("various-textobjs").url()
     local foundURL = vim.fn.mode():find("v")
+
     if foundURL then
       vim.cmd.normal('"zy')
       local url = vim.fn.getreg("z")
-      openURL(url)
-    else
+      vim.ui.open(url)
+    elseif not openRepo() then
       -- find all URLs in buffer
       local urlPattern = require("various-textobjs.charwise-textobjs").urlPattern
       local bufText = table.concat(vim.api.nvim_buf_get_lines(0, 0, -1, false), "\n")
@@ -1611,7 +1640,7 @@ M.treesitter = function()
       -- select one, use a plugin like dressing.nvim for nicer UI for
       -- `vim.ui.select`
       vim.ui.select(urls, { prompt = "Select URL:" }, function(choice)
-        if choice then openURL(choice) end
+        if choice then vim.ui.open(choice) end
       end)
     end
   end, { desc = "URL Opener" })

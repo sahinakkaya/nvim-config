@@ -25,7 +25,7 @@ local opts = { noremap = true, silent = true }
 -- local term_opts = { silent = true }
 
 -- Shorten function name
-local keymap = vim.api.nvim_set_keymap
+local keymap = vim.keymap.set
 --Remap space as leader key
 keymap("", "<Space>", "<Nop>", opts)
 vim.g.mapleader = " "
@@ -57,14 +57,6 @@ keymap('n', '<C-a>', 'ggVG', opts)
 --   visual_block_mode = "x",
 --   term_mode = "t",
 --   command_mode = "c",
-
--- Normal --
--- Go to the repo under cursor
--- Ex: press gr -> "sahinakkayadev/dotfiles"
--- for complete urls, press gx.
-keymap("n", "gr",
-  ':let url = "https://github.com/" . split(expand("<cWORD>"), "\\"")[0]  | exe "silent! ! xdg-open " . url | echo "Visit repo: " . url <CR>',
-  opts)
 
 -- Resize with arrows
 keymap("n", "<C-Up>", ":resize -2<CR>", opts)
@@ -125,10 +117,6 @@ keymap("v", 'y', 'myy`y', opts)
 keymap("v", 'Y', 'myY`y', opts)
 
 
-vim.keymap.set('x', 'is', '<Plug>(textobj-sandwich-query-i)')
-vim.keymap.set('x', 'as', '<Plug>(textobj-sandwich-query-a)')
-vim.keymap.set('o', 'is', '<Plug>(textobj-sandwich-query-i)')
-vim.keymap.set('o', 'as', '<Plug>(textobj-sandwich-query-a)')
 
 -- keymap("n", "j", "<NOP>", opts) -- disable j to get used to search with s
 -- keymap("n", "k", "<NOP>", opts) -- disable k to get used to search with s
@@ -269,6 +257,23 @@ if not vim.loop.fs_stat(lazypath) then
     lazypath,
   })
 end
+
+local open_item_and_close_menu = function()
+  local utils = require('dropbar.utils')
+  local menu = utils.menu.get_current()
+  if not menu then
+    return
+  end
+
+  local cursor = vim.api.nvim_win_get_cursor(menu.win)
+  local entry = menu.entries[cursor[1]]
+  -- stolen from https://github.com/Bekaboo/dropbar.nvim/issues/66
+  local component = entry:first_clickable(entry.padding.left + entry.components[1]:bytewidth())
+  if component then
+    menu:click_on(component, nil, 1, 'l')
+  end
+end
+
 vim.opt.rtp:prepend(lazypath)
 require("lazy").setup({
     -- { import = "plugins" }, I have deleted the plugins folder, i don't need this now
@@ -470,6 +475,67 @@ require("lazy").setup({
         end
       },
       {
+        'Bekaboo/dropbar.nvim',
+        -- event = 'VeryLazy',
+        lazy = false,
+        -- optional, but required for fuzzy finder support
+        opts = {
+          icons = {
+            kinds = {
+              symbols = require('sahinakkaya.icons').kinds
+            }
+          },
+          menu = {
+            keymaps = {
+              ['h'] = function()
+                local utils = require('dropbar.utils')
+                local menu = utils.menu.get_current()
+                if not menu then
+                  return
+                end
+                if menu.prev_menu then
+                  menu:close()
+                else
+                  local bar = require('dropbar.utils.bar').get({ win = menu.prev_win })
+                  local barComponents = bar.components[1]._.bar.components
+                  for _, component in ipairs(barComponents) do
+                    if component.menu then
+                      local idx = component._.bar_idx
+                      menu:close()
+                      require('dropbar.api').pick(idx - 1)
+                    end
+                  end
+                end
+              end,
+              ['l'] = function()
+                local utils = require('dropbar.utils')
+                local menu = utils.menu.get_current()
+                if not menu then
+                  return
+                end
+                local cursor = vim.api.nvim_win_get_cursor(menu.win)
+                local component = menu.entries[cursor[1]]:first_clickable(cursor[2])
+                if component then
+                  menu:click_on(component, nil, 1, 'l')
+                end
+              end,
+              ['<CR>'] = open_item_and_close_menu,
+              ['o'] = open_item_and_close_menu,
+            }
+          },
+          bar = {
+            pick = {
+              -- pivots = "abcdefghijklmnopqrstuvwxyz"
+              pivots = "jklasdfghuioqwertynmzxcv"
+            }
+          }
+
+        },
+        dependencies = {
+          'nvim-telescope/telescope-fzf-native.nvim'
+        }
+      },
+      {
         "akinsho/bufferline.nvim",
         -- version = "v3.*",
         event = "UIEnter",
@@ -478,7 +544,7 @@ require("lazy").setup({
             options = {
               mode = "buffers",              -- set to "tabs" to only show tabpages instead
               themable = true,               -- allows highlight groups to be overriden i.e. sets highlights as default
-              numbers = "none",              -- | "ordinal" | "buffer_id" | "both" | function({ ordinal, id, lower, raise }): string,
+              numbers = "ordinal",           -- | "ordinal" | "buffer_id" | "both" | function({ ordinal, id, lower, raise }): string,
               close_command = "bdelete! %d", -- can be a string | function, | false see "Mouse actions"
               -- right_mouse_command = "bdelete! %d", -- can be a string | function | false, see "Mouse actions"
               right_mouse_command = "vertical sbuffer %d",
