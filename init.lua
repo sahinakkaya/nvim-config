@@ -1171,24 +1171,6 @@ require("lazy").setup({
             dependencies = { "rafamadriz/friendly-snippets" },
             config = function()
               require("luasnip.loaders.from_vscode").lazy_load()
-              local ls = require("luasnip")
-              vim.keymap.set({ "i" }, "<C-j>", function()
-                if ls.expand_or_locally_jumpable() then
-                  ls.expand_or_jump()
-                end
-              end, { silent = true })
-              vim.keymap.set({ "i" }, "<space>", function()
-                if ls.expandable() then
-                  ls.expand()
-                else
-                  vim.api.nvim_feedkeys(' ', 'n', true)
-                end
-              end, { silent = true })
-              vim.keymap.set({ "i", "s" }, "<C-E>", function()
-                if ls.choice_active() then
-                  ls.change_choice(1)
-                end
-              end, { silent = true })
             end
           },
           -- "dmitmel/cmp-cmdline-history",
@@ -1223,6 +1205,7 @@ require("lazy").setup({
           end
 
 
+          local ls = require("luasnip")
 
           -- local cmp_autopairs = require "nvim-autopairs.completion.cmp"
           -- cmp.event:on("confirm_done", cmp_autopairs.on_confirm_done())
@@ -1245,6 +1228,7 @@ require("lazy").setup({
               ['<C-t>'] = cmp.mapping.complete(),
               ['<C-e>'] = cmp.mapping.abort(),
               ['<CR>'] = cmp.mapping.confirm({ select = false }), -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items
+
 
               ["<Tab>"] = cmp.mapping(function(fallback)
                 if cmp.visible() then

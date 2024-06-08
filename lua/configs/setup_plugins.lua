@@ -799,7 +799,7 @@ M.which_key = function()
 
     j = {
       name = "Jump",
-      ["<Space>"] = { function() harpoon():list():append() end, "Harpoon add" },
+      ["<Space>"] = { function() harpoon():list():add() end, "Harpoon add" },
       a = { function() harpoon():list():select(1) end, "Harpoon a" },
       s = { function() harpoon():list():select(2) end, "Harpoon s" },
       d = { function() harpoon():list():select(3) end, "Harpoon d" },
@@ -815,7 +815,7 @@ M.which_key = function()
       D = { vim.lsp.buf.declaration, "Go to declaration" },
       f = { function() vim.lsp.buf.format { async = true } end, "Format" },
       I = { function()
-        local enabled = vim.lsp.inlay_hint.is_enabled(0)
+        local enabled = vim.lsp.inlay_hint.is_enabled({bufnr = 0})
         vim.lsp.inlay_hint.enable(not enabled)
       end, "Toggle inlay hints" },
       i = { vim.lsp.buf.implementation, "Go to implementation" },
@@ -1527,12 +1527,12 @@ M.treesitter = function()
 
   local ts_repeat_move = require "nvim-treesitter.textobjects.repeatable_move"
 
-  vim.keymap.set({ "n", "x", "o" }, "z;", ts_repeat_move.repeat_last_move)
-  vim.keymap.set({ "n", "x", "o" }, "z,", ts_repeat_move.repeat_last_move_opposite)
-  -- vim.keymap.set({ "n", "x", "o" }, "f", ts_repeat_move.builtin_f)
-  -- vim.keymap.set({ "n", "x", "o" }, "F", ts_repeat_move.builtin_F)
-  -- vim.keymap.set({ "n", "x", "o" }, "t", ts_repeat_move.builtin_t)
-  -- vim.keymap.set({ "n", "x", "o" }, "T", ts_repeat_move.builtin_T)
+  vim.keymap.set({ "n", "x", "o" }, ";", ts_repeat_move.repeat_last_move)
+  vim.keymap.set({ "n", "x", "o" }, ",", ts_repeat_move.repeat_last_move_opposite)
+  vim.keymap.set({ "n", "x", "o" }, "f", ts_repeat_move.builtin_f_expr, { expr = true })
+  vim.keymap.set({ "n", "x", "o" }, "F", ts_repeat_move.builtin_F_expr, { expr = true })
+  vim.keymap.set({ "n", "x", "o" }, "t", ts_repeat_move.builtin_t_expr, { expr = true })
+  vim.keymap.set({ "n", "x", "o" }, "T", ts_repeat_move.builtin_T_expr, { expr = true })
 
   -- default config
   require("various-textobjs").setup {
