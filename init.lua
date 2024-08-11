@@ -727,7 +727,20 @@ require("lazy").setup({
         keys = keys.dial,
         config = setup_plugins.dial,
       },
-
+      {
+        "jonatan-branting/nvim-better-n",
+        lazy = false,
+        config = function()
+          require("better-n").setup(
+            {
+              -- These are default values, which can be omitted.
+              -- By default, the following mappings are made repeatable using `n` and `<S-n>`:
+              -- `f`, `F`, `t`, `T`, `*`, `#`, `/`, `?`
+              disable_default_mappings = false,
+            }
+          )
+        end
+      },
       {
         "nvim-treesitter/nvim-treesitter",
         event = "VeryLazy",
@@ -809,12 +822,12 @@ require("lazy").setup({
         config = setup_plugins.nvim_dap_python,
       },
 
-      {
-        "ggandor/leap.nvim",
-        dependencies = { "tpope/vim-repeat" },
-        lazy = false,
-        config = setup_plugins.leap,
-      },
+      -- {
+      --   "ggandor/leap.nvim",
+      --   dependencies = { "tpope/vim-repeat" },
+      --   lazy = false,
+      --   config = setup_plugins.leap,
+      -- },
       {
         "junegunn/vim-easy-align",
         keys = keys.vim_easy_align,
