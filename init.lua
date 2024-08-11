@@ -175,7 +175,7 @@ M.autocmds.last_location = {
     callback = function()
       if fn.line("'\"") > 0 and fn.line("'\"") <= fn.line("$") then
         fn.setpos('.', fn.getpos("'\""))
-        vim.api.nvim_feedkeys('zz', 'n', true)
+        -- vim.api.nvim_feedkeys('zz', 'n', true)
       end
     end
   }, -- start where you left off
@@ -945,11 +945,12 @@ require("lazy").setup({
       },
       {
         "folke/which-key.nvim",
+        commit = "af4ded85542d40e190014c732fa051bdbf88be3d",
         keys = keys.which_key,
         -- lazy = false, -- uncomment this line if you are facing a problem with frecency plugin. it inserts an A character if database is not up to date
         init = function()
           vim.o.timeout = true
-          vim.o.timeoutlen = 500
+          vim.o.timeoutlen = 100
         end,
         config = setup_plugins.which_key,
       },
@@ -1113,7 +1114,15 @@ require("lazy").setup({
         opts = {
           keymaps = {
             ["?"] = "actions.show_help",
-          }
+            ["<CR>"] = "actions.select",
+            ["<C-v>"] = { "actions.select", opts = { vertical = true }, desc = "Open the entry in a vertical split" },
+            ["<C-x>"] = { "actions.select", opts = { horizontal = true }, desc = "Open the entry in a horizontal split" },
+            ["H"] = "actions.toggle_hidden",
+          },
+          view_options = {
+            -- Show files and directories that start with "."
+            show_hidden = false,
+          },
         },
         lazy = false,
         -- Optional dependencies

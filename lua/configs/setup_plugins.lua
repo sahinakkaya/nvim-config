@@ -382,7 +382,7 @@ M.neotree = function()
         },
       },
       follow_current_file = {
-        enabled = false,         -- This will find and focus the file in the active buffer every time
+        enabled = false,        -- This will find and focus the file in the active buffer every time
         --               -- the current file is changed while the tree is open.
         leave_dirs_open = true, -- `false` closes auto expanded dirs, such as with `:Neotree reveal`
       },
@@ -490,9 +490,7 @@ M.scrollbar = function()
       delay = 10,
       ignore_whitespace = false,
     },
-    current_line_blame_formatter_opts = {
-      relative_time = false,
-    },
+    current_line_blame_formatter = '<author>, <author_time:%R> - <summary>',
     status_formatter = function(status)
       local added, changed, removed = status.added, status.changed, status.removed
       local status_txt = {}
@@ -816,7 +814,7 @@ M.which_key = function()
       D = { vim.lsp.buf.declaration, "Go to declaration" },
       f = { function() vim.lsp.buf.format { async = true } end, "Format" },
       I = { function()
-        local enabled = vim.lsp.inlay_hint.is_enabled({bufnr = 0})
+        local enabled = vim.lsp.inlay_hint.is_enabled({ bufnr = 0 })
         vim.lsp.inlay_hint.enable(not enabled)
       end, "Toggle inlay hints" },
       i = { vim.lsp.buf.implementation, "Go to implementation" },
@@ -838,7 +836,10 @@ M.which_key = function()
       q = { vim.diagnostic.setloclist, "Quickfix" },
       r = {
         name = "Refactor",
-        n = { function() return ":IncRename " .. vim.fn.expand('<cword>') end, "Rename" },
+        n = { function() return ":IncRename " .. vim.fn.expand('<cword>') end, "Rename", expr = true },
+        R = { function()
+          require("sahinakkaya.util").rename({})
+        end, "Rename with normal mode" },
         e = { ":lua require('refactoring').refactor('Extract Block')<CR>", "Extract block" },
         f = { ":lua require('refactoring').refactor('Extract Block To File')<CR>", "Extract block to file" },
         i = { ":lua require('refactoring').refactor('Inline Variable')<CR>", "Inline variable" },

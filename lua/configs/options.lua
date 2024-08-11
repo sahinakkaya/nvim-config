@@ -56,7 +56,7 @@ local options = {
   -- foldcolumn = '1',
 
   virtualedit = "block",
-  inccommand = "split"
+  inccommand = "nosplit" -- split, nosplit
 
   -- foldclose = 'all',
   -- foldopen = 'all',
