@@ -117,7 +117,8 @@ M.telescope = function()
   local data = home .. '/.local/share/'
 
   local telescope = require("telescope")
-  local trouble = require("trouble.providers.telescope")
+  local trouble = require("trouble.sources.telescope")
+
   local project_actions = require("telescope._extensions.project.actions")
   telescope.setup {
     defaults = {
@@ -129,7 +130,7 @@ M.telescope = function()
           -- map actions.which_key to <C-h> (default: <C-/>)
           -- actions.which_key shows the mappings for your picker,
           -- e.g. git_{create, delete, ...}_branch for the git_branches picker
-          ["<m-t>"] = trouble.open_with_trouble,
+          ["<m-t>"] = trouble.open,
           ["<scrollwheelup>"] = {
             mouse_scroll_up,
             type = "action",
@@ -138,7 +139,7 @@ M.telescope = function()
           ["<C-h>"] = "which_key"
         },
         n = {
-          ["<m-t>"] = trouble.open_with_trouble,
+          ["<m-t>"] = trouble.open,
           ["q"] = "close",
         }
       }
@@ -381,7 +382,7 @@ M.neotree = function()
         },
       },
       follow_current_file = {
-        enabled = true,         -- This will find and focus the file in the active buffer every time
+        enabled = false,         -- This will find and focus the file in the active buffer every time
         --               -- the current file is changed while the tree is open.
         leave_dirs_open = true, -- `false` closes auto expanded dirs, such as with `:Neotree reveal`
       },
