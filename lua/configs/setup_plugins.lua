@@ -178,6 +178,7 @@ M.telescope = function()
       },
       frecency = {
         show_filter_column = false,
+        -- db_safe_mode = false,
         sorter = telescope.extensions.fzf.native_fzf_sorter(),
         workspaces = {
           ["conf"]     = config,

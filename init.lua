@@ -64,6 +64,9 @@ keymap("n", "<C-Down>", ":resize +2<CR>", opts)
 keymap("n", "<C-Left>", ":vertical resize -2<CR>", opts)
 keymap("n", "<C-Right>", ":vertical resize +2<CR>", opts)
 
+keymap("n", "<Tab>", "gt", opts)
+keymap("n", "<S-Tab>", "gT", opts)
+
 
 -- When text is wrapped, move by terminal rows, not lines, unless a count is provided
 keymap('n', 'j', '(v:count == 0 ? "gj" : "j")',
