@@ -825,12 +825,12 @@ require("lazy").setup({
         config = setup_plugins.nvim_dap_python,
       },
 
-      -- {
-      --   "ggandor/leap.nvim",
-      --   dependencies = { "tpope/vim-repeat" },
-      --   lazy = false,
-      --   config = setup_plugins.leap,
-      -- },
+      {
+        "ggandor/leap.nvim",
+        dependencies = { "tpope/vim-repeat" },
+        lazy = false,
+        config = setup_plugins.leap,
+      },
       {
         "junegunn/vim-easy-align",
         keys = keys.vim_easy_align,
