@@ -9,6 +9,12 @@ return {
       "hrsh7th/cmp-nvim-lsp",
       "saadparwaiz1/cmp_luasnip",
       {
+        "zbirenbaum/copilot-cmp",
+        config = function()
+          require("copilot_cmp").setup()
+        end
+      },
+      {
         "L3MON4D3/LuaSnip",
         -- follow latest release.
         version = "v2.*", -- Replace <CurrentMajor> by the latest released major (first number of latest release)
@@ -21,7 +27,7 @@ return {
       },
       -- "dmitmel/cmp-cmdline-history",
       -- "rcarriga/cmp-dap",
-      -- "zbirenbaum/copilot-cmp",
+      "zbirenbaum/copilot-cmp",
       "petertriho/cmp-git",
     },
     config = function()
@@ -108,7 +114,8 @@ return {
           end, { "i", "s" }),
         }),
         sources = cmp.config.sources({
-            { name = 'nvim_lsp', max_item_count = 40 },
+            { name = "copilot", group_index = 2 },
+            { name = 'nvim_lsp'},
             { name = 'luasnip',  max_item_count = 40 },
             { name = 'path' }
           },

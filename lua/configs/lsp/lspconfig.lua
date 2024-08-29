@@ -10,7 +10,7 @@ local on_attach = util.on_attach
 -- IMPORTANT: make sure to setup neodev BEFORE lspconfig
 require("configs.editor.neodev")
 require("mason-lspconfig").setup({
-  -- ensure_installed = { "tsserver", "lua_ls", "pyright", "yamlls", "bashls" },
+  ensure_installed = { "tsserver", "lua_ls", "pyright", "yamlls", "bashls" },
 })
 
 
@@ -20,16 +20,6 @@ require("mason-lspconfig").setup_handlers({
       capabilities = capabilities,
       on_attach = on_attach,
       -- root_dir = require("lspconfig.util").root_pattern(".git"),
-    })
-  end,
-  clangd = function()
-    require('lspconfig').clangd.setup({
-      capabilities = capabilities,
-      on_attach = on_attach,
-      -- root_dir = require("lspconfig.util").root_pattern(".git"),
-      filetypes = { "c", "cpp", "h", "hpp" },
-      offsetEncoding = { "utf-8" },
-      client_encoding = "utf-8",
     })
   end,
   lua_ls = function()
@@ -53,39 +43,21 @@ require("mason-lspconfig").setup_handlers({
       -- root_dir = require("lspconfig.util").root_pattern(".git", ".zshrc"),
     })
   end,
-  tsserver = function()
-    -- don't need this as we are using typescript-tools now.
-    -- but we are still using tsserver bin from mason so don't delete it.
-  --   require('lspconfig').tsserver.setup({
-  --     capabilities = mkcaps(true),
-  --     attach = on_attach,
-  --     settings = {
-  --       javascript = {
-  --         inlayHints = {
-  --           includeInlayEnumMemberValueHints = true,
-  --           includeInlayFunctionLikeReturnTypeHints = true,
-  --           includeInlayFunctionParameterTypeHints = true,
-  --           includeInlayParameterNameHints = "all",   -- 'none' | 'literals' | 'all';
-  --           includeInlayParameterNameHintsWhenArgumentMatchesName = true,
-  --           includeInlayPropertyDeclarationTypeHints = true,
-  --           includeInlayVariableTypeHints = true,
-  --         },
-  --       },
-  --       typescript = {
-  --         inlayHints = {
-  --           includeInlayEnumMemberValueHints = true,
-  --           includeInlayFunctionLikeReturnTypeHints = true,
-  --           includeInlayFunctionParameterTypeHints = true,
-  --           includeInlayParameterNameHints = "all",   -- 'none' | 'literals' | 'all';
-  --           includeInlayParameterNameHintsWhenArgumentMatchesName = true,
-  --           includeInlayPropertyDeclarationTypeHints = true,
-  --           includeInlayVariableTypeHints = true,
-  --         },
-  --       },
-  --     }
-  --   })
-  end
+  tsserver = function() end, -- i don't use mason's tsserver. typescript-tools is better. however, it needs tsserver installed by mason
 })
 
+require'lspconfig'.clangd.setup{
+  capabilities = capabilities,
+  on_attach=on_attach,
+}
+require('lspconfig').ruff_lsp.setup {
+  on_attach = on_attach,
+  init_options = {
+    settings = {
+      -- Any extra CLI arguments for `ruff` go here.
+      args = {},
+    }
+  }
+}
 -- required to trigger lspattach
 vim.api.nvim_exec_autocmds("FileType", {})

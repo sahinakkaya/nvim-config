@@ -53,7 +53,7 @@ return {
       -- OPTIONAL:
       --   `nvim-notify` is only needed, if you want to use the notification view.
       --   If not available, we use `mini` as the fallback
-      "rcarriga/nvim-notify",
+      -- "rcarriga/nvim-notify",
     }
   },
   --  {
@@ -105,17 +105,8 @@ return {
   },
 
   {
-    "3rd/image.nvim",
-    ft = { "markdown", "vimwiki" },
-    config = function()
-      -- Example for configuring Neovim to load user-installed installed Lua rocks:
-      package.path = package.path .. ";" .. vim.fn.expand("$HOME") .. "/.luarocks/share/lua/5.1/?/init.lua;"
-      package.path = package.path .. ";" .. vim.fn.expand("$HOME") .. "/.luarocks/share/lua/5.1/?.lua;"
-      require("image").setup({ editor_only_render_when_focused = true,  window_overlap_clear_enabled = true,tmux_show_only_in_active_window = true })
-    end
-  }, -- Optional image support in preview window: See `# Preview Mode` for more information
-  {
     'nvim-telescope/telescope.nvim',
+    event = "BufEnter",
     tag = '0.1.5',
     -- or, branch = '0.1.x',
     dependencies = {
@@ -174,6 +165,7 @@ return {
   },
   {
     'NvChad/nvim-colorizer.lua',
+    ft = { "css", "scss" },
     cmd = { "ColorizerAttachToBuffer", "ColorizerToggle" },
     config = function()
       require('colorizer').setup()
@@ -185,5 +177,10 @@ return {
     config = function()
       require("neoscroll").setup()
     end
+  },
+  {
+    "m4xshen/smartcolumn.nvim",
+    lazy=false,
+    opts = {}
   },
 }

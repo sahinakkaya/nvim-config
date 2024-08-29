@@ -28,7 +28,7 @@ local options = {
   completeopt = { "menuone", "noselect" }, -- mostly just for cmp
   conceallevel = 1,                        -- default 0, so that `` is visible in markdown files
   fileencoding = "utf-8",                  -- the encoding written to a file
-  hlsearch = true,                         -- highlight all matches on previous search pattern
+  hlsearch = false,                         -- highlight all matches on previous search pattern
   ignorecase = true,                       -- ignore case in search patterns
   mouse = "a",                             -- allow the mouse to be used in neovim
   pumheight = 10,                          -- pop up menu height
@@ -247,7 +247,7 @@ M.autocmds.last_location = {
 }
 
 M.autocmds.auto_reload_config = { -- reload programs when their config changes
-  { "BufWritePost", config .. "kitty/kitty.conf", "silent !kill -SIGUSR1 $(pgrep kitty)" },
+  { "BufWritePost", config .. "kitty/kitty.conf", "silent !pgrep kitty | xargs -i kill -SIGUSR1 {}" },
   { "BufWritePost", config .. "tmux/tmux.conf",   "silent !tmux source-file ~/.config/tmux/tmux.conf" },
 }
 
@@ -260,6 +260,8 @@ M.autocmds.filetype_specific = {
   },
 
   { "BufReadPost", "*.wiki", "set filetype=vimwiki" },
+  { "BufWinEnter", home .. "/scripts/*", "if empty(&filetype) | set filetype=sh | endif" }, -- set filetype to sh if it is not set
+  { "BufWritePost", home .. "/scripts/*", "silent !chmod +x %" }, -- make the file executable
 }
 
 

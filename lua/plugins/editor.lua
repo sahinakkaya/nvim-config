@@ -64,8 +64,21 @@ return {
     event = { 'InsertEnter', 'CmdlineEnter' },
     branch = 'v0.6', --recomended as each new version will have breaking changes
     opts = {
-      --Config goes here
-    },
+      fastwarp = {
+        map = '<C-;>',     --string or table
+        rmap = '<C-s-;>',  --string or table
+        cmap = '<C-;>',    --string or table
+        rcmap = '<C-s-;>', --string or table
+        nocursormove = false,
+        --makes the cursor not move (|)foo > fastwarp > (|foo)
+        --disables multiline feature
+        --only activates if prev char is start pair, otherwise fallback to normal
+        faster = true,
+        --only enables jump over pair, goto end/next line
+        --useful for the situation of:
+        --{|}M.foo('bar') > {M.foo('bar')|}
+      },
+    }
   },
   {
     "gbprod/substitute.nvim",
@@ -139,13 +152,13 @@ return {
     dependencies = { "nvim-telescope/telescope.nvim" },
     -- Author's Note: If default keymappings fail to register (possible config issue in my local setup),
     -- verify lazy loading functionality. On failure, disable lazy load and report issue
-    -- lazy = false,
     config = function()
       require("textcase").setup({})
       require("telescope").load_extension("textcase")
     end,
+    lazy = true,
     keys = {
-      "ga",
+      { "ga" },
       { "ga.", "<cmd>TextCaseOpenTelescope<CR>", mode = { "n", "v" }, desc = "Telescope" },
     },
     { "tpope/vim-fugitive", cmd = { "G", "Git", "Gedit", "Gsplit", "Gread", "Gwrite", "Ggrep", "GMove", "GRename", "GDelete", "GBrowse" } }
@@ -155,7 +168,38 @@ return {
     cmd = "Copilot",
     event = "InsertEnter",
     config = function()
-      require("copilot").setup({})
+      require("copilot").setup({
+        filetypes = {
+          yaml = false,
+          norg = false,
+          markdown = false,
+          help = false,
+          gitcommit = false,
+          gitrebase = false,
+          hgcommit = false,
+          svn = false,
+          cvs = false,
+          txt = false,
+          ["."] = false,
+        },
+      })
     end,
+  },
+  {
+    "zbirenbaum/copilot-cmp",
+    after = { "copilot.lua" },
+    config = function()
+      require("copilot_cmp").setup()
+    end
+  },
+  {
+    'stevearc/oil.nvim',
+    opts = {},
+    event = "VeryLazy",
+    -- Optional dependencies
+    dependencies = { "nvim-tree/nvim-web-devicons" },
+    config = function()
+      require("oil").setup()
+    end
   }
 }

@@ -10,7 +10,7 @@ require("noice").setup({
       ["cmp.entry.get_documentation"] = true,
     },
   },
-  notify = {enabled = true},
+  notify = {enabled = false},
   -- you can enable a preset for easier configuration
   presets = {
     bottom_search = false, -- use a classic bottom cmdline for search
@@ -21,6 +21,19 @@ require("noice").setup({
   },
 })
 
+
+-- lsp hover doc scrolling
+vim.keymap.set({ "n", "i", "s" }, "<c-f>", function()
+  if not require("noice.lsp").scroll(4) then
+    return "<c-f>"
+  end
+end, { silent = true, expr = true })
+
+vim.keymap.set({ "n", "i", "s" }, "<c-b>", function()
+  if not require("noice.lsp").scroll(-4) then
+    return "<c-b>"
+  end
+end, { silent = true, expr = true })
 -- local border_style = {
 --   left = { " ", "NoiceCmdlinePopupBorder" },
 --   right = { " ", "NoiceCmdlinePopupBorder" },
