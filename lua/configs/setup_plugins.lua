@@ -364,6 +364,40 @@ M.neotree = function()
       "diagnostics",
     },
     filesystem = {
+      components = {
+        harpoon_index = function(config, node, _)
+          local harpoon_list = require("harpoon"):list()
+          local path = node:get_id()
+          local harpoon_key = vim.uv.cwd()
+
+          for i, item in ipairs(harpoon_list.items) do
+            local value = item.value
+            if string.sub(item.value, 1, 1) ~= "/" then
+              value = harpoon_key .. "/" .. item.value
+            end
+
+            if value == path then
+              vim.print(path)
+              local keys = "asdfxxxxxx"
+
+              return {
+                text = string.format("-> %s", keys:sub(i, i)), -- <-- Add your favorite harpoon like arrow here
+                highlight = config.highlight or "NeoTreeDirectoryIcon",
+              }
+            end
+          end
+          return {}
+        end,
+      },
+      renderers = {
+        file = {
+          { "icon" },
+          { "name",         use_git_status_colors = true },
+          { "harpoon_index" }, --> This is what actually adds the component in where you want it
+          { "diagnostics" },
+          { "git_status",   highlight = "NeoTreeDimText" },
+        },
+      },
       window = {
         mappings = {
           ["gh"] = "focus_git_status",
@@ -492,6 +526,9 @@ M.scrollbar = function()
       ignore_whitespace = false,
     },
     current_line_blame_formatter = '<author>, <author_time:%R> - <summary>',
+    -- current_line_blame_formatter_opts = {
+    --   relative_time = false,
+    -- },
     status_formatter = function(status)
       local added, changed, removed = status.added, status.changed, status.removed
       local status_txt = {}
@@ -1011,6 +1048,18 @@ M.noice = function()
     },
   })
 
+  -- lsp hover doc scrolling
+  vim.keymap.set({ "n", "i", "s" }, "<c-f>", function()
+    if not require("noice.lsp").scroll(4) then
+      return "<c-f>"
+    end
+  end, { silent = true, expr = true })
+
+  vim.keymap.set({ "n", "i", "s" }, "<c-b>", function()
+    if not require("noice.lsp").scroll(-4) then
+      return "<c-b>"
+    end
+  end, { silent = true, expr = true })
   -- local border_style = {
   --   left = { " ", "NoiceCmdlinePopupBorder" },
   --   right = { " ", "NoiceCmdlinePopupBorder" },
@@ -1705,6 +1754,7 @@ M.copilot = function()
     },
     filetypes = {
       yaml = false,
+      norg = false,
       markdown = false,
       help = false,
       gitcommit = true,
@@ -1712,6 +1762,7 @@ M.copilot = function()
       hgcommit = false,
       svn = false,
       cvs = false,
+      txt = false,
       ["."] = false,
     },
   })
@@ -2159,7 +2210,8 @@ M.typescript_tools = function()
       -- CodeLens
       -- WARNING: Experimental feature also in VSCode, because it might hit performance of server.
       -- possible values: ("off"|"all"|"implementations_only"|"references_only")
-      code_lens = "off",
+      -- TODO: test to see if this will slow down the server
+      code_lens = "all",
       -- by default code lenses are displayed on all referencable values and for some of you it can
       -- be too much this option reduce count of them by removing member references from lenses
       disable_member_code_lens = true,
@@ -2167,7 +2219,8 @@ M.typescript_tools = function()
       -- WARNING: it is disabled by default (maybe you configuration or distro already uses nvim-auto-tag,
       -- that maybe have a conflict if enable this feature. )
       jsx_close_tag = {
-        enable = false,
+        -- TODO: test to see if this will improve things
+        enable = true,
         filetypes = { "javascriptreact", "typescriptreact", "typescript" },
       }
     },

@@ -1,4 +1,5 @@
 -- vim:fileencoding=utf-8
+-- config for neovim built from 4353996d
 --
 if vim.g.neovide then
   vim.g.neovide_cursor_vfx_mode = "torpedo"
@@ -208,9 +209,9 @@ M.autocmds.filetype_specific = {
     "setlocal wrap | setlocal spell",
   },
 
-  { "BufReadPost", "*.wiki", "set filetype=vimwiki" },
-  { "BufWinEnter", home .. "/scripts/*", "if empty(&filetype) | set filetype=sh | endif" }, -- set filetype to sh if it is not set
-  { "BufWritePost", home .. "/scripts/*", "silent !chmod +x %" }, -- make the file executable
+  { "BufReadPost",  "*.wiki",             "set filetype=vimwiki" },
+  { "BufWinEnter",  home .. "/scripts/*", "if empty(&filetype) | set filetype=sh | endif" }, -- set filetype to sh if it is not set
+  { "BufWritePost", home .. "/scripts/*", "silent !chmod +x %" },                            -- make the file executable
 }
 
 
@@ -866,6 +867,10 @@ require("lazy").setup({
         "tridactyl/vim-tridactyl",
         ft = "tridactyl"
       },
+      { -- syntax highlighting for kitty configuration
+        "fladson/vim-kitty",
+        ft = "kitty",
+      },
       -- {
       -- 'vimwiki/vimwiki',
       -- ft = 'vimwiki',
@@ -875,6 +880,32 @@ require("lazy").setup({
         "tools-life/taskwiki",
         ft = "vimwiki",
         init = init.taskwiki
+      },
+      {
+        "nvim-neorg/neorg",
+        build = ":Neorg sync-parsers",
+        cmd = "Neorg",
+        dependencies = { "nvim-lua/plenary.nvim" },
+        config = function()
+          require("neorg").setup {
+            load = {
+              ["core.defaults"] = {},
+              ["core.concealer"] = {},
+              ["core.ui.calendar"] = {},
+              ["core.dirman"] = {
+                config = {
+                  workspaces = {
+                    notes = "~/notes",
+                  },
+                  default_workspace = "notes",
+                },
+              },
+            },
+          }
+
+          vim.wo.foldlevel = 99
+          vim.wo.conceallevel = 2
+        end,
       },
       -- filetype specific plugins end
       -- lsp related plugins
