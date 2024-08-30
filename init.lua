@@ -1086,6 +1086,18 @@ require("lazy").setup({
         config = setup_plugins.neotree,
       },
 
+      { -- automatically rename other files when some file is moved
+        "antosha417/nvim-lsp-file-operations",
+        event = "LSPAttach",
+        dependencies = {
+          "nvim-lua/plenary.nvim",
+          "nvim-neo-tree/neo-tree.nvim",
+        },
+        config = function()
+          require("lsp-file-operations").setup()
+        end,
+      },
+
       -- {
       --   "3rd/image.nvim",
       --   -- ft = { "markdown", "vimwiki" },
