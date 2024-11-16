@@ -6,6 +6,9 @@ local M = {}
 M.dadbod_ui = function()
   -- Your DBUI configuration
   --
+  vim.g.db_ui_env_variable_url = ''
+  vim.g.db_ui_env_variable_name = ''
+  vim.g.db_ui_dotenv_variable_prefix = ''
   vim.g.dbs = {
     -- dev= 'postgres://postgres:mypassword@localhost:5432/my-dev-db',
     -- staging= 'postgres://postgres:mypassword@localhost:5432/my-staging-db',

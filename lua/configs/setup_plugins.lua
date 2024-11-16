@@ -178,7 +178,7 @@ M.telescope = function()
       },
       frecency = {
         show_filter_column = false,
-        -- db_safe_mode = false,
+        db_safe_mode = false,
         sorter = telescope.extensions.fzf.native_fzf_sorter(),
         workspaces = {
           ["conf"]     = config,
@@ -519,6 +519,41 @@ M.scrollbar = function()
 
   vim.keymap.set({ "n", "x", "o" }, "]h", next_hunk_repeat, { desc = "Next git hunk" })
   vim.keymap.set({ "n", "x", "o" }, "[h", prev_hunk_repeat, { desc = "Prev git hunk" })
+end
+
+
+M.spectre = function ()
+require('spectre').setup({
+  find_engine = {
+    -- rg is map with finder_cmd
+    ['rg'] = {
+      cmd = "rg",
+      -- default args
+      args = {
+        '--color=never',
+        '--no-heading',
+        '--with-filename',
+        '--line-number',
+        '--column',
+        '--pcre2'
+      },
+      options = {
+        ['ignore-case'] = {
+          value= "--ignore-case",
+          icon="[I]",
+          desc="ignore case"
+        },
+        ['hidden'] = {
+          value="--hidden",
+          desc="hidden file",
+          icon="[H]"
+        },
+        -- you can put any rg search option you want here it can toggle with
+        -- show_option function
+      }
+    }
+  }
+  })
 end
 
 

@@ -787,7 +787,8 @@ require("lazy").setup({
       {
         'nvim-pack/nvim-spectre',
         cmd = "Spectre",
-        keys = keys.spectre
+        keys = keys.spectre,
+        config = setup_plugins.spectre
       },
       {
         "johmsalas/text-case.nvim",
