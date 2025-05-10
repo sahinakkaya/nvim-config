@@ -40,7 +40,7 @@ M._lsp_utils = {
   end,
 
   on_attach = function(client, bufnr)
-    if client.name == 'ruff_lsp' then
+    if client.name == 'ruff' then
       -- Disable hover in favor of Pyright
       client.server_capabilities.hoverProvider = false
     end
@@ -559,13 +559,13 @@ end
 
 M.repeatable_moves = function()
   local N = {}
-  local cp = require("copilot.panel")
+  -- local cp = require("copilot.panel")
   local gs = require("gitsigns")
   local dropbar_api = require('dropbar.api')
   local ts_repeat_move = require "nvim-treesitter.textobjects.repeatable_move"
   -- make sure forward function comes first
   local next_hunk_repeat, prev_hunk_repeat = ts_repeat_move.make_repeatable_move_pair(gs.next_hunk, gs.prev_hunk)
-  local next_suggestion, prev_suggestion = ts_repeat_move.make_repeatable_move_pair(cp.jump_next, cp.jump_prev)
+  -- local next_suggestion, prev_suggestion = ts_repeat_move.make_repeatable_move_pair(cp.jump_next, cp.jump_prev)
   local next_context, prev_context = ts_repeat_move.make_repeatable_move_pair(dropbar_api.select_next_context,
     dropbar_api.goto_context_start)
   -- Or, use `make_repeatable_move` or `set_last_move` functions for more control. See the code for instructions.
@@ -577,8 +577,8 @@ M.repeatable_moves = function()
   end
   N.next_context = next_context
   N.prev_context = prev_context
-  N.next_suggestion = next_suggestion
-  N.prev_suggestion = prev_suggestion
+  -- N.next_suggestion = next_suggestion
+  -- N.prev_suggestion = prev_suggestion
   return N
 end
 M.which_key = function()
@@ -1574,18 +1574,21 @@ M.treesitter = function()
 
   -- default config
   require("various-textobjs").setup {
-    -- lines to seek forwards for "small" textobjs (mostly characterwise textobjs)
-    -- set to 0 to only look in the current line
-    lookForwardSmall = 5,
+    forwardLooking = {
+      -- lines to seek forwards for "small" textobjs (mostly characterwise textobjs)
+      -- set to 0 to only look in the current line
+      small = 5,
+      -- lines to seek forwards for "big" textobjs (mostly linewise textobjs)
+      big = 15
+    },
 
-    -- lines to seek forwards for "big" textobjs (mostly linewise textobjs)
-    lookForwardBig = 15,
+    keymaps = {
+      -- use suggested keymaps (see overview table in README)
+      useDefaults = true,
+      -- disable only some default keymaps, e.g. { "ai", "ii" }
+      disabledDefaults = { "\\", "iq", "aq", "in", "an" },
+    },
 
-    -- use suggested keymaps (see overview table in README)
-    useDefaultKeymaps = true,
-
-    -- disable only some default keymaps, e.g. { "ai", "ii" }
-    disabledKeymaps = { "\\", "iq", "aq", "in", "an" },
   }
 
 
@@ -1992,21 +1995,10 @@ M.lsp_config = function()
   local util = M._lsp_utils
   require("mason").setup()
 
-  local capabilities = util.mkcaps(true)
   local on_attach = util.on_attach
 
 
 
-  -- IMPORTANT: make sure to setup neodev BEFORE lspconfig
-  require("neodev").setup({
-    -- add any options here, or leave empty to use the default settings
-    library = {
-      plugins = { "nvim-dap-ui", "trouble.nvim", "nvim-web-devicons",
-        "telescope.nvim",
-        "lazy.nvim" },
-      types = true
-    },
-  })
   -- It's important that you set up neoconf.nvim BEFORE nvim-lspconfig.
 
   require("neoconf").setup({
@@ -2016,99 +2008,7 @@ M.lsp_config = function()
     -- ensure_installed = { "tsserver", "lua_ls", "pyright", "yamlls", "bashls" },
   })
 
-  require("mason-lspconfig").setup_handlers({
-    function(server_name)
-      require('lspconfig')[server_name].setup({
-        capabilities = capabilities,
-        on_attach = on_attach,
-        -- root_dir = require("lspconfig.util").root_pattern(".git"),
-      })
-    end,
-    clangd = function()
-      require('lspconfig').clangd.setup({
-        capabilities = capabilities,
-        on_attach = on_attach,
-        -- root_dir = require("lspconfig.util").root_pattern(".git"),
-        filetypes = { "c", "cpp", "h", "hpp" },
-        offsetEncoding = { "utf-8" },
-        client_encoding = "utf-8",
-      })
-    end,
-    pyright = function()
-      require('lspconfig').pyright.setup({
-        capabilities = capabilities,
-        on_attach = on_attach,
-        settings = {
-          pyright = {
-            -- Using Ruff's import organizer
-            disableOrganizeImports = true,
-          },
-          python = {
-            analysis = {
-              -- Ignore all files for analysis to exclusively use Ruff for linting
-              -- ignore = { '*' },
-            },
-          },
-        },
-      })
-    end,
-    lua_ls = function()
-      require("lspconfig").lua_ls.setup({
-        capabilities = capabilities,
-        on_attach = on_attach,
-        settings = {
-          Lua = {
-            hint = {
-              enable = false,
-            },
-          },
-        },
-      })
-    end,
-    bashls = function()
-      require("lspconfig").bashls.setup({
-        capabilities = util.mkcaps(false),
-        attach = on_attach,
-        filetypes = { "zsh", "sh", "bash" },
-        -- root_dir = require("lspconfig.util").root_pattern(".git", ".zshrc"),
-      })
-    end,
-    tsserver = function()
-      -- don't need this as we are using typescript-tools now.
-      -- but we are still using tsserver bin from mason so don't delete it.
-      --   require('lspconfig').tsserver.setup({
-      --     capabilities = mkcaps(true),
-      --     attach = on_attach,
-      --     settings = {
-      --       javascript = {
-      --         inlayHints = {
-      --           includeInlayEnumMemberValueHints = true,
-      --           includeInlayFunctionLikeReturnTypeHints = true,
-      --           includeInlayFunctionParameterTypeHints = true,
-      --           includeInlayParameterNameHints = "all",   -- 'none' | 'literals' | 'all';
-      --           includeInlayParameterNameHintsWhenArgumentMatchesName = true,
-      --           includeInlayPropertyDeclarationTypeHints = true,
-      --           includeInlayVariableTypeHints = true,
-      --         },
-      --       },
-      --       typescript = {
-      --         inlayHints = {
-      --           includeInlayEnumMemberValueHints = true,
-      --           includeInlayFunctionLikeReturnTypeHints = true,
-      --           includeInlayFunctionParameterTypeHints = true,
-      --           includeInlayParameterNameHints = "all",   -- 'none' | 'literals' | 'all';
-      --           includeInlayParameterNameHintsWhenArgumentMatchesName = true,
-      --           includeInlayPropertyDeclarationTypeHints = true,
-      --           includeInlayVariableTypeHints = true,
-      --         },
-      --       },
-      --     }
-      --   })
-    end
-  }
-  )
-
-  require('lspconfig').ruff_lsp.setup {
+  require('lspconfig').ruff.setup {
     on_attach = on_attach,
     init_options = {
       settings = {

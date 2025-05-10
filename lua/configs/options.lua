@@ -75,6 +75,11 @@ for k, v in pairs(options) do
   vim.opt[k] = v
 end
 
+vim.diagnostic.config({
+  virtual_text = true,
+  virtual_lines = false
+})
+
 
 for _, path in pairs(vim.api.nvim_list_runtime_paths()) do
   vim.opt.path:append(path .. '/lua')

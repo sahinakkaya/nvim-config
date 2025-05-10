@@ -281,7 +281,17 @@ vim.opt.rtp:prepend(lazypath)
 require("lazy").setup({
     -- { import = "plugins" }, I have deleted the plugins folder, i don't need this now
     {
-      "folke/neodev.nvim",
+      {
+        "folke/lazydev.nvim",
+        ft = "lua", -- only load on lua files
+        opts = {
+          library = {
+            -- See the configuration section for more details
+            -- Load luvit types when the `vim.uv` word is found
+            { path = "${3rd}/luv/library", words = { "vim%.uv" } },
+          },
+        },
+      },
       { "folke/neoconf.nvim", cmd = "Neoconf" }, -- don't quite understand this
       {
         "numToStr/Comment.nvim",
@@ -797,12 +807,12 @@ require("lazy").setup({
         keys = keys.text_case,
       },
       { "tpope/vim-fugitive", cmd = { "G", "Git", "Gedit", "Gsplit", "Gread", "Gwrite", "Ggrep", "GMove", "GRename", "GDelete", "GBrowse", "Gclog" } },
-      {
-        "zbirenbaum/copilot.lua",
-        cmd = "Copilot",
-        event = "InsertEnter",
-        config = setup_plugins.copilot,
-      },
+      -- {
+      --   "zbirenbaum/copilot.lua",
+      --   cmd = "Copilot",
+      --   event = "InsertEnter",
+      --   config = setup_plugins.copilot,
+      -- },
       {
         'kristijanhusak/vim-dadbod-ui',
         dependencies = {
@@ -1174,237 +1184,74 @@ require("lazy").setup({
         end,
       },
       {
-        "Shougo/nvim-cmp",
+        "saghen/blink.cmp",
         event = { "InsertEnter", "CmdlineEnter" },
-        dependencies = {
-          "hrsh7th/cmp-buffer",
-          "hrsh7th/cmp-path",
-          "hrsh7th/cmp-cmdline",
-          "hrsh7th/cmp-nvim-lsp",
-          -- {
-          --   "zbirenbaum/copilot-cmp",
-          --   config = function()
-          --     require("copilot_cmp").setup()
-          --   end
-          -- },
-          "saadparwaiz1/cmp_luasnip",
-          {
-            "L3MON4D3/LuaSnip",
-            -- follow latest release.
-            version = "v2.*", -- Replace <CurrentMajor> by the latest released major (first number of latest release)
-            -- install jsregexp (optional!).
-            build = "make install_jsregexp",
-            dependencies = { "rafamadriz/friendly-snippets" },
-            config = function()
-              require("luasnip.loaders.from_vscode").lazy_load()
-            end
+        -- optional: provides snippets for the snippet source
+        dependencies = { "rafamadriz/friendly-snippets" },
+
+        -- use a release tag to download pre-built binaries
+        version = "1.*",
+        -- AND/OR build from source, requires nightly: https://rust-lang.github.io/rustup/concepts/channels.html#working-with-nightly-rust
+        -- build = "cargo build --release",
+        -- If you use nix, you can build from source using latest nightly rust with:
+        -- build = "nix run .#build-plugin",
+
+        opts = {
+          -- "default" (recommended) for mappings similar to built-in completions (C-y to accept)
+          -- "super-tab" for mappings similar to vscode (tab to accept)
+          -- "enter" for enter to accept
+          -- "none" for no mappings
+          --
+          -- All presets have the following mappings:
+          -- C-space: Open menu or open docs if already open
+          -- C-n/C-p or Up/Down: Select next/previous item
+          -- C-e: Hide menu
+          -- C-k: Toggle signature help (if signature.enabled = true)
+          --
+          -- See :h blink-cmp-config-keymap for defining your own keymap
+          keymap = { preset = "super-tab" },
+
+          appearance = {
+            -- "mono" (default) for "Nerd Font Mono" or "normal" for "Nerd Font"
+            -- Adjusts spacing to ensure icons are aligned
+            nerd_font_variant = "mono"
           },
-          -- "dmitmel/cmp-cmdline-history",
-          -- "rcarriga/cmp-dap",
-          "petertriho/cmp-git",
+
+          -- (Default) Only show the documentation popup when manually triggered
+          completion = { documentation = { auto_show = true } },
+
+          -- Default list of enabled providers defined so that you can extend it
+          -- elsewhere in your config, without redefining it, due to `opts_extend`
+          sources = {
+            default = { "lsp", "path", "snippets", "buffer" },
+          },
+
+          -- (Default) Rust fuzzy matcher for typo resistance and significantly better performance
+          -- You may use a lua implementation instead by using `implementation = "lua"` or fallback to the lua implementation,
+          -- when the Rust fuzzy matcher is not available, by using `implementation = "prefer_rust"`
+          --
+          -- See the fuzzy documentation for more information
+          fuzzy = { implementation = "prefer_rust_with_warning" }
         },
-        config = function()
-          local cmp = require('cmp')
-          local luasnip = require("luasnip")
-          -- local cmp_select = { behavior = cmp.SelectBehavior.Select }
-
-
-          local icons = require('sahinakkaya.icons')
-
-
-          local has_words_before = function()
-            unpack = unpack or table.unpack
-            local line, col = unpack(vim.api.nvim_win_get_cursor(0))
-            return col ~= 0 and vim.api.nvim_buf_get_lines(0, line - 1, line, true)[1]:sub(col, col):match("%s") == nil
-          end
-
-          local under = function(entry1, entry2)
-            local _, entry1_under = entry1.completion_item.label:find "^_+"
-            local _, entry2_under = entry2.completion_item.label:find "^_+"
-            entry1_under = entry1_under or 0
-            entry2_under = entry2_under or 0
-            if entry1_under > entry2_under then
-              return false
-            elseif entry1_under < entry2_under then
-              return true
-            end
-          end
-
-
-          local ls = require("luasnip")
-
-          -- local cmp_autopairs = require "nvim-autopairs.completion.cmp"
-          -- cmp.event:on("confirm_done", cmp_autopairs.on_confirm_done())
-          cmp.setup({
-            snippet = {
-              expand = function(args)
-                luasnip.lsp_expand(args.body)
-              end,
-            },
-            -- formatting = format,
-            window = {
-              completion = cmp.config.window.bordered(),
-              documentation = cmp.config.window.bordered(),
-            },
-            mapping = cmp.mapping.preset.insert({
-              ['<C-b>'] = cmp.mapping.scroll_docs(-2),
-              ['<C-f>'] = cmp.mapping.scroll_docs(2),
-              ['<C-n>'] = cmp.mapping.select_next_item(),
-              ['<C-p>'] = cmp.mapping.select_prev_item(),
-              ['<C-t>'] = cmp.mapping.complete(),
-              ['<C-e>'] = cmp.mapping.abort(),
-              ['<CR>'] = cmp.mapping.confirm({ select = false }), -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items
-
-
-              ["<Tab>"] = cmp.mapping(function(fallback)
-                if cmp.visible() then
-                  cmp.select_next_item()
-                elseif luasnip.jumpable() then
-                  luasnip.jump()
-                  -- You could replace the expand_or_jumpable() calls with expand_or_locally_jumpable()
-                  -- that way you will only jump inside the snippet region
-                  -- elseif has_words_before() then
-                  --   cmp.complete()
-                else
-                  fallback()
-                end
-              end, { "i", "s", "c" }),
-              ["<S-Tab>"] = cmp.mapping(function(fallback)
-                if cmp.visible() then
-                  cmp.select_prev_item()
-                elseif luasnip.jumpable(-1) then
-                  luasnip.jump(-1)
-                else
-                  fallback()
-                end
-              end, { "i", "s", "c" }),
-            }),
-
-            formatting = {
-              fields = { "menu", "abbr", "kind" },
-              format = function(entry, vim_item)
-                -- Kind icons
-                -- vim_item.kind = string.format("%s", kind_icons[vim_item.kind])
-                vim_item.kind = string.format("%s %s", icons.kinds[vim_item.kind], vim_item.kind) -- This concatonates the icons with the name of the item kind
-
-                local function trim(text)
-                  local max = 40
-                  if text and text:len() > max then
-                    text = text:sub(1, max) .. "..."
-                  end
-                  return text
-                end
-
-                vim_item.abbr = trim(vim_item.abbr)
-
-                -- vim_item.menu = ({
-                -- 	nvim_lsp = "[LSP]",
-                -- 	luasnip = "[Snippet]",
-                -- 	buffer = "[Buffer]",
-                -- 	path = "[Path]",
-                -- 	nvim_lua = "[Lua]",
-                -- 	latex_symbols = "[Latex]",
-                -- })[entry.source.name]
-
-                local menu_name = icons.sources[entry.source.name] or ("[" .. entry.source.name .. "]")
-                vim_item.menu = menu_name .. " "
-
-                -- vim_item.menu = "via " .. menu_name
-                -- local item = entry:get_completion_item()
-                -- if item.detail then
-                --   vim_item.menu = item.detail
-                -- end
-                return vim_item
-              end,
-            },
-            sorting = {
-              priority_weight = 2,
-              comparators = {
-                -- cmp.config.compare.exact,
-                -- cmp.config.compare.recently_used,
-                -- cmp.config.compare.kind,
-                -- cmp.config.compare.offset,
-                -- cmp.config.compare.score,
-                -- cmp.config.compare.sort_text,
-                -- cmp.config.compare.order,
-                -- cmp.config.compare.length,
-
-                cmp.config.compare.exact,
-                cmp.config.compare.locality,
-                cmp.config.compare.recently_used,
-                cmp.config.compare.score,
-                -- cmp.config.compare.sources,
-                cmp.config.compare.offset,
-                cmp.config.compare.order,
-                under,
-                cmp.config.compare.kind,
-                -- cmp.config.compare.sort_text,
-                cmp.config.compare.length,
-              },
-            },
-            sources = cmp.config.sources({
-                { name = 'nvim_lsp' },
-                { name = 'luasnip', max_item_count = 40 },
-                -- { name = "copilot",  group_index = 2 },
-                { name = 'path' }
-              },
-              {
-                { name = 'buffer' },
-                { name = 'path' }
-              })
-          })
-
-          -- Set configuration for specific filetype.
-          cmp.setup.filetype('gitcommit', {
-            sources = cmp.config.sources({
-              { name = 'git' }, -- You can specify the `git` source if [you were installed it](https://github.com/petertriho/cmp-git).
-            }, {
-              { name = 'buffer' },
-            })
-          })
-
-
-          cmp.setup.filetype("harpoon", {
-            sources = cmp.config.sources({
-              { name = "path" },
-            }),
-            -- formatting = format,
-          })
-
-          -- Use buffer source for `/` and `?` (if you enabled `native_menu`, this won't work anymore).
-          cmp.setup.cmdline({ '/', '?' }, {
-            mapping = cmp.mapping.preset.cmdline(),
-            sources = {
-              { name = 'buffer' }
-            }
-          })
-
-          -- Use cmdline & path source for ':' (if you enabled `native_menu`, this won't work anymore).
-          cmp.setup.cmdline(':', {
-            mapping = cmp.mapping.preset.cmdline(),
-            sources = cmp.config.sources({
-              { name = 'path' }
-            }, {
-              { name = 'cmdline' }
-            })
-          })
-
-          require('tabout').setup {}
-        end,
+        opts_extend = { "sources.default" },
+      },
+      {
+        "jamestthompson3/nvim-remote-containers",
+        lazy = false
       },
 
       {
         "MunsMan/kitty-navigator.nvim",
-        build = function()
-          vim.fn.system("cp navigate_kitty.py ~/.config/kitty")
-          vim.fn.system("cp pass_keys.py ~/.config/kitty")
-        end,
+        build = {
+            "cp navigate_kitty.py ~/.config/kitty",
+            "cp pass_keys.py ~/.config/kitty",
+        },
         keys = {
           { "<C-h>", function() require("kitty-navigator").navigateLeft() end,  desc = "Move left a Split",  mode = { "n" } },
           { "<C-j>", function() require("kitty-navigator").navigateDown() end,  desc = "Move down a Split",  mode = { "n" } },
           { "<C-k>", function() require("kitty-navigator").navigateUp() end,    desc = "Move up a Split",    mode = { "n" } },
           { "<C-l>", function() require("kitty-navigator").navigateRight() end, desc = "Move right a Split", mode = { "n" } }
-        }
+        },
       },
       {
         'mikesmithgh/kitty-scrollback.nvim',
