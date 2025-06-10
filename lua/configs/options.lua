@@ -85,28 +85,6 @@ for _, path in pairs(vim.api.nvim_list_runtime_paths()) do
   vim.opt.path:append(path .. '/lua')
 end
 
-M.indent_blankline = {
-  indent = {
-    char = "│",
-    tab_char = "│",
-  },
-  scope = { enabled = true },
-  exclude = {
-    filetypes = {
-      "help",
-      "alpha",
-      "dashboard",
-      "neo-tree",
-      "Trouble",
-      "trouble",
-      "lazy",
-      "mason",
-      "notify",
-      "toggleterm",
-      "lazyterm",
-    },
-  },
-}
 
 M.ultimate_pairs = {
   cmap = false,     --cmap stands for cmd-line map

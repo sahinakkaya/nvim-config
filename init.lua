@@ -881,10 +881,6 @@ require("lazy").setup({
         cmd = "Mason",
         dependencies = {
           "williamboman/mason-lspconfig.nvim",
-          {
-            'stevearc/dressing.nvim',
-            opts = {},
-          }
         },
       },
       {
@@ -924,6 +920,71 @@ require("lazy").setup({
           vim.cmd([[colorscheme kanagawa]])
         end,
 
+      },
+      {
+        "folke/snacks.nvim",
+        priority = 1000,
+        lazy = false,
+        opts = {
+          -- your configuration comes here
+          -- or leave it empty to use the default settings
+          -- refer to the configuration section below
+          bigfile = { enabled = true },
+          dashboard = {
+            enabled = true,
+            sections = {
+              { section = "header" },
+              {
+                pane = 2,
+                section = "terminal",
+                cmd = "cat ~/.config/sahinakkaya/splash | lolcat",
+                height = 5,
+                padding = 1,
+              },
+              { section = "keys", gap = 1, padding = 1 },
+              { pane = 2, icon = " ", title = "Recent Files", section = "recent_files", indent = 2, padding = 1 },
+              { pane = 2, icon = " ", title = "Projects", section = "projects", indent = 2, padding = 1 },
+              {
+                pane = 2,
+                icon = " ",
+                title = "Git Status",
+                section = "terminal",
+                enabled = function()
+                  return require("snacks").git.get_root() ~= nil
+                end,
+                cmd = "git status --short --branch --renames",
+                height = 5,
+                padding = 1,
+                ttl = 5 * 60,
+                indent = 3,
+              },
+              { section = "startup" },
+            }
+          },
+          explorer = { enabled = false },
+          image = { enabled = true },
+          indent = { enabled = true },
+          input = { enabled = true, opts = {} },
+          picker = { enabled = false },
+          notifier = { enabled = true },
+          quickfile = { enabled = true },
+          scope = { enabled = false },
+          scroll = {
+            animate = {
+              duration = { step = 5, total = 50 },
+              easing = "linear",
+            },
+            -- faster animation when repeating scroll after delay
+            animate_repeat = {
+              delay = 100, -- delay in ms before using the repeat animation
+              duration = { step = 5, total = 50 },
+              easing = "linear",
+            },
+
+          },
+          statuscolumn = { enabled = true },
+          words = { enabled = true },
+        },
       },
 
       {
@@ -1084,12 +1145,6 @@ require("lazy").setup({
         -- event = "VeryLazy",
         config = setup_plugins.telescope,
       },
-      { -- there is also integration with rainbow-delimiters. check read me if you want
-        "lukas-reineke/indent-blankline.nvim",
-        event = "VeryLazy",
-        opts = options.indent_blankline,
-        main = "ibl",
-      },
       {
         "hiphish/rainbow-delimiters.nvim",
         dependencies = "nvim-treesitter/nvim-treesitter",
@@ -1149,14 +1204,6 @@ require("lazy").setup({
           require('colorizer').setup()
         end
       },
-      {
-        "karb94/neoscroll.nvim",
-        keys = keys.neoscroll,
-        config = function()
-          require("neoscroll").setup()
-        end
-      },
-
       {
         "nvimtools/hydra.nvim",
         dependencies = {
@@ -1243,8 +1290,8 @@ require("lazy").setup({
       {
         "MunsMan/kitty-navigator.nvim",
         build = {
-            "cp navigate_kitty.py ~/.config/kitty",
-            "cp pass_keys.py ~/.config/kitty",
+          "cp navigate_kitty.py ~/.config/kitty",
+          "cp pass_keys.py ~/.config/kitty",
         },
         keys = {
           { "<C-h>", function() require("kitty-navigator").navigateLeft() end,  desc = "Move left a Split",  mode = { "n" } },

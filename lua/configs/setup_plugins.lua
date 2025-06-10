@@ -789,8 +789,9 @@ M.which_key = function()
 
     g = {
       name = "Git",
-      -- g = { require("plugin_configs.terminal").lazygit_toggle, "Lazygit" },
-      g = { ":Git<CR>", "Fugitive" },
+      g = { ":lua require('snacks').lazygit()<CR>", "Lazygit" },
+      x = { ":lua require('snacks').gitbrowse()<CR>", "Open in browser" },
+      -- g = { ":Git<CR>", "Fugitive" },
       j = { M.repeatable_moves().next_hunk, "Next Hunk" },
 
       d = { function()
@@ -1000,6 +1001,7 @@ M.which_key = function()
     g = {
       name = "Git",
       r = { function() require("gitsigns").reset_hunk { vim.fn.line('.'), vim.fn.line('v') } end, "Reset Hunk" },
+      x = { ":lua require('snacks').gitbrowse()<CR>", "Open in browser" },
       s = { function() require("gitsigns").stage_hunk { vim.fn.line('.'), vim.fn.line('v') } end, "Stage Hunk" },
     },
   }
