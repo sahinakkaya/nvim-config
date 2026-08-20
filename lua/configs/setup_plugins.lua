@@ -563,6 +563,8 @@ end
 M.which_key = function()
   local whichkey = require("which-key")
 
+  local _, _ = pcall(require, "telescope")
+
   local harpoon = function()
     return require("harpoon")
   end
@@ -762,7 +764,7 @@ M.which_key = function()
       w = { ":Telescope frecency workspace=wiki<CR>", "wiki" },
       p = { ":Telescope project<CR>", "<Projects>" },
     },
-    q = { require("sahinakkaya.util").smart_quit, "Smart quit" },
+    q = { ":q<CR>", "Quit" },
 
 
 

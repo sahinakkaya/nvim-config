@@ -6,6 +6,7 @@ local options = {
   backup = true, -- creates a backup file
   backupdir = home .. '/.cache/nvim/backup',
   background = 'dark',
+  breakindent = true,
 
   laststatus = 3,       -- have a global statusline at the bottom instead of one for each window
   undofile = true,      -- enable persistent undo
@@ -16,7 +17,6 @@ local options = {
 
   spell = false,
   spelllang = 'en,tr',
-  clipboard = "unnamedplus",               -- allows neovim to access the system clipboard
   cmdheight = 2,                           -- more space in the neovim command line for displaying messages
   completeopt = { "menuone", "noselect" }, -- mostly just for cmp
   conceallevel = 1,                        -- default 0, so that `` is visible in markdown files
@@ -33,8 +33,8 @@ local options = {
   -- smartindent = true,                      -- make indenting smarter again
   splitbelow = true,                       -- force all horizontal splits to go below current window
   splitright = true,                       -- force all vertical splits to go to the right of current window
-  timeoutlen = 500,                        -- time to wait for a mapped sequence to complete (in milliseconds)
-  updatetime = 300,                        -- faster completion (4000ms default)
+  timeoutlen = 300,                        -- time to wait for a mapped sequence to complete (in milliseconds)
+  updatetime = 250,                        -- faster completion (4000ms default)
   expandtab = true,                        -- convert tabs to spaces
   shiftwidth = 2,                          -- the number of spaces inserted for each indentation
   tabstop = 2,                             -- insert 2 spaces for a tab
@@ -56,7 +56,10 @@ local options = {
   -- foldcolumn = '1',
 
   virtualedit = "block",
-  inccommand = "nosplit" -- split, nosplit
+  inccommand = "split", -- split, nosplit
+
+  list = true,
+  confirm = true
 
   -- foldclose = 'all',
   -- foldopen = 'all',
@@ -79,6 +82,9 @@ vim.diagnostic.config({
   virtual_text = true,
   virtual_lines = false
 })
+-- Sync clipboard between OS and Neovim.
+--  Schedule the setting after `UiEnter` because it can increase startup-time.
+vim.schedule(function() vim.o.clipboard = 'unnamedplus' end)
 
 
 for _, path in pairs(vim.api.nvim_list_runtime_paths()) do
