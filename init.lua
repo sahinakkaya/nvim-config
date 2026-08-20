@@ -1037,7 +1037,7 @@ require("lazy").setup({
       -- automatic dark mode
       {
         "cormacrelf/dark-notify",
-        lazy = false,
+        event = "VeryLazy",
         config = function()
           require("dark_notify").run()
         end,
@@ -1285,7 +1285,6 @@ require("lazy").setup({
       },
       {
         "hiphish/rainbow-delimiters.nvim",
-        enabled = false,
         dependencies = "nvim-treesitter/nvim-treesitter",
         event = "VeryLazy",
         config = function()
