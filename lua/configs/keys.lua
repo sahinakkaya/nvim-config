@@ -16,10 +16,30 @@ M.comment = {
   { "gb", mode = { "n", "v" } },
 }
 
-M.spectre = {
+-- M.spectre = {
+--   { '<leader>rr', '<cmd>lua require("spectre").toggle()<CR>',                             desc = "Toggle Spectre" },
+--   { '<leader>rw', '<cmd>lua require("spectre").open_visual({select_word=true})<CR>',      desc = "Search current word" },
+--   { '<leader>rw', '<esc><cmd>lua require("spectre").open_visual()<CR>',                   mode = "v",                     desc = "Search current word" },
+--   { '<leader>rp', '<cmd>lua require("spectre").open_file_search({select_word=true})<CR>', desc = "Search on current file" }
+-- }
+
+M.grug_far = {
+  {
+    "<leader>rw",
+    function()
+      local is_visual = vim.fn.mode():lower():find("v")
+      if is_visual then     -- needed to make visual selection work
+        vim.cmd([[normal! v]])
+      end
+      local grug = require("grug-far");
+      (is_visual and grug.with_visual_selection or grug.grug_far)({
+            prefills = { filesFilter = "*." .. vim.fn.expand("%:e") },
+          })
+    end,
+    mode = { "n", "v" },
+    desc = "Search and Replace",
+  },
   { '<leader>rr', '<cmd>lua require("spectre").toggle()<CR>',                             desc = "Toggle Spectre" },
-  { '<leader>rw', '<cmd>lua require("spectre").open_visual({select_word=true})<CR>',      desc = "Search current word" },
-  { '<leader>rw', '<esc><cmd>lua require("spectre").open_visual()<CR>',                   mode = "v",                     desc = "Search current word" },
   { '<leader>rp', '<cmd>lua require("spectre").open_file_search({select_word=true})<CR>', desc = "Search on current file" }
 }
 
@@ -37,13 +57,13 @@ M.text_case = {
 
 M.which_key = {
   { "<Leader>", mode = { "n", "v" } },
-  { "z", mode = { "n", "v" } },
-  { "y", mode = { "n", "v" } },
-  { "c", mode = { "n", "v" } },
-  { "g", mode = { "n", "v" } },
-  { "d", mode = { "n", "v" } },
-  { "]", mode = { "n", "v" } },
-  { "[", mode = { "n", "v" } }
+  { "z",        mode = { "n", "v" } },
+  { "y",        mode = { "n", "v" } },
+  { "c",        mode = { "n", "v" } },
+  { "g",        mode = { "n", "v" } },
+  { "d",        mode = { "n", "v" } },
+  { "]",        mode = { "n", "v" } },
+  { "[",        mode = { "n", "v" } }
 }
 M.vimwiki = { "<Space>ww" }
 M.neoscroll = { '<C-u>', '<C-d>', '<C-b>', '<C-f>', '<C-y>', '<C-e>', 'zt', 'zz', 'zb' }

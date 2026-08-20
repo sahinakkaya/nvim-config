@@ -40,39 +40,6 @@ M._lsp_utils = {
   end,
 
   on_attach = function(client, bufnr)
-    if client.name == 'ruff' then
-      -- Disable hover in favor of Pyright
-      client.server_capabilities.hoverProvider = false
-    end
-    -- if client.server_capabilities.inlayHintProvider then
-    --   print("yes")
-    -- end
-    vim.lsp.inlay_hint.enable(true, { 0 })
-
-    -- Mappings.
-    -- See `:help vim.lsp.*` for documentation on any of the below functions
-    local bufopts = { noremap = true, silent = true, buffer = bufnr }
-    -- vim.keymap.set('n', 'gD', vim.lsp.buf.declaration, bufopts)
-    vim.keymap.set('n', 'gD', function() require("trouble").toggle("lsp_type_definitions") end, bufopts)
-    -- vim.keymap.set('n', 'gd', vim.lsp.buf.definition, bufopts)
-    vim.keymap.set('n', 'gd', function() require("trouble").toggle("lsp_definitions") end, bufopts)
-    vim.keymap.set('n', 'K', function() require("pretty_hover").hover() end, bufopts)
-    -- vim.keymap.set('n', 'gi', vim.lsp.buf.implementation, buf_opts)
-    vim.keymap.set('n', 'gi', function() require("trouble").toggle("lsp_implementations") end, bufopts)
-    -- vim.keymap.set('n', 'gr', vim.lsp.buf.references, bufopts)
-    vim.keymap.set('n', 'gr', function() require("trouble").toggle("lsp_references") end, bufopts)
-    vim.keymap.set('i', '<C-k>', vim.lsp.buf.signature_help, bufopts)
-    -- vim.keymap.set('n', '<C-m>', vim.lsp.buf.signature_help, bufopts) -- because it confuses with enter
-    -- vim.keymap.set('i', '<C-k>', vim.lsp.buf.signature_help, bufopts)
-    -- vim.keymap.set('n', '<space>wa', vim.lsp.buf.add_workspace_folder, bufopts)
-    -- vim.keymap.set('n', '<space>wr', vim.lsp.buf.remove_workspace_folder, bufopts)
-    -- vim.keymap.set('n', '<space>wl', function()
-    --   print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
-    -- end, bufopts)
-    -- vim.keymap.set('n', '<space>D', vim.lsp.buf.type_definition, bufopts)
-    -- vim.keymap.set('n', '<space>rn', vim.lsp.buf.rename, bufopts)
-    -- vim.keymap.set('n', '<space>ca', vim.lsp.buf.code_action, bufopts)
-    -- vim.keymap.set('n', '<space>f', function() vim.lsp.buf.format { async = true } end, bufopts)
   end
 }
 
@@ -221,6 +188,7 @@ M.telescope = function()
   -- telescope.load_extension("notify")
 end
 M.neotree = function()
+  local icons = require("sahinakkaya.icons")
   -- event_handlers = {
   --   {
   --     event = "neo_tree_window_before_open",
@@ -242,13 +210,13 @@ M.neotree = function()
   -- },
 
   vim.fn.sign_define("DiagnosticSignError",
-    { text = " ", texthl = "DiagnosticSignError" })
+    { text = icons.diagnostics.Error, texthl = "DiagnosticSignError" })
   vim.fn.sign_define("DiagnosticSignWarn",
-    { text = " ", texthl = "DiagnosticSignWarn" })
+    { text = icons.diagnostics.Warn, texthl = "DiagnosticSignWarn" })
   vim.fn.sign_define("DiagnosticSignInfo",
-    { text = " ", texthl = "DiagnosticSignInfo" })
+    { text = icons.diagnostics.Info, texthl = "DiagnosticSignInfo" })
   vim.fn.sign_define("DiagnosticSignHint",
-    { text = "󰌵", texthl = "DiagnosticSignHint" })
+    { text = icons.diagnostics.Hint, texthl = "DiagnosticSignHint" })
 
   local focus = function(source)
     -- local position
@@ -272,6 +240,7 @@ M.neotree = function()
       position = command._last.position,
     })
   end
+
   require("neo-tree").setup({
     commands = {
       focus_filesystem = function()
@@ -288,18 +257,20 @@ M.neotree = function()
       end,
     },
     default_component_configs = {
-      symbols = {
-        -- Change type
-        added     = "✚",
-        deleted   = "✖",
-        modified  = "",
-        renamed   = "󰁕",
-        -- Status type
-        untracked = "",
-        ignored   = "",
-        unstaged  = "󰄱",
-        staged    = "",
-        conflict  = "",
+      git_status = {
+        symbols = {
+          -- Change type
+          added     = icons.git.File.Added,
+          deleted   = icons.git.File.Deleted,
+          modified  = icons.git.File.Modified,
+          renamed   = icons.git.File.Renamed,
+          -- Status type
+          untracked = icons.git.File.Untracked,
+          ignored   = icons.git.FileIgnored,
+          unstaged  = icons.git.File.Unstaged,
+          staged    = icons.git.File.Staged,
+          conflict  = icons.git.File.Conflict,
+        }
       }
     },
     modified = {
@@ -337,6 +308,8 @@ M.neotree = function()
     source_selector = {
       winbar = true,
       statusline = false,
+      truncation_character = "…",
+      ---@diagnostic disable-next-line: assign-type-mismatch
       tabs_layout = "active",
       sources = {
         {
@@ -508,17 +481,6 @@ M.scrollbar = function()
     end, -- Use default
   })
   require("scrollbar.handlers.gitsigns").setup()
-
-  -- example: make gitsigns.nvim movement repeatable with ; and , keys.
-  local gs = require("gitsigns")
-
-  local ts_repeat_move = require "nvim-treesitter.textobjects.repeatable_move"
-  -- make sure forward function comes first
-  local next_hunk_repeat, prev_hunk_repeat = ts_repeat_move.make_repeatable_move_pair(gs.next_hunk, gs.prev_hunk)
-  -- Or, use `make_repeatable_move` or `set_last_move` functions for more control. See the code for instructions.
-
-  vim.keymap.set({ "n", "x", "o" }, "]h", next_hunk_repeat, { desc = "Next git hunk" })
-  vim.keymap.set({ "n", "x", "o" }, "[h", prev_hunk_repeat, { desc = "Prev git hunk" })
 end
 
 
@@ -560,25 +522,42 @@ end
 M.repeatable_moves = function()
   local N = {}
   -- local cp = require("copilot.panel")
-  local gs = require("gitsigns")
-  local dropbar_api = require('dropbar.api')
-  local ts_repeat_move = require "nvim-treesitter.textobjects.repeatable_move"
+  -- local gs = require("gitsigns")
+  -- local dropbar_api = require('dropbar.api')
+  -- local ts_repeat_move = require "nvim-treesitter-textobjects.repeatable_move"
   -- make sure forward function comes first
-  local next_hunk_repeat, prev_hunk_repeat = ts_repeat_move.make_repeatable_move_pair(gs.next_hunk, gs.prev_hunk)
+  --
+  -- local prev_hunk = function() gs.nav_hunk('prev') end
+  -- local next_hunk = function() gs.nav_hunk('next') end
+  -- local next_hunk_repeat, prev_hunk_repeat = ts_repeat_move.make_repeatable_move_pair(next_hunk, prev_hunk)
   -- local next_suggestion, prev_suggestion = ts_repeat_move.make_repeatable_move_pair(cp.jump_next, cp.jump_prev)
-  local next_context, prev_context = ts_repeat_move.make_repeatable_move_pair(dropbar_api.select_next_context,
-    dropbar_api.goto_context_start)
+  -- local next_context, prev_context = ts_repeat_move.make_repeatable_move_pair(dropbar_api.select_next_context,
+  -- dropbar_api.goto_context_start)
   -- Or, use `make_repeatable_move` or `set_last_move` functions for more control. See the code for instructions.
-  N.next_hunk = function()
-    next_hunk_repeat()
-  end
-  N.prev_hunk = function()
-    prev_hunk_repeat()
-  end
-  N.next_context = next_context
-  N.prev_context = prev_context
+  -- N.next_hunk = function()
+  --   next_hunk_repeat()
+  -- end
+  -- N.prev_hunk = function()
+  --   prev_hunk_repeat()
+  -- end
+
+  -- local next_diagnostic, prev_diagnostic = ts_repeat_move.make_repeatable_move_pair(
+  --   function() vim.diagnostic.jump({ count = 1, }) end,
+  --   function() vim.diagnostic.jump({ count = -1 }) end
+  -- )
+  -- N.next_diagnostic = next_diagnostic
+  -- N.prev_diagnostic = prev_diagnostic
+  -- N.next_context = next_context
+  -- N.prev_context = prev_context
   -- N.next_suggestion = next_suggestion
   -- N.prev_suggestion = prev_suggestion
+
+  -- vim.keymap.set({ "n", "x", "o" }, "]h", next_hunk_repeat, { desc = "Next git hunk" })
+  -- vim.keymap.set({ "n", "x", "o" }, "[h", prev_hunk_repeat, { desc = "Prev git hunk" })
+  --
+  -- vim.keymap.set({ "n", "x", "o" }, "]d", next_diagnostic, { desc = "Next diagnostic" })
+  -- vim.keymap.set({ "n", "x", "o" }, "[d", prev_diagnostic, { desc = "Prev diagnostic" })
+
   return N
 end
 M.which_key = function()
@@ -743,9 +722,9 @@ M.which_key = function()
 
     c = {
       name = 'Context',
-      h = { M.repeatable_moves().prev_context, "Go to context start" },
-      l = { M.repeatable_moves().next_context, "Select next context" },
-      p = { require('dropbar.api').pick, "Select next context" },
+      -- h = { M.repeatable_moves().prev_context, "Go to context start" },
+      -- l = { M.repeatable_moves().next_context, "Select next context" },
+      p = { require('dropbar.api').pick, "Context Pick" },
     },
     d = {
       name = "Debug",
@@ -789,16 +768,26 @@ M.which_key = function()
 
     g = {
       name = "Git",
-      g = { ":lua require('snacks').lazygit()<CR>", "Lazygit" },
+      -- g = { require("plugin_configs.terminal").lazygit_toggle, "Lazygit" },
       x = { ":lua require('snacks').gitbrowse()<CR>", "Open in browser" },
-      -- g = { ":Git<CR>", "Fugitive" },
-      j = { M.repeatable_moves().next_hunk, "Next Hunk" },
+      g = { ":Git<CR>", "Fugitive" },
+      j = { function()
+        vim.notify("use ]h instead, this action is repeatable with ; and ,")
+        -- if math.random() < 0.5 then
+        --   M.repeatable_moves().next_hunk()
+        -- end
+      end, "Next Hunk" },
 
       d = { function()
         require("gitsigns").diffthis('~')
       end, "Diff this" },
-      e = { require("gitsigns").toggle_deleted, "Toggle Deleted" },
-      k = { M.repeatable_moves().prev_hunk, "Prev Hunk" },
+      e = { require("gitsigns").preview_hunk_inline, "Toggle Deleted" },
+      k = { function()
+        vim.notify("use [h instead, this action is repeatable with ; and ,")
+        -- if math.random() < 0.5 then
+        --   M.repeatable_moves().prev_hunk()
+        -- end
+      end, "Prev Hunk" },
       l = { require("gitsigns").toggle_current_line_blame, "Blame line" },
       b = { function()
         require("gitsigns").blame_line({ full = true })
@@ -830,8 +819,8 @@ M.which_key = function()
       t = { activate_hydra(hydras.toggle), "Toggle" },
       -- t = { ":TSContextToggle<CR>", "Toggle TSContext" },
     },
-    H = { M.repeatable_moves().prev_context, "Prev context" },
-    L = { M.repeatable_moves().next_context, "Next context" },
+    -- H = { M.repeatable_moves().prev_context, "Prev context" },
+    -- L = { M.repeatable_moves().next_context, "Next context" },
 
     j = {
       name = "Jump",
@@ -858,8 +847,19 @@ M.which_key = function()
       h = { function() require("pretty_hover").hover() end, "Hover info" },
       H = { vim.lsp.buf.signature_help, "Signature help" },
       n = { ":LspInfo<CR>", "Info" },
-      j = { vim.diagnostic.goto_next, "Next Diagnostic" },
-      k = { vim.diagnostic.goto_prev, "Prev Diagnostic" },
+      j = { function()
+        vim.notify("use ]d instead, this action is repeatable with ; and ,")
+
+        -- if math.random() < 0.5 then
+        --   M.repeatable_moves().next_diagnostic()
+        -- end
+      end, "Next Diagnostic" },
+      k = { function()
+        vim.notify("use [d instead, this action is repeatable with ; and ,")
+        -- if math.random() < 0.5 then
+        --   M.repeatable_moves().prev_diagnostic()
+        -- end
+      end, "Prev Diagnostic" },
       -- vim.lsp.buf.references, "Go to references"},
       l = {
         name = "Workspace",
@@ -1038,6 +1038,13 @@ M.noice = function()
       },
     },
     notify = { enabled = true },
+
+    -- routes = {
+    --   {
+    --     view = "notify",
+    --     filter = { event = "msg_showmode" },
+    --   },
+    -- },
     -- you can enable a preset for easier configuration
     presets = {
       bottom_search = false,        -- use a classic bottom cmdline for search
@@ -1364,6 +1371,8 @@ M.notify = function()
   local notify = require("notify")
   notify.setup({
     render = "minimal",
+    merge_duplicates = 2,
+
 
     timeout = 2000,
 
@@ -1372,8 +1381,12 @@ M.notify = function()
   })
 
 
+  ---@diagnostic disable-next-line: duplicate-set-field
   vim.notify = function(msg, ...)
     if msg:match("warning: multiple different client offset_encodings") then
+      return
+    end
+    if msg:match("csvview: already enabled for this buffer") then
       return
     end
 
@@ -1386,307 +1399,190 @@ M.text_case = function()
 end
 
 M.treesitter = function()
-  local selection_modes = function(table)
-    local modes = {
-      -- ['@class.outer'] = '<c-v>', -- blockwise
-      ['@parameter.outer'] = 'v',   -- charwise
-      ['@class.outer'] = 'V',       -- linewise
-      ['@conditional.outer'] = 'V', -- linewise
-      ['@class.inner'] = 'V',
-      ['@function.outer'] = vim.o.filetype == 'lua' and 'v' or 'V',
-      ['@function.inner'] = vim.o.filetype == 'lua' and 'v' or 'V',
-      ['@loop.outer'] = 'V',
-      ['@loop.inner'] = 'V',
-    }
-    return modes[table['query_string']]
-  end
+  local ts = require("nvim-treesitter")
 
-  require 'nvim-treesitter.configs'.setup {
-    -- ensure_installed = { "c", "lua", "vim", "vimdoc", "query" },
-    auto_install = true,
-    matchup = {
-      enable = true, -- mandatory, false will disable the whole extension
-      -- disable = { "c", "ruby" }, -- optional, list of language that will be disabled
-      -- [options]
-    },
-    highlight = {
-      enable = true,
-      -- NOTE: these are the names of the parsers and not the filetype. (for example if you want to
-      -- disable highlighting for the `tex` filetype, you need to include `latex` in this list as this is
-      -- the name of the parser)
-      -- list of language that will be disabled
-      -- disable = { "c", "rust" },
-      -- Or use a function for more flexibility, e.g. to disable slow treesitter highlight for large files
-      disable = function(lang, buf)
-        local max_filesize = 100 * 1024 -- 100 KB
-        local ok, stats = pcall(vim.loop.fs_stat, vim.api.nvim_buf_get_name(buf))
-        if ok and stats and stats.size > max_filesize then
-          return true
-        end
-      end,
+  -- nvim-treesitter/main is now primarily parser/query management.
+  ts.setup()
 
-      -- Setting this to true will run `:h syntax` and tree-sitter at the same time.
-      -- Set this to `true` if you depend on 'syntax' being enabled (like for indentation).
-      -- Using this option may slow down your editor, and you may see some duplicate highlights.
-      -- Instead of true it can also be a list of languages
-      additional_vim_regex_highlighting = false,
-    },
-    indent = {
-      enable = true
-
-    },
-
-    textobjects = {
-      lsp_interop = {
-        enable = true,
-        border = 'none',
-        floating_preview_opts = {},
-        peek_definition_code = {
-          ["gk"] = "@function.outer",
-          ["gK"] = "@class.outer",
-        },
-      },
-      select = {
-        enable = true,
-
-        -- Automatically jump forward to textobj, similar to targets.vim
-        lookahead = true,
-
-        keymaps = {
-          ["A"] = "@assignment.outer",
-          -- ["iv"] = "@assignment.inner",
-          -- ["ha"] = "@assignment.lhs",
-          -- ["la"] = "@assignment.rhs",
-          ["id"] = "@conditional.inner",
-          ["ad"] = "@conditional.outer",
-          ["af"] = "@function.outer",
-          ["if"] = "@function.inner",
-          ["a]"] = "@class.outer",
-          ["i]"] = "@class.inner",
-          ["il"] = "@loop.inner",
-          ["al"] = "@loop.outer",
-          ["ia"] = "@parameter.inner",
-          ["aa"] = "@parameter.outer",
-          ["ar"] = "@return.outer",
-          ["ir"] = "@return.inner",
-          ["ac"] = { query = "@call.outer", desc = "Outer part of function call" },
-          ["ic"] = { query = "@call.inner", desc = "Inner part of function call" },
-          -- You can optionally set descriptions to the mappings (used in the desc parameter of
-          -- nvim_buf_set_keymap) which plugins like which-key display
-          -- You can also use captures from other query groups like `locals.scm`
-          -- ["as"] = { query = "@scope", query_group = "locals", desc = "Select language scope" },
-        },
-        -- You can choose the select mode (default is charwise 'v')
-        -- Can also be a function which gets passed a table with the keys
-        -- * query_string: eg '@function.inner'
-        -- * method: eg 'v' or 'o'
-        -- and should return the mode ('v', 'V', or '<c-v>') or a table
-        -- mapping query_strings to modes.
-        -- TODO: change this to a functions which returns most sensible things based on filetype
-        selection_modes = selection_modes
-      },
-      swap = {
-        enable = true,
-        swap_previous = {
-          ["<leader>,"] = { query = "@parameter.inner", desc = "swap with previous parameter" },
-        },
-        swap_next = {
-          ["<leader>."] = { query = "@parameter.inner", desc = "swap with next parameter" },
-        },
-      },
-
-      move = {
-        enable = true,
-        set_jumps = true,
-        goto_next_start = {
-          ["]v"] = { query = "@assignment.outer", desc = "Next assignment" },
-          ["]f"] = { query = "@function.outer", desc = "Next function" },
-          ["]]"] = { query = "@class.outer", desc = "Next class" },
-          ["]l"] = { query = "@loop.outer", desc = "Next loop" },
-          -- ["]s"] = { query = "@scope", query_group = "locals", desc = "Next scope" },
-          ["]c"] = { query = "@call.outer", desc = "Next call" },
-          ["]C"] = { query = "@call.inner", desc = "Next call" },
-          ["]a"] = { query = "@parameter.inner", desc = "Next parameter" },
-          ["]r"] = "@return.inner",
-        },
-        goto_next_end = {
-          ["]ev"] = { query = "@assignment.outer", desc = "Next assignment" },
-          ["]ef"] = "@function.outer",
-          ["]e]"] = "@class.outer",
-          ["]el"] = { query = "@loop.outer", desc = "Next loop" },
-          -- ["]es"] = { query = "@scope", query_group = "locals", desc = "Next scope" },
-          ["]ec"] = { query = "@call.outer", desc = "Next call" },
-          ["]eC"] = { query = "@call.inner", desc = "Next call" },
-          ["]ea"] = { query = "@parameter.inner", desc = "Next parameter" },
-          ["]er"] = "@return.inner",
-        },
-        goto_previous_start = {
-          ["[v"] = { query = "@assignment.outer", desc = "Previous assignment" },
-          ["[f"] = { query = "@function.outer", desc = "Previous function" },
-          ["[]"] = { query = "@class.outer", desc = "Previous class" },
-          ["[l"] = { query = "@loop.outer", desc = "Previous loop" },
-          -- ["[s"] = { query = "@scope", query_group = "locals", desc = "Previous scope" },
-          ["[c"] = { query = "@call.outer", desc = "Previous call" },
-          ["[C"] = { query = "@call.inner", desc = "Previous call" },
-          ["[a"] = { query = "@parameter.inner", desc = "Previous parameter" },
-          ["[r"] = "@return.inner",
-        },
-        goto_previous_end = {
-          ["[ev"] = { query = "@assignment.outer", desc = "Previous assignment" },
-          ["[ef"] = { query = "@function.outer", desc = "Previous function" },
-          ["[e]"] = { query = "@class.outer", desc = "Previous class" },
-          ["[el"] = { query = "@loop.outer", desc = "Previous loop" },
-          -- ["[es"] = { query = "@scope", query_group = "locals", desc = "Previous scope" },
-          ["[ec"] = { query = "@call.outer", desc = "Previous call" },
-          ["[eC"] = { query = "@call.inner", desc = "Previous call" },
-          ["[ea"] = { query = "@parameter.inner", desc = "Previous parameter" },
-          ["[er"] = "@return.inner",
-        },
-        -- Below will go to either the start or the end, whichever is closer.
-        -- Use if you want more granular movements
-        -- Make it even more gradual by adding multiple queries and regex.
-        goto_next = {
-          ["]d"] = "@conditional.outer",
-        },
-        goto_previous = {
-          ["[d"] = "@conditional.outer",
-          ["[r"] = "@return.outer",
-        }
-      },
-    },
-    incremental_selection = {
-      enable = true,
-      keymaps = {
-        init_selection = '<CR>',
-        scope_incremental = '<CR>',
-        node_incremental = '<TAB>',
-        node_decremental = '<BS>',
-      },
-    },
+  -- Install parsers you actually want.
+  -- "ensure_installed = all" no longer exists in the old form.
+  local parsers = {
+    "lua",
+    "python",
+    "javascript",
+    "typescript",
+    "tsx",
+    "json",
+    "bash",
+    "html",
+    "css",
+    "vim",
+    "vimdoc",
+    "query",
+    -- etc.
   }
 
-  local ts_repeat_move = require "nvim-treesitter.textobjects.repeatable_move"
+  ts.install(parsers)
 
-  vim.keymap.set({ "n", "x", "o" }, ";", ts_repeat_move.repeat_last_move)
-  vim.keymap.set({ "n", "x", "o" }, ",", ts_repeat_move.repeat_last_move_opposite)
-  vim.keymap.set({ "n", "x", "o" }, "f", ts_repeat_move.builtin_f_expr, { expr = true })
-  vim.keymap.set({ "n", "x", "o" }, "F", ts_repeat_move.builtin_F_expr, { expr = true })
-  vim.keymap.set({ "n", "x", "o" }, "t", ts_repeat_move.builtin_t_expr, { expr = true })
-  vim.keymap.set({ "n", "x", "o" }, "T", ts_repeat_move.builtin_T_expr, { expr = true })
+  -- Highlighting + indentation are enabled through Neovim APIs now.
+  vim.api.nvim_create_autocmd("FileType", {
+    callback = function(args)
+      local ok = pcall(vim.treesitter.start, args.buf)
 
-  -- default config
-  require("various-textobjs").setup {
-    forwardLooking = {
-      -- lines to seek forwards for "small" textobjs (mostly characterwise textobjs)
-      -- set to 0 to only look in the current line
-      small = 5,
-      -- lines to seek forwards for "big" textobjs (mostly linewise textobjs)
-      big = 15
-    },
-
-    keymaps = {
-      -- use suggested keymaps (see overview table in README)
-      useDefaults = true,
-      -- disable only some default keymaps, e.g. { "ai", "ii" }
-      disabledDefaults = { "\\", "iq", "aq", "in", "an" },
-    },
-
-  }
-
-
-  vim.keymap.set({ "o" }, "ov", "<cmd>lua require('various-textobjs').value('outer')<CR>")
-
-  vim.keymap.set({ "o" }, "ok", "<cmd>lua require('various-textobjs').key('outer')<CR>")
-
-  vim.keymap.set("n", "dsi", function()
-    -- select outer indentation
-    require("various-textobjs").indentation("outer", vim.o.filetype == 'python' and 'inner' or "outer")
-
-    -- plugin only switches to visual mode when a textobj has been found
-    local indentationFound = vim.fn.mode():find("V")
-    if not indentationFound then return end
-
-    -- dedent indentation
-    vim.cmd.normal { "<", bang = true }
-
-    -- delete surrounding lines
-    local endBorderLn = vim.api.nvim_buf_get_mark(0, ">")[1]
-    local startBorderLn = vim.api.nvim_buf_get_mark(0, "<")[1]
-    if vim.o.filetype ~= "python" then
-      vim.cmd(tostring(endBorderLn) .. " delete") -- delete end first so line index is not shifted
-    end
-    vim.cmd(tostring(startBorderLn) .. " delete")
-  end, { desc = "Delete Surrounding Indentation" })
-
-  vim.keymap.set("n", "ysii", function()
-    local startPos = vim.api.nvim_win_get_cursor(0)
-
-    -- identify start- and end-border
-    require("various-textobjs").indentation("outer", vim.o.filetype == 'python' and "inner" or 'outer')
-    local indentationFound = vim.fn.mode():find("V")
-    if not indentationFound then return end
-    vim.cmd.normal { "V", bang = true } -- leave visual mode so the `'<` `'>` marks are set
-
-    -- copy them into the + register
-    local startLn = vim.api.nvim_buf_get_mark(0, "<")[1] - 1
-    local endLn = vim.api.nvim_buf_get_mark(0, ">")[1] - 1
-    local startLine = vim.api.nvim_buf_get_lines(0, startLn, startLn + 1, false)[1]
-    local endLine = vim.api.nvim_buf_get_lines(0, endLn, endLn + 1, false)[1]
-    if vim.o.filetype == 'python' then
-      vim.fn.setreg("+", startLine .. "\n")
-    else
-      vim.fn.setreg("+", startLine .. "\n" .. endLine .. "\n")
-    end
-
-
-    -- highlight yanked text: doesn't work for some reason
-    local ns = vim.api.nvim_create_namespace("ysi")
-    vim.highlight.range(0, ns, "IncSearch", { startLn, 0 }, { startLn, -1 })
-    vim.highlight.range(0, ns, "IncSearch", { endLn, 0 }, { endLn, -1 })
-    vim.defer_fn(function() vim.api.nvim_buf_clear_namespace(0, ns, 0, -1) end, 2000)
-
-    -- restore cursor position
-    vim.api.nvim_win_set_cursor(0, startPos)
-  end, { desc = "Yank surrounding indentation" })
-
-  local function openRepo()
-    require("various-textobjs").anyQuote('inner')
-    local repo = vim.fn.mode():find("v")
-    if repo then
-      vim.cmd.normal('"zy')
-      local url = "https://github.com/" .. vim.fn.getreg("z")
-      vim.ui.open(url)
-      return true
-    end
-    return false
-  end
-
-  vim.keymap.set("n", "gX", openRepo, { desc = "Open Repository" })
-  vim.keymap.set("n", "gx", function()
-    require("various-textobjs").url()
-    local foundURL = vim.fn.mode():find("v")
-
-    if foundURL then
-      vim.cmd.normal('"zy')
-      local url = vim.fn.getreg("z")
-      vim.ui.open(url)
-    elseif not openRepo() then
-      -- find all URLs in buffer
-      local urlPattern = require("various-textobjs.charwise-textobjs").urlPattern
-      local bufText = table.concat(vim.api.nvim_buf_get_lines(0, 0, -1, false), "\n")
-      local urls = {}
-      for url in bufText:gmatch(urlPattern) do
-        table.insert(urls, url)
+      if ok then
+        vim.bo[args.buf].indentexpr =
+        "v:lua.require'nvim-treesitter'.indentexpr()"
       end
-      if #urls == 0 then return end
+    end,
+  })
 
-      -- select one, use a plugin like dressing.nvim for nicer UI for
-      -- `vim.ui.select`
-      vim.ui.select(urls, { prompt = "Select URL:" }, function(choice)
-        if choice then vim.ui.open(choice) end
-      end)
-    end
-  end, { desc = "URL Opener" })
+  require("nvim-treesitter-textobjects").setup({
+    select = {
+      lookahead = true,
+
+      selection_modes = function(opts)
+        local modes = {
+          ["@parameter.outer"] = "v",
+          ["@class.outer"] = "V",
+          ["@conditional.outer"] = "V",
+          ["@class.inner"] = "V",
+          ["@function.outer"] = vim.bo.filetype == "lua" and "v" or "V",
+          ["@function.inner"] = vim.bo.filetype == "lua" and "v" or "V",
+          ["@loop.outer"] = "V",
+          ["@loop.inner"] = "V",
+        }
+
+        return modes[opts.query_string]
+      end,
+    },
+
+    move = {
+      set_jumps = true,
+    },
+  })
+
+  local select = require("nvim-treesitter-textobjects.select")
+
+  local function textobject(lhs, query)
+    vim.keymap.set({ "x", "o" }, lhs, function()
+      select.select_textobject(query, "textobjects")
+    end)
+  end
+
+  textobject("A", "@assignment.outer")
+  textobject("id", "@conditional.inner")
+  textobject("ad", "@conditional.outer")
+  textobject("af", "@function.outer")
+  textobject("if", "@function.inner")
+  textobject("a]", "@class.outer")
+  textobject("i]", "@class.inner")
+  textobject("il", "@loop.inner")
+  textobject("al", "@loop.outer")
+  textobject("ia", "@parameter.inner")
+  textobject("aa", "@parameter.outer")
+  textobject("ar", "@return.outer")
+  textobject("ir", "@return.inner")
+  textobject("ac", "@call.outer")
+  textobject("ic", "@call.inner")
+
+  local swap = require("nvim-treesitter-textobjects.swap")
+
+  vim.keymap.set("n", "<leader>,", function()
+    swap.swap_previous("@parameter.inner")
+  end)
+
+  vim.keymap.set("n", "<leader>.", function()
+    swap.swap_next("@parameter.inner")
+  end)
+
+  local move = require("nvim-treesitter-textobjects.move")
+
+  local function movement(lhs, fn, query)
+    vim.keymap.set({ "n", "x", "o" }, lhs, function()
+      fn(query, "textobjects")
+    end)
+  end
+
+  movement("]v", move.goto_next_start, "@assignment.outer")
+  movement("]f", move.goto_next_start, "@function.outer")
+  movement("]]", move.goto_next_start, "@class.outer")
+  movement("]l", move.goto_next_start, "@loop.outer")
+  movement("]c", move.goto_next_start, "@call.outer")
+  movement("]C", move.goto_next_start, "@call.inner")
+  movement("]a", move.goto_next_start, "@parameter.inner")
+  movement("]r", move.goto_next_start, "@return.inner")
+
+  movement("]ev", move.goto_next_end, "@assignment.outer")
+  movement("]ef", move.goto_next_end, "@function.outer")
+  movement("]e]", move.goto_next_end, "@class.outer")
+  movement("]el", move.goto_next_end, "@loop.outer")
+  movement("]ec", move.goto_next_end, "@call.outer")
+  movement("]eC", move.goto_next_end, "@call.inner")
+  movement("]ea", move.goto_next_end, "@parameter.inner")
+  movement("]er", move.goto_next_end, "@return.inner")
+
+  movement("[v", move.goto_previous_start, "@assignment.outer")
+  movement("[f", move.goto_previous_start, "@function.outer")
+  movement("[]", move.goto_previous_start, "@class.outer")
+  movement("[l", move.goto_previous_start, "@loop.outer")
+  movement("[c", move.goto_previous_start, "@call.outer")
+  movement("[C", move.goto_previous_start, "@call.inner")
+  movement("[a", move.goto_previous_start, "@parameter.inner")
+  movement("[r", move.goto_previous_start, "@return.inner")
+
+  movement("[ev", move.goto_previous_end, "@assignment.outer")
+  movement("[ef", move.goto_previous_end, "@function.outer")
+  movement("[e]", move.goto_previous_end, "@class.outer")
+  movement("[el", move.goto_previous_end, "@loop.outer")
+  movement("[ec", move.goto_previous_end, "@call.outer")
+  movement("[eC", move.goto_previous_end, "@call.inner")
+  movement("[ea", move.goto_previous_end, "@parameter.inner")
+  movement("[er", move.goto_previous_end, "@return.inner")
+
+  local repeat_move =
+      require("nvim-treesitter-textobjects.repeatable_move")
+
+  vim.keymap.set(
+    { "n", "x", "o" },
+    ";",
+    repeat_move.repeat_last_move
+  )
+
+  vim.keymap.set(
+    { "n", "x", "o" },
+    ",",
+    repeat_move.repeat_last_move_opposite
+  )
+
+  vim.keymap.set(
+    { "n", "x", "o" },
+    "f",
+    repeat_move.builtin_f_expr,
+    { expr = true }
+  )
+
+  vim.keymap.set(
+    { "n", "x", "o" },
+    "F",
+    repeat_move.builtin_F_expr,
+    { expr = true }
+  )
+
+  vim.keymap.set(
+    { "n", "x", "o" },
+    "t",
+    repeat_move.builtin_t_expr,
+    { expr = true }
+  )
+
+  vim.keymap.set(
+    { "n", "x", "o" },
+    "T",
+    repeat_move.builtin_T_expr,
+    { expr = true }
+  )
+
+  -- Keep the rest of your various-textobjs configuration here.
 end
 
 M.harpoon = function()
@@ -1705,8 +1601,8 @@ M.copilot = function()
   local cp = require("copilot")
   local cs = require("copilot.suggestion")
   vim.api.nvim_set_hl(0, "CopilotSuggestion", { fg = "#83a598" })
-  vim.keymap.set("n", "gps", M.repeatable_moves().prev_suggestion)
-  vim.keymap.set("n", "gns", M.repeatable_moves().next_suggestion)
+  -- vim.keymap.set("n", "gps", M.repeatable_moves().prev_suggestion)
+  -- vim.keymap.set("n", "gns", M.repeatable_moves().next_suggestion)
   vim.keymap.set("i", "<C-f>", function()
     if cs.is_visible() then
       cs.accept_word()
@@ -2001,28 +1897,119 @@ M.lsp_config = function()
 
 
 
-  -- It's important that you set up neoconf.nvim BEFORE nvim-lspconfig.
-
-  require("neoconf").setup({
-    -- override any of the default settings here
-  })
+  -- Figure out why we are calling setup twice
   require("mason-lspconfig").setup({
     -- ensure_installed = { "tsserver", "lua_ls", "pyright", "yamlls", "bashls" },
   })
 
-  require('lspconfig').ruff.setup {
-    on_attach = on_attach,
-    init_options = {
-      settings = {
-        -- Any extra CLI arguments for `ruff` go here.
-        args = {},
-        lint = {
-          -- Disable all linters in favor of Pyright
-          enable = false,
-        },
+  require("mason-lspconfig").setup({
+    function(server_name)
+      vim.lsp.config[server_name].setup({
+        capabilities = capabilities,
+        on_attach = on_attach,
+        -- root_dir = vim.lsp.configtil").root_pattern(".git"),
+      })
+    end,
+
+    ruff = function()
+      vim.lsp.config.ruff.setup {
+        on_attach = on_attach,
+        init_options = {
+          settings = {
+            -- Any extra CLI arguments for `ruff` go here.
+            args = {},
+            lint = {
+              -- Disable all linters in favor of Pyright
+              enable = true,
+            },
+          }
+        }
       }
-    }
+    end,
+    clangd = function()
+      vim.lsp.config.clangd.setup({
+        capabilities = capabilities,
+        on_attach = on_attach,
+        -- root_dir = vim.lsp.configtil").root_pattern(".git"),
+        filetypes = { "c", "cpp", "h", "hpp" },
+        offsetEncoding = { "utf-8" },
+        client_encoding = "utf-8",
+      })
+    end,
+    pyright = function()
+      vim.lsp.config.pyright.setup({
+        capabilities = capabilities,
+        on_attach = on_attach,
+        settings = {
+          pyright = {
+            -- Using Ruff's import organizer
+            disableOrganizeImports = true,
+          },
+          python = {
+            analysis = {
+              -- Ignore all files for analysis to exclusively use Ruff for linting
+              -- ignore = { '*' },
+            },
+          },
+        },
+      })
+    end,
+    lua_ls = function()
+      vim.lsp.config.lua_ls.setup({
+        capabilities = capabilities,
+        on_attach = on_attach,
+        settings = {
+          Lua = {
+            hint = {
+              enable = false,
+            },
+          },
+        },
+      })
+    end,
+    bashls = function()
+      vim.lsp.config.bashls.setup({
+        capabilities = util.mkcaps(false),
+        attach = on_attach,
+        filetypes = { "zsh", "sh", "bash" },
+        -- root_dir = vim.lsp.configtil").root_pattern(".git", ".zshrc"),
+      })
+    end,
+    tsserver = function()
+      -- don't need this as we are using typescript-tools now.
+      -- but we are still using tsserver bin from mason so don't delete it.
+      --   vim.lsp.config.tsserver.setup({
+      --     capabilities = mkcaps(true),
+      --     attach = on_attach,
+      --     settings = {
+      --       javascript = {
+      --         inlayHints = {
+      --           includeInlayEnumMemberValueHints = true,
+      --           includeInlayFunctionLikeReturnTypeHints = true,
+      --           includeInlayFunctionParameterTypeHints = true,
+      --           includeInlayParameterNameHints = "all",   -- 'none' | 'literals' | 'all';
+      --           includeInlayParameterNameHintsWhenArgumentMatchesName = true,
+      --           includeInlayPropertyDeclarationTypeHints = true,
+      --           includeInlayVariableTypeHints = true,
+      --         },
+      --       },
+      --       typescript = {
+      --         inlayHints = {
+      --           includeInlayEnumMemberValueHints = true,
+      --           includeInlayFunctionLikeReturnTypeHints = true,
+      --           includeInlayFunctionParameterTypeHints = true,
+      --           includeInlayParameterNameHints = "all",   -- 'none' | 'literals' | 'all';
+      --           includeInlayParameterNameHintsWhenArgumentMatchesName = true,
+      --           includeInlayPropertyDeclarationTypeHints = true,
+      --           includeInlayVariableTypeHints = true,
+      --         },
+      --       },
+      --     }
+      --   })
+    end
   }
+  )
+
   -- required to trigger lspattach
   vim.api.nvim_exec_autocmds("FileType", {})
 end
@@ -2082,7 +2069,7 @@ M.typescript_tools = function()
         -- allowRenameOfImportPath = false,
       },
       tsserver_file_preferences = {
-        includeInlayParameterNameHints = "all",
+        -- includeInlayParameterNameHints = "all",
         includeCompletionsForModuleExports = true,
         quotePreference = "auto",
 
@@ -2110,5 +2097,7 @@ M.typescript_tools = function()
     },
   }
 end
+
+
 
 return M

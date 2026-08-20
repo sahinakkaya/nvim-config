@@ -1,11 +1,11 @@
-local Icons = {}
+local M             = {}
 
-local icons = { -- keeping these just in case. stolen from trouble
+local icons         = { -- keeping these just in case. stolen from trouble
   folder_closed = " ",
   folder_open   = " ",
 }
 
-Icons.kinds         = {
+M.kinds             = {
   Array             = '󰅪 ',
   Boolean           = "󰨙 ",
   -- Boolean       = " ",
@@ -122,7 +122,7 @@ Icons.kinds         = {
   WhileStatement    = '󰑖 ',
 }
 
-Icons.sources = {
+M.sources           = {
   path = "",
   buffer = "",
   luasnip = "󱐌",
@@ -132,11 +132,22 @@ Icons.sources = {
   cmdline = ""
 }
 
-Icons.diagnostics = {
-  errors = "󰞏", --
-  warnings = "", -- "",--
-  hints = "󱐌", --"󰮔", -- 󱐌
-  info = "",
+M.diagnostics       = {
+  -- errors = "", --
+  -- warnings = "", -- "",--
+  -- hints = "󱐌", --"󰮔", -- 󱐌
+  -- info = "",
+
+  -- errors = '󰅚 ', -- x000f015a
+  -- warnings = '󰀪 ', -- x000f002a
+  -- info = '󰋽 ', -- x000f02fd
+  -- hints = '󰌶 ', -- x000f0336
+
+
+  errors = " ",
+  warnings = " ",
+  info = " ",
+  hints = "󰌵",
 
   BoldError = "",
   Error = "",
@@ -151,16 +162,16 @@ Icons.diagnostics = {
   Debug = "",
   Trace = "✎",
 }
-Icons.diagnostics.Error = Icons.diagnostics.errors
-Icons.diagnostics.Warn = Icons.diagnostics.warnings
-Icons.diagnostics.Hint = Icons.diagnostics.hints
-Icons.diagnostics.Info = Icons.diagnostics.info
+M.diagnostics.Error = M.diagnostics.errors
+M.diagnostics.Warn  = M.diagnostics.warnings
+M.diagnostics.Hint  = M.diagnostics.hints
+M.diagnostics.Info  = M.diagnostics.info
 
-Icons.lsp = {
+M.lsp               = {
   action_hint = "",
 }
 
-Icons.git = {
+M.git               = {
   diff = {
     added = "",
     modified = "󰆗",
@@ -178,6 +189,19 @@ Icons.git = {
   LineAdded = "",
   LineModified = "",
   LineRemoved = "",
+  File = {
+    Added     = "✚",
+    Deleted   = "✖",
+    Modified  = "",
+    Renamed   = "󰁕",
+    -- Status type
+    -- Untracked = "",
+    Untracked = "?",
+    Ignored   = "",
+    Unstaged  = "󰄱",
+    Staged    = "",
+    Conflict  = "",
+  },
   FileDeleted = "",
   FileIgnored = "◌",
   FileRenamed = "➜",
@@ -191,7 +215,7 @@ Icons.git = {
   Branch = "",
 }
 
-Icons.dap = {
+M.dap               = {
   breakpoint = {
     conditional = "",
     data = "",
@@ -221,7 +245,7 @@ Icons.dap = {
   console = "",
 }
 
-Icons.actions = {
+M.actions           = {
   close_hexagon = "󰅜",
   close_round = "󰅙",
   close_outline = "󰅚",
@@ -229,7 +253,7 @@ Icons.actions = {
   close_box = "󰅗",
 }
 
-Icons.menu = {
+M.menu              = {
   actions = {
     outline = {
       left = "󰨂",
@@ -252,14 +276,14 @@ Icons.menu = {
   hamburger_open = "󰮫",
 }
 
-Icons.fold = {
+M.fold              = {
   open        = "",
   closed      = "",
   fold_closed = " ",
   fold_open   = " ",
 }
 
-Icons.separators = {
+M.separators        = {
   angle_quote = {
     left = "«",
     right = "»",
@@ -287,7 +311,7 @@ Icons.separators = {
   },
 }
 
-Icons.blocks = {
+M.blocks            = {
   left = {
     "▏",
     "▎",
@@ -305,7 +329,7 @@ Icons.blocks = {
   },
 }
 
-Icons.misc = {
+M.misc              = {
   datetime = "󱛡 ",
   modified = "●",
   fold = "⮓",
@@ -322,4 +346,4 @@ Icons.misc = {
   hook_disabled = "󰛣",
 }
 
-return Icons
+return M
