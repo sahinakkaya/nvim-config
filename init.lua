@@ -924,17 +924,6 @@ require("lazy").setup({
       --   config = setup_plugins.copilot,
       -- },
       {
-        "CopilotC-Nvim/CopilotChat.nvim",
-        dependencies = {
-          { "nvim-lua/plenary.nvim", branch = "master" },
-        },
-        cmd = "CopilotChat",
-        build = "make tiktoken",
-        opts = {
-          -- See Configuration section for options
-        },
-      },
-      {
         'kristijanhusak/vim-dadbod-ui',
         dependencies = {
           { 'tpope/vim-dadbod',                     lazy = true },
@@ -1159,9 +1148,7 @@ require("lazy").setup({
       },
       {
         "folke/which-key.nvim",
-        commit = "af4ded85542d40e190014c732fa051bdbf88be3d",
-        keys = keys.which_key,
-        lazy = true, -- uncomment this line if you are facing a problem with frecency plugin. it inserts an A character if database is not up to date
+        event = "VeryLazy",
         init = function()
           vim.o.timeout = true
           vim.o.timeoutlen = 100
@@ -1494,43 +1481,43 @@ require("lazy").setup({
           { "<C-l>", function() require("kitty-navigator").navigateRight() end, desc = "Move right a Split", mode = { "n" } }
         },
       },
-      -- {
-      --   'mikesmithgh/kitty-scrollback.nvim',
-      --   cmd = { 'KittyScrollbackGenerateKittens', 'KittyScrollbackCheckHealth' },
-      --   event = { 'User KittyScrollbackLaunch' },
-      --   -- version = '*', -- latest stable version, may have breaking changes if major version changed
-      --   -- version = '^4.0.0', -- pin major version, include fixes and features that do not have breaking changes
-      --   config = function()
-      --     require('kitty-scrollback').setup({
-      --       {
-      --         paste_window = { yank_register = 'a' },
-      --       },
-      --
-      --       callbacks = function()
-      --         vim.keymap.set('n', '<C-a>', 'ggVG', {})
-      --         vim.keymap.set({ 'n' }, 'q', '<Plug>(KsbCloseOrQuitAll)', {})
-      --         vim.keymap.set({ 'n', 't', 'i' }, 'ZZ', '<Plug>(KsbQuitAll)', {})
-      --
-      --         vim.keymap.set({ 'n' }, '<tab>', '<Plug>(KsbToggleFooter)', {})
-      --         -- vim.keymap.set({ 'n', 'i' }, '<cr>', '<Plug>(KsbExecuteCmd)', {})
-      --         -- vim.keymap.set({ 'n', 'i' }, '<c-v>', '<Plug>(KsbPasteCmd)', {})
-      --
-      --
-      --         vim.keymap.set({ 'v' }, 'Y', '<Plug>(KsbVisualYankLine)', {})
-      --         vim.keymap.set({ 'v' }, 'y', '<Plug>(KsbVisualYank)', {})
-      --         vim.keymap.set({ 'n' }, 'Y', '<Plug>(KsbNormalYankEnd)', {})
-      --         vim.keymap.set({ 'n' }, 'y', '<Plug>(KsbNormalYank)', {})
-      --         vim.keymap.set({ 'n' }, 'yy', '<Plug>(KsbYankLine)', {})
-      --
-      --         vim.keymap.set({ 'v' }, '<leader>Y', '"aY', {})
-      --         vim.keymap.set({ 'v' }, '<leader>y', '"ay', {})
-      --         vim.keymap.set({ 'n' }, '<leader>Y', '"ay$', {})
-      --         vim.keymap.set({ 'n' }, '<leader>y', '"ay', {})
-      --         vim.keymap.set({ 'n' }, '<leader>yy', '"ayy', {})
-      --       end,
-      --     })
-      --   end,
-      -- },
+      {
+        'mikesmithgh/kitty-scrollback.nvim',
+        cmd = { 'KittyScrollbackGenerateKittens', 'KittyScrollbackCheckHealth' },
+        event = { 'User KittyScrollbackLaunch' },
+        -- version = '*', -- latest stable version, may have breaking changes if major version changed
+        -- version = '^4.0.0', -- pin major version, include fixes and features that do not have breaking changes
+        config = function()
+          require('kitty-scrollback').setup({
+            {
+              paste_window = { yank_register = 'a' },
+            },
+
+            callbacks = function()
+              vim.keymap.set('n', '<C-a>', 'ggVG', {})
+              vim.keymap.set({ 'n' }, 'q', '<Plug>(KsbCloseOrQuitAll)', {})
+              vim.keymap.set({ 'n', 't', 'i' }, 'ZZ', '<Plug>(KsbQuitAll)', {})
+
+              vim.keymap.set({ 'n' }, '<tab>', '<Plug>(KsbToggleFooter)', {})
+              -- vim.keymap.set({ 'n', 'i' }, '<cr>', '<Plug>(KsbExecuteCmd)', {})
+              -- vim.keymap.set({ 'n', 'i' }, '<c-v>', '<Plug>(KsbPasteCmd)', {})
+
+
+              vim.keymap.set({ 'v' }, 'Y', '<Plug>(KsbVisualYankLine)', {})
+              vim.keymap.set({ 'v' }, 'y', '<Plug>(KsbVisualYank)', {})
+              vim.keymap.set({ 'n' }, 'Y', '<Plug>(KsbNormalYankEnd)', {})
+              vim.keymap.set({ 'n' }, 'y', '<Plug>(KsbNormalYank)', {})
+              vim.keymap.set({ 'n' }, 'yy', '<Plug>(KsbYankLine)', {})
+
+              vim.keymap.set({ 'v' }, '<leader>Y', '"aY', {})
+              vim.keymap.set({ 'v' }, '<leader>y', '"ay', {})
+              vim.keymap.set({ 'n' }, '<leader>Y', '"ay$', {})
+              vim.keymap.set({ 'n' }, '<leader>y', '"ay', {})
+              vim.keymap.set({ 'n' }, '<leader>yy', '"ayy', {})
+            end,
+          })
+        end,
+      },
 
       { "mbbill/undotree",     cmd = { "UndotreeToggle", "UndotreeShow" } },
       {

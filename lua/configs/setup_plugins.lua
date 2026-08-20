@@ -484,41 +484,6 @@ M.scrollbar = function()
 end
 
 
-M.spectre = function ()
-require('spectre').setup({
-  find_engine = {
-    -- rg is map with finder_cmd
-    ['rg'] = {
-      cmd = "rg",
-      -- default args
-      args = {
-        '--color=never',
-        '--no-heading',
-        '--with-filename',
-        '--line-number',
-        '--column',
-        '--pcre2'
-      },
-      options = {
-        ['ignore-case'] = {
-          value= "--ignore-case",
-          icon="[I]",
-          desc="ignore case"
-        },
-        ['hidden'] = {
-          value="--hidden",
-          desc="hidden file",
-          icon="[H]"
-        },
-        -- you can put any rg search option you want here it can toggle with
-        -- show_option function
-      }
-    }
-  }
-  })
-end
-
-
 M.repeatable_moves = function()
   local N = {}
   -- local cp = require("copilot.panel")
@@ -561,7 +526,7 @@ M.repeatable_moves = function()
   return N
 end
 M.which_key = function()
-  local whichkey = require("which-key")
+  local wk = require("which-key")
 
   local _, _ = pcall(require, "telescope")
 
@@ -588,7 +553,7 @@ M.which_key = function()
   end
 
 
-  whichkey.setup({
+  wk.setup({
     plugins = {
       marks = true,     -- shows a list of your marks on ' and `
       registers = true, -- shows your registers on " in NORMAL or <C-r> in INSERT mode
@@ -614,411 +579,376 @@ M.which_key = function()
     -- operators = {
     --   gc = "+Comments",
     -- },
-    key_labels = {
-      -- override the label used to display some keys. It doesn't effect WK in any other way.
-      -- For example:
-      ["<space>"] = "SPC",
-      ["<CR>"] = "RET",
-      ["<tab>"] = "TAB",
+
+    replace = {
+      key = {
+        function(key)
+          return require("which-key.view").format(key)
+        end,
+        -- { "<Space>", "SPC" },
+      },
+      desc = {
+        { "<Plug>%(?(.*)%)?", "%1" },
+        { "^%+",              "" },
+        { "<[cC]md>",         "" },
+        { "<[cC][rR]>",       "" },
+        { "<[sS]ilent>",      "" },
+        { "^lua%s+",          "" },
+        { "^call%s+",         "" },
+        { "^:%s*",            "" },
+      },
     },
     icons = {
       breadcrumb = "»", -- symbol used in the command line area that shows your active key combo
       separator = "➜", -- symbol used between a key and it's label
       group = "+", -- symbol prepended to a group
     },
-    popup_mappings = {
+    keys = {
       scroll_down = "<c-d>", -- binding to scroll down inside the popup
       scroll_up = "<c-u>",   -- binding to scroll up inside the popup
     },
-    window = {
+    win = {
       border = "rounded",       -- none, single, double, shadow
-      position = "bottom",      -- bottom, top
-      margin = { 1, 0, 1, 0 },  -- extra window margin [top, right, bottom, left]
-      padding = { 2, 2, 2, 2 }, -- extra window padding [top, right, bottom, left]
-      winblend = 0,
-    },
-    layout = {
-      height = { min = 4, max = 25 },                                     -- min and max height of the columns
-      width = { min = 20, max = 50 },                                     -- min and max width of the columns
-      spacing = 3,                                                        -- spacing between columns
-      align = "left",                                                     -- align columns left, center or right
-    },
-    ignore_missing = false,                                               -- enable this to hide mappings for which you didn't specify a label
-    hidden = { "<silent>", ":", ":", "<CR>", "call", "lua", "^:", "^ " }, -- hide mapping boilerplate
-    show_help = true,                                                     -- show help message on the command line when the popup is visible
-    triggers = "auto",                                                    -- automatically setup triggers
-    -- triggers = {"<leader>"} -- or specify a list manually
-    triggers_blacklist = {
-      -- list of mode / prefixes that should never be hooked by WhichKey
-      -- this is mostly relevant for key maps that start with a native binding
-      -- most people should not need to change this
-      i = { "j", "k" },
-      v = { "j", "k" },
-      n = { "d", "y" } -- for modes.nvim to work properly
-    },
-  })
-
-  local opts = {
-    mode = "n",     -- NORMAL mode
-    prefix = "<leader>",
-    buffer = nil,   -- Global mappings. Specify a buffer number for buffer local mappings
-    silent = true,  -- use `silent` when creating keymaps
-    noremap = true, -- use `noremap` when creating keymaps
-    nowait = true,  -- use `nowait` when creating keymaps
-  }
-
-
-
-
-  local mappings = {
-    ["<tab>"] = { "<C-^>", "which_key_ignore" },
-    ["<space>"] = { ":Telescope frecency workspace=CWD<CR>", "Frecent files" },
-    ["\\"] = { ":vnew<CR>", "which_key_ignore" },
-    ["-"] = { ":new<CR>", "which_key_ignore" },
-    a = { function() harpoon():list():add() end, "Harpoon add" },
-    e = { ":Neotree toggle reveal right last<CR>", "which_key_ignore" },
-    b = {
-      name = "Buffers",
-      b = {
-        ":lua require('telescope.builtin').buffers(require('telescope.themes').get_dropdown{previewer = false})<CR>",
-        "Buffers",
-      },
-      c = { ":bd!<CR>", "Close Buffer" },
-      d = {
-        "<cmd>BufferLineSortByDirectory<cr>",
-        "Sort by directory",
-      },
-      e = {
-        "<cmd>BufferLineSortByExtension<cr>",
-        "Sort by extension",
-      },
-      f = { "<cmd>Telescope buffers<cr>", "Find" },
-      h = { "<cmd>BufferLineCloseLeft<cr>", "Close all to the left" },
-      l = { "<cmd>BufferLineCloseRight<cr>", "Close all to the right" },
-      n = { "<cmd>BufferLineCycleNext<cr>", "Next" },
-      o = { "<cmd>BufferLineCloseOthers<cr>", "Close all to the right" },
-      j = { "<cmd>BufferLinePick<cr>", "Jump" },
-      p = { "<cmd>BufferLineCyclePrev<cr>", "Previous" },
-      ['.'] = { "<cmd>BufferLineMoveNext<cr>", "Move buffer" },
-      [','] = { "<cmd>BufferLineMovePrev<cr>", "Move buffer" },
-      ['>'] = { "<cmd>lua require'bufferline'.move_to(-1)<cr>", "Move buffer to last" },
-      ['<'] = { "<cmd>lua require'bufferline'.move_to(1)<cr>", "Move buffer to last" },
-      P = { "<cmd>BufferLineTogglePin<cr>", "Toggle pin" },
-      q = { ":bd!<CR>", "Close Buffer" },
-      x = { "<cmd>BufferLinePickClose<cr>", "Pick which buffer to close" },
-    },
-
-    ['>'] = { "<cmd>BufferLineMoveNext<cr>", "which_key_ignore" },
-    ['<'] = { "<cmd>BufferLineMovePrev<cr>", "which_key_ignore" },
-    ['1'] = { "<cmd>lua require'bufferline'.go_to(1)<cr>", "which_key_ignore" },
-    ['2'] = { "<cmd>lua require'bufferline'.go_to(2)<cr>", "which_key_ignore" },
-    ['3'] = { "<cmd>lua require'bufferline'.go_to(3)<cr>", "which_key_ignore" },
-    ['4'] = { "<cmd>lua require'bufferline'.go_to(4)<cr>", "which_key_ignore" },
-    ['5'] = { "<cmd>lua require'bufferline'.go_to(5)<cr>", "which_key_ignore" },
-    ['6'] = { "<cmd>lua require'bufferline'.go_to(6)<cr>", "which_key_ignore" },
-    ['7'] = { "<cmd>lua require'bufferline'.go_to(7)<cr>", "which_key_ignore" },
-    ['8'] = { "<cmd>lua require'bufferline'.go_to(8)<cr>", "which_key_ignore" },
-    ['9'] = { "<cmd>lua require'bufferline'.go_to(9)<cr>", "which_key_ignore" },
-    ['0'] = { "<cmd>lua require'bufferline'.go_to(-1)<cr>", "which_key_ignore" },
-    ['$'] = { "<cmd>lua require'bufferline'.go_to(-1)<cr>", "which_key_ignore" },
-
-    c = {
-      name = 'Context',
-      -- h = { M.repeatable_moves().prev_context, "Go to context start" },
-      -- l = { M.repeatable_moves().next_context, "Select next context" },
-      p = { require('dropbar.api').pick, "Context Pick" },
-    },
-    d = {
-      name = "Debug",
-      t = { "<cmd>lua require'dap'.toggle_breakpoint()<cr>", "Toggle Breakpoint" },
-      b = { "<cmd>lua require'dap'.step_back()<cr>", "Step Back" },
-      c = { "<cmd>lua require'dap'.continue()<cr>", "Continue" },
-      C = { "<cmd>lua require'dap'.run_to_cursor()<cr>", "Run To Cursor" },
-      d = { "<cmd>lua require'dap'.disconnect()<cr>", "Disconnect" },
-      g = { "<cmd>lua require'dap'.session()<cr>", "Get Session" },
-      i = { "<cmd>lua require'dap'.step_into()<cr>", "Step Into" },
-      o = { "<cmd>lua require'dap'.step_over()<cr>", "Step Over" },
-      u = { "<cmd>lua require'dap'.step_out()<cr>", "Step Out" },
-      p = { "<cmd>lua require'dap'.pause()<cr>", "Pause" },
-      r = { "<cmd>lua require'dap'.repl.toggle()<cr>", "Toggle Repl" },
-      s = { "<cmd>lua require'dap'.continue()<cr>", "Start" },
-      q = { "<cmd>lua require'dap'.close()<cr>", "Quit" },
-      U = { "<cmd>lua require'dapui'.toggle()<cr>", "Toggle UI" },
-    },
-    u = { ":UndotreeToggle<CR>", "Toggle undotree" },
-    f = {
-      name = "Find",
-      i = {
-        name = "Inside",
-        p = { ":Telescope frecency workspace=projects<CR>", "projects" },
-        c = { ":Telescope frecency workspace=conf<CR>", ".config" },
-        d = { ":Telescope frecency workspace=data<CR>", ".local/share" },
-        w = { ":Telescope frecency workspace=wiki<CR>", "wiki" },
-        s = { ":Telescope frecency workspace=scripts<CR>", "scripts" },
-      },
-      b = { ":Telescope file_browser<CR>", "File browser" },
-      -- f = { ":Telescope frecency workspace=CWD<CR>", "cwd" },
-      c = { ":Telescope frecency workspace=conf<CR>", ".config" },
-      d = { ":Telescope frecency workspace=data<CR>", ".local/share" },
-      s = { ":Telescope frecency workspace=scripts<CR>", "scripts" },
-      w = { ":Telescope frecency workspace=wiki<CR>", "wiki" },
-      p = { ":Telescope project<CR>", "<Projects>" },
-    },
-    q = { ":q<CR>", "Quit" },
-
-
-
-    g = {
-      name = "Git",
-      -- g = { require("plugin_configs.terminal").lazygit_toggle, "Lazygit" },
-      x = { ":lua require('snacks').gitbrowse()<CR>", "Open in browser" },
-      g = { ":Git<CR>", "Fugitive" },
-      j = { function()
-        vim.notify("use ]h instead, this action is repeatable with ; and ,")
-        -- if math.random() < 0.5 then
-        --   M.repeatable_moves().next_hunk()
-        -- end
-      end, "Next Hunk" },
-
-      d = { function()
-        require("gitsigns").diffthis('~')
-      end, "Diff this" },
-      e = { require("gitsigns").preview_hunk_inline, "Toggle Deleted" },
-      k = { function()
-        vim.notify("use [h instead, this action is repeatable with ; and ,")
-        -- if math.random() < 0.5 then
-        --   M.repeatable_moves().prev_hunk()
-        -- end
-      end, "Prev Hunk" },
-      l = { require("gitsigns").toggle_current_line_blame, "Blame line" },
-      b = { function()
-        require("gitsigns").blame_line({ full = true })
-      end, "Blame line full" },
-      o = { require("gitsigns").show, "Open original" },
-      p = { require("gitsigns").preview_hunk, "Preview" },
-      P = { require("gitsigns").preview_hunk_inline, "Inline Preview" },
-      q = { require("gitsigns").setqflist, "Quickfix List" },
-      r = { require("gitsigns").reset_hunk, "Reset Hunk" },
-      R = { require("gitsigns").reset_buffer, "Reset Buffer" },
-      s = { require("gitsigns").stage_hunk, "Stage Hunk" },
-      S = { require("gitsigns").stage_buffer, "Stage Buffer" },
-      w = { require("gitsigns").toggle_word_diff, "Word diff" },
-      O = { ":Telescope git_status<CR>", "Open changed file" },
-      B = { ":Telescope git_branches<CR>", "Checkout branch" },
-      c = { ":Telescope git_commits<CR>", "Checkout commit" },
-      f = {
-        "<cmd>Telescope git_bcommits<cr>",
-        "Checkout commit(for current file)",
-      },
-    },
-    h = {
-      name = "Hydra",
-      d = { activate_debug_hydra, "Debug" },
-      g = { activate_hydra(hydras.git), "Git" },
-      i = { activate_hydra(hydras.draw_diagram), "Draw diagram" },
-      h = { activate_hydra(hydras.history), "History" },
-      o = { activate_hydra(hydras.options), "Options" },
-      t = { activate_hydra(hydras.toggle), "Toggle" },
-      -- t = { ":TSContextToggle<CR>", "Toggle TSContext" },
-    },
-    -- H = { M.repeatable_moves().prev_context, "Prev context" },
-    -- L = { M.repeatable_moves().next_context, "Next context" },
-
-    j = {
-      name = "Jump",
-      ["<Space>"] = { function() harpoon():list():add() end, "Harpoon add" },
-      a = { function() harpoon():list():select(1) end, "Harpoon a" },
-      s = { function() harpoon():list():select(2) end, "Harpoon s" },
-      d = { function() harpoon():list():select(3) end, "Harpoon d" },
-      f = { function() harpoon():list():select(4) end, "Harpoon f" },
-      j = { "<cmd>BufferLinePick<cr>", "Jump" },
-      l = { function() harpoon().ui:toggle_quick_menu(harpoon():list()) end, "Harpoon list" },
-    },
-    l = {
-      name = "LSP",
-      a = { vim.lsp.buf.code_action, "Code Action" },
-      c = { vim.lsp.codelens.run, "CodeLens Action" },
-      d = { vim.lsp.buf.definition, "Go to definition" },
-      D = { vim.lsp.buf.declaration, "Go to declaration" },
-      f = { function() vim.lsp.buf.format { async = true } end, "Format" },
-      I = { function()
-        local enabled = vim.lsp.inlay_hint.is_enabled({ bufnr = 0 })
-        vim.lsp.inlay_hint.enable(not enabled)
-      end, "Toggle inlay hints" },
-      i = { vim.lsp.buf.implementation, "Go to implementation" },
-      h = { function() require("pretty_hover").hover() end, "Hover info" },
-      H = { vim.lsp.buf.signature_help, "Signature help" },
-      n = { ":LspInfo<CR>", "Info" },
-      j = { function()
-        vim.notify("use ]d instead, this action is repeatable with ; and ,")
-
-        -- if math.random() < 0.5 then
-        --   M.repeatable_moves().next_diagnostic()
-        -- end
-      end, "Next Diagnostic" },
-      k = { function()
-        vim.notify("use [d instead, this action is repeatable with ; and ,")
-        -- if math.random() < 0.5 then
-        --   M.repeatable_moves().prev_diagnostic()
-        -- end
-      end, "Prev Diagnostic" },
-      -- vim.lsp.buf.references, "Go to references"},
-      l = {
-        name = "Workspace",
-        w = { ":Telescope diagnostics<CR>", "Workspace Diagnostics" },
-        s = {
-          ":Telescope lsp_dynamic_workspace_symbols<CR>",
-          "Dynamic Workspace Symbols",
-        },
-        p = { ":Lazy profile<CR>", "Lazy profile" },
-      },
-      q = { vim.diagnostic.setloclist, "Quickfix" },
-      r = {
-        name = "Refactor",
-        n = { function() return ":IncRename " .. vim.fn.expand('<cword>') end, "Rename", expr = true },
-        R = { function()
-          require("sahinakkaya.util").rename({})
-        end, "Rename with normal mode" },
-        e = { ":lua require('refactoring').refactor('Extract Block')<CR>", "Extract block" },
-        f = { ":lua require('refactoring').refactor('Extract Block To File')<CR>", "Extract block to file" },
-        i = { ":lua require('refactoring').refactor('Inline Variable')<CR>", "Inline variable" },
-        I = { ":lua require('refactoring').refactor('Inline Function')<CR>", "Inline function" },
-        c = { function() require('refactoring').debug.cleanup() end, "Cleanup" },
-        r = { function()
-          require('refactoring').select_refactor()
-        end, "Select refactor" },
-      },
-
-      v = { function() require('refactoring').debug.print_var({ below = true }) end, "Print var" },
-      p = { function() require('refactoring').debug.printf({ below = true }) end, "Debug statement" },
-      s = { vim.lsp.buf.signature_help, "Signature help" },
-      w = {
-        name = "Workspace",
-        a = { vim.lsp.buf.add_workspace_folder, "Add workspace folder" },
-        r = { vim.lsp.buf.remove_workspace_folder, "Remove workspace folder" },
-        l = { function()
-          print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
-        end, "List workspace folders" },
+      title = true,
+      padding = { 1, 2 }, -- extra window padding [top/bottom, right/left]
+      wo = {
+        winblend = 10
       }
     },
-
-    n = {
-      name = "Notifications",
-      d = { function() require('notify').dismiss({ pending = false, silent = false }) end, "Dismiss notifications" },
-      -- n = { ":Fidget history<CR>", "Notifications" },
-      n = { ":Telescope notify<CR>", "Notifications" },
+    layout = {
+      height = { min = 4, max = 25 }, -- min and max height of the columns
+      width = { min = 20, max = 50 }, -- min and max width of the columns
+      spacing = 3,                    -- spacing between columns
+      align = "left",                 -- align columns left, center or right
     },
-    m = { ":WindowsMaximize<CR>", "Toggle maximize" },
+    show_help = true,                 -- show help message on the command line when the popup is visible
+    triggers = {
+      { "<auto>", mode = "nixsotc" },
+    }
+  })
 
-    s = {
-      name = "Sessions | Search | Split",
-      b = { ":Telescope git_branches<CR>", "Checkout branch" },
-      c = { ":Telescope colorscheme<CR>", "Colorscheme" },
-      C = { ":Telescope commands<CR>", "Commands" },
-      f = { "<cmd>Telescope find_files<cr>", "Find File" },
-      h = { ":Telescope help_tags<CR>", "Find Help" },
-      H = { "<cmd>Telescope highlights<cr>", "Find highlight groups" },
-      k = { ":Telescope keymaps<CR>", "Keymaps" },
-      m = { ":Telescope man_pages<CR>", "Man Pages" },
-      -- n = { ":Fidget history<CR>", "Notifications" },
-      n = { ":Telescope notify<CR>", "Notifications" },
-      r = { ":Telescope oldfiles<CR>", "Open Recent File" },
-      -- R = { ":Telescope registers<CR>", "Registers" },
-      -- s = { ":Telescope projects<CR>", "Recent Projects" },
-      t = { ":Telescope live_grep theme=ivy<CR>", "Find Text" },
-      v = { ":vnew<CR>", "vsplit" },
-      s = { ":new<CR>", "hsplit" },
-      w = { ":lua require('mini.sessions').write('Session.vim')<CR>", "Write session" },
-      l = { ":lua require('mini.sessions').select()<CR>", "List session" },
-      R = { ":lua require('mini.sessions').read('Session.vim')<CR>", "Read session" },
-    },
-    o = {
-      name = "Open Trouble",
-      d = { function() require("trouble").toggle("document_diagnostics") end, "Document Diagnostics" },
-      f = { function() require("trouble").toggle("lsp_definitions") end, "Lsp Definitions" },
-      l = { function() require("trouble").toggle("loclist") end, "Location List" },
-      i = { function() require("trouble").toggle("lsp_implementations") end, "Lsp Implementations" },
-      r = { function() require("trouble").toggle("lsp_references") end, "Lsp References" },
-      o = { function() require("trouble").toggle() end, "Trouble Toggle" },
-      w = { function() require("trouble").toggle("workspace_diagnostics") end, "Workspace Diagnostics" },
-      q = { function() require("trouble").toggle("quickfix") end, "Quickfix list" },
-      -- n = { ":Fidget history<CR>", "Notifications" },
-    },
-    t = {
-      name = "Toggle",
-      n = { ":Telescope notify<CR>", "Notifications" },
-    },
+  -- Most attributes are inherited by the entries in each block. Keeping the
+  -- specs split by feature makes adding or removing mappings less error-prone.
+  wk.add({
+    mode = "n",
+    silent = true,
+    noremap = true,
+    nowait = true,
 
-    w = {
-      name = "windows",
-      e = { ":WindowsEqualize<CR>", "Equalize windows" },
-      h = { "<C-W>H", "Move window to far left" },
-      l = { "<C-W>L", "Move window to far right" },
-      j = { "<C-W>J", "Move window to very top" },
-      k = { "<C-W>K", "Move window to very bottom" },
-      K = { "<C-w>t<C-w>H", "Move window to very bottom" },
+    { "<leader><tab>", "<C-^>", hidden = true },
+    { "<leader><space>", ":Telescope frecency workspace=CWD<CR>", desc = "Frecent files" },
+    { "<leader>\\", ":vnew<CR>", hidden = true },
+    { "<leader>-", ":new<CR>", hidden = true },
+    { "<leader>a", function() harpoon():list():add() end, desc = "Harpoon add" },
+    { "<leader>e", ":Neotree toggle reveal right last<CR>", hidden = true },
+    { "<leader>q", ":q<CR>", hidden = true },
+    { "<leader>u", ":UndotreeToggle<CR>", desc = "Toggle undotree" },
+    { "<leader>m", ":WindowsMaximize<CR>", desc = "Toggle maximize" },
+  })
 
-      m = { ":WindowsMaximize<CR>", "Toggle maximize" },
-      ['\\'] = { ":WindowsMaximizeHorizontally<CR>", "Maximize horizontally" },
-      ['|'] = { ":WindowsMaximizeHorizontally<CR>", "Maximize horizontally" },
-      ['_'] = { ":WindowsMaximizeVertically<CR>", "Maximize vertically" },
-      ['-'] = { ":WindowsMaximizeVertically<CR>", "Maximize vertically" },
-      r = { ":lua require('smart-splits').start_resize_mode()<CR>", "Resize mode" },
-      s = { "<C-W>x", "Swap with closest to right" },
-      w = { "<C-W>r", "Rotate windows to down/right" },
-      W = { "<C-W>R", "Rotate windows to up/left" },
+  wk.add({
+    mode = "n",
+    silent = true,
+    noremap = true,
+    nowait = true,
+
+    { "<leader>b", group = "Buffers" },
+    {
+      "<leader>bb",
+      ":lua require('telescope.builtin').buffers(require('telescope.themes').get_dropdown{previewer = false})<CR>",
+      desc = "Buffers",
     },
-    -- w = {
-    --   name = "windows",
-    --   h = { "<C-W>H", "Move window to far left" },
-    --   l = { "<C-W>L", "Move window to far right" },
-    --   j = { "<C-W>J", "Move window to very top" },
-    --   k = { "<C-W>K", "Move window to very bottom" },
-    --   s = { "<C-W>x", "Swap with closest to right" },
-    --   w = { "<C-W>r", "Rotate windows to down/right" },
-    --   W = { "<C-W>R", "Rotate windows to up/left" },
-    -- },
-  }
+    { "<leader>bc", ":bd!<CR>", desc = "Close Buffer" },
+    { "<leader>bd", "<cmd>BufferLineSortByDirectory<cr>", desc = "Sort by directory" },
+    { "<leader>be", "<cmd>BufferLineSortByExtension<cr>", desc = "Sort by extension" },
+    { "<leader>bf", "<cmd>Telescope buffers<cr>", desc = "Find" },
+    { "<leader>bh", "<cmd>BufferLineCloseLeft<cr>", desc = "Close all to the left" },
+    { "<leader>bl", "<cmd>BufferLineCloseRight<cr>", desc = "Close all to the right" },
+    { "<leader>bn", "<cmd>BufferLineCycleNext<cr>", desc = "Next" },
+    { "<leader>bo", "<cmd>BufferLineCloseOthers<cr>", desc = "Close all to the right" },
+    { "<leader>bj", "<cmd>BufferLinePick<cr>", desc = "Jump" },
+    { "<leader>bp", "<cmd>BufferLineCyclePrev<cr>", desc = "Previous" },
+    { "<leader>b.", "<cmd>BufferLineMoveNext<cr>", desc = "Move buffer" },
+    { "<leader>b,", "<cmd>BufferLineMovePrev<cr>", desc = "Move buffer" },
+    { "<leader>b>", "<cmd>lua require'bufferline'.move_to(-1)<cr>", desc = "Move buffer to last" },
+    { "<leader>b<", "<cmd>lua require'bufferline'.move_to(1)<cr>", desc = "Move buffer to first" },
+    { "<leader>bP", "<cmd>BufferLineTogglePin<cr>", desc = "Toggle pin" },
+    { "<leader>bq", ":bd!<CR>", desc = "Close Buffer" },
+    { "<leader>bx", "<cmd>BufferLinePickClose<cr>", desc = "Pick which buffer to close" },
 
+    { "<leader>>", "<cmd>BufferLineMoveNext<cr>", hidden = true },
+    { "<leader><", "<cmd>BufferLineMovePrev<cr>", hidden = true },
+    { "<leader>1", "<cmd>lua require'bufferline'.go_to(1)<cr>", hidden = true },
+    { "<leader>2", "<cmd>lua require'bufferline'.go_to(2)<cr>", hidden = true },
+    { "<leader>3", "<cmd>lua require'bufferline'.go_to(3)<cr>", hidden = true },
+    { "<leader>4", "<cmd>lua require'bufferline'.go_to(4)<cr>", hidden = true },
+    { "<leader>5", "<cmd>lua require'bufferline'.go_to(5)<cr>", hidden = true },
+    { "<leader>6", "<cmd>lua require'bufferline'.go_to(6)<cr>", hidden = true },
+    { "<leader>7", "<cmd>lua require'bufferline'.go_to(7)<cr>", hidden = true },
+    { "<leader>8", "<cmd>lua require'bufferline'.go_to(8)<cr>", hidden = true },
+    { "<leader>9", "<cmd>lua require'bufferline'.go_to(9)<cr>", hidden = true },
+    { "<leader>0", "<cmd>lua require'bufferline'.go_to(-1)<cr>", hidden = true },
+    { "<leader>$", "<cmd>lua require'bufferline'.go_to(-1)<cr>", hidden = true },
+  })
 
-  local vmappings = {
-    l = {
-      v = { function() require('refactoring').debug.print_var({ below = true }) end, "Print var" },
-      r = {
-        name = "Refactor",
-        e = { function() require('refactoring').refactor('Extract Function') end, "Extract function" },
-        f = {
-          function() require('refactoring').refactor('Extract Function To File') end,
-          "Extract function to file",
-        },
-        v = { function() require('refactoring').refactor('Extract Variable') end, "Extract variable" },
-        i = { function() require('refactoring').refactor('Inline Variable') end, "Inline variable" },
-        r = { function() require('telescope').extensions.refactoring.refactors() end, "Refactor" },
-      },
-    },
-    d = {
-      name = "Debug",
-      e = { ":lua require('dapui').eval()<CR>", "Evaluate expression" },
-    },
-    g = {
-      name = "Git",
-      r = { function() require("gitsigns").reset_hunk { vim.fn.line('.'), vim.fn.line('v') } end, "Reset Hunk" },
-      x = { ":lua require('snacks').gitbrowse()<CR>", "Open in browser" },
-      s = { function() require("gitsigns").stage_hunk { vim.fn.line('.'), vim.fn.line('v') } end, "Stage Hunk" },
-    },
-  }
+  wk.add({
+    mode = "n",
+    silent = true,
+    noremap = true,
+    nowait = true,
 
-  local vopts = {
-    mode = "v",     -- NORMAL mode
-    prefix = "<leader>",
-    buffer = nil,   -- Global mappings. Specify a buffer number for buffer local mappings
-    silent = true,  -- use `silent` when creating keymaps
-    noremap = true, -- use `noremap` when creating keymaps
-    nowait = true,  -- use `nowait` when creating keymaps
-  }
+    { "<leader>c", group = "Context" },
+    { "<leader>cp", require("dropbar.api").pick, desc = "Context Pick" },
 
-  whichkey.register(mappings, opts)
-  whichkey.register(vmappings, vopts)
+    { "<leader>d", group = "Debug" },
+    { "<leader>dt", "<cmd>lua require'dap'.toggle_breakpoint()<cr>", desc = "Toggle Breakpoint" },
+    { "<leader>db", "<cmd>lua require'dap'.step_back()<cr>", desc = "Step Back" },
+    { "<leader>dc", "<cmd>lua require'dap'.continue()<cr>", desc = "Continue" },
+    { "<leader>dC", "<cmd>lua require'dap'.run_to_cursor()<cr>", desc = "Run To Cursor" },
+    { "<leader>dd", "<cmd>lua require'dap'.disconnect()<cr>", desc = "Disconnect" },
+    { "<leader>dg", "<cmd>lua require'dap'.session()<cr>", desc = "Get Session" },
+    { "<leader>di", "<cmd>lua require'dap'.step_into()<cr>", desc = "Step Into" },
+    { "<leader>do", "<cmd>lua require'dap'.step_over()<cr>", desc = "Step Over" },
+    { "<leader>du", "<cmd>lua require'dap'.step_out()<cr>", desc = "Step Out" },
+    { "<leader>dp", "<cmd>lua require'dap'.pause()<cr>", desc = "Pause" },
+    { "<leader>dr", "<cmd>lua require'dap'.repl.toggle()<cr>", desc = "Toggle Repl" },
+    { "<leader>ds", "<cmd>lua require'dap'.continue()<cr>", desc = "Start" },
+    { "<leader>dq", "<cmd>lua require'dap'.close()<cr>", desc = "Quit" },
+    { "<leader>dU", "<cmd>lua require'dapui'.toggle()<cr>", desc = "Toggle UI" },
+  })
+
+  wk.add({
+    mode = "n",
+    silent = true,
+    noremap = true,
+    nowait = true,
+
+    { "<leader>f", group = "Find" },
+    { "<leader>fi", group = "Inside" },
+    { "<leader>fip", ":Telescope frecency workspace=projects<CR>", desc = "projects" },
+    { "<leader>fic", ":Telescope frecency workspace=conf<CR>", desc = ".config" },
+    { "<leader>fid", ":Telescope frecency workspace=data<CR>", desc = ".local/share" },
+    { "<leader>fiw", ":Telescope frecency workspace=wiki<CR>", desc = "wiki" },
+    { "<leader>fis", ":Telescope frecency workspace=scripts<CR>", desc = "scripts" },
+    { "<leader>fb", ":Telescope file_browser<CR>", desc = "File browser" },
+    { "<leader>fc", ":Telescope frecency workspace=conf<CR>", desc = ".config" },
+    { "<leader>fd", ":Telescope frecency workspace=data<CR>", desc = ".local/share" },
+    { "<leader>fs", ":Telescope frecency workspace=scripts<CR>", desc = "scripts" },
+    { "<leader>fw", ":Telescope frecency workspace=wiki<CR>", desc = "wiki" },
+    { "<leader>fp", ":Telescope project<CR>", desc = "<Projects>" },
+  })
+
+  wk.add({
+    mode = "n",
+    silent = true,
+    noremap = true,
+    nowait = true,
+
+    { "<leader>g", group = "Git" },
+    { "<leader>gg", ":Git<CR>", desc = "Fugitive" },
+    { "<leader>gj", function()
+      vim.notify("use ]h instead, this action is repeatable with ; and ,")
+    end, desc = "Next Hunk" },
+    { "<leader>gd", function() require("gitsigns").diffthis("~") end, desc = "Diff this" },
+    { "<leader>ge", require("gitsigns").preview_hunk_inline, desc = "Toggle Deleted" },
+    { "<leader>gk", function()
+      vim.notify("use [h instead, this action is repeatable with ; and ,")
+    end, desc = "Prev Hunk" },
+    { "<leader>gl", require("gitsigns").toggle_current_line_blame, desc = "Blame line" },
+    { "<leader>gb", function() require("gitsigns").blame_line({ full = true }) end, desc = "Blame line full" },
+    { "<leader>go", require("gitsigns").show, desc = "Open original" },
+    { "<leader>gp", require("gitsigns").preview_hunk, desc = "Preview" },
+    { "<leader>gP", require("gitsigns").preview_hunk_inline, desc = "Inline Preview" },
+    { "<leader>gq", require("gitsigns").setqflist, desc = "Quickfix List" },
+    { "<leader>gr", require("gitsigns").reset_hunk, desc = "Reset Hunk" },
+    { "<leader>gR", require("gitsigns").reset_buffer, desc = "Reset Buffer" },
+    { "<leader>gs", require("gitsigns").stage_hunk, desc = "Stage Hunk" },
+    { "<leader>gS", require("gitsigns").stage_buffer, desc = "Stage Buffer" },
+    { "<leader>gw", require("gitsigns").toggle_word_diff, desc = "Word diff" },
+    { "<leader>gO", ":Telescope git_status<CR>", desc = "Open changed file" },
+    { "<leader>gB", ":Telescope git_branches<CR>", desc = "Checkout branch" },
+    { "<leader>gc", ":Telescope git_commits<CR>", desc = "Checkout commit" },
+    { "<leader>gf", "<cmd>Telescope git_bcommits<cr>", desc = "Checkout commit (current file)" },
+  })
+
+  wk.add({
+    mode = "n",
+    silent = true,
+    noremap = true,
+    nowait = true,
+
+    { "<leader>h", group = "Hydra" },
+    { "<leader>hd", activate_debug_hydra, desc = "Debug" },
+    { "<leader>hg", activate_hydra(hydras.git), desc = "Git" },
+    { "<leader>hi", activate_hydra(hydras.draw_diagram), desc = "Draw diagram" },
+    { "<leader>hh", activate_hydra(hydras.history), desc = "History" },
+    { "<leader>ho", activate_hydra(hydras.options), desc = "Options" },
+    { "<leader>ht", activate_hydra(hydras.toggle), desc = "Toggle" },
+
+    { "<leader>j", group = "Jump" },
+    { "<leader>j<space>", function() harpoon():list():add() end, desc = "Harpoon add" },
+    { "<leader>ja", function() harpoon():list():select(1) end, desc = "Harpoon a" },
+    { "<leader>js", function() harpoon():list():select(2) end, desc = "Harpoon s" },
+    { "<leader>jd", function() harpoon():list():select(3) end, desc = "Harpoon d" },
+    { "<leader>jf", function() harpoon():list():select(4) end, desc = "Harpoon f" },
+    { "<leader>jj", "<cmd>BufferLinePick<cr>", desc = "Jump" },
+    { "<leader>jl", function() harpoon().ui:toggle_quick_menu(harpoon():list()) end, desc = "Harpoon list" },
+  })
+
+  wk.add({
+    mode = "n",
+    silent = true,
+    noremap = true,
+    nowait = true,
+
+    { "<leader>l", group = "LSP" },
+    { "<leader>la", vim.lsp.buf.code_action, desc = "Code Action" },
+    { "<leader>lc", vim.lsp.codelens.run, desc = "CodeLens Action" },
+    { "<leader>ld", vim.lsp.buf.definition, desc = "Go to definition" },
+    { "<leader>lD", vim.lsp.buf.declaration, desc = "Go to declaration" },
+    { "<leader>lf", function() vim.lsp.buf.format({ async = true }) end, desc = "Format" },
+    { "<leader>lI", function()
+      local enabled = vim.lsp.inlay_hint.is_enabled({ bufnr = 0 })
+      vim.lsp.inlay_hint.enable(not enabled)
+    end, desc = "Toggle inlay hints" },
+    { "<leader>li", vim.lsp.buf.implementation, desc = "Go to implementation" },
+    { "<leader>lh", function() require("pretty_hover").hover() end, desc = "Hover info" },
+    { "<leader>lH", vim.lsp.buf.signature_help, desc = "Signature help" },
+    { "<leader>ln", ":LspInfo<CR>", desc = "Info" },
+    { "<leader>lj", function()
+      vim.notify("use ]d instead, this action is repeatable with ; and ,")
+    end, desc = "Next Diagnostic" },
+    { "<leader>lk", function()
+      vim.notify("use [d instead, this action is repeatable with ; and ,")
+    end, desc = "Prev Diagnostic" },
+    { "<leader>lq", vim.diagnostic.setloclist, desc = "Quickfix" },
+    { "<leader>lv", function() require("refactoring").debug.print_var({ below = true }) end, desc = "Print var" },
+    { "<leader>lp", function() require("refactoring").debug.printf({ below = true }) end, desc = "Debug statement" },
+    { "<leader>ls", vim.lsp.buf.signature_help, desc = "Signature help" },
+
+    { "<leader>ll", group = "Workspace" },
+    { "<leader>llw", ":Telescope diagnostics<CR>", desc = "Workspace Diagnostics" },
+    { "<leader>lls", ":Telescope lsp_dynamic_workspace_symbols<CR>", desc = "Dynamic Workspace Symbols" },
+    { "<leader>llp", ":Lazy profile<CR>", desc = "Lazy profile" },
+
+    { "<leader>lr", group = "Refactor" },
+    { "<leader>lrn", function() return ":IncRename " .. vim.fn.expand("<cword>") end, desc = "Rename", expr = true },
+    { "<leader>lrR", function() require("sahinakkaya.util").rename({}) end, desc = "Rename with normal mode" },
+    { "<leader>lre", ":lua require('refactoring').refactor('Extract Block')<CR>", desc = "Extract block" },
+    { "<leader>lrf", ":lua require('refactoring').refactor('Extract Block To File')<CR>", desc = "Extract block to file" },
+    { "<leader>lri", ":lua require('refactoring').refactor('Inline Variable')<CR>", desc = "Inline variable" },
+    { "<leader>lrI", ":lua require('refactoring').refactor('Inline Function')<CR>", desc = "Inline function" },
+    { "<leader>lrc", function() require("refactoring").debug.cleanup() end, desc = "Cleanup" },
+    { "<leader>lrr", function() require("refactoring").select_refactor() end, desc = "Select refactor" },
+
+    { "<leader>lw", group = "Workspace" },
+    { "<leader>lwa", vim.lsp.buf.add_workspace_folder, desc = "Add workspace folder" },
+    { "<leader>lwr", vim.lsp.buf.remove_workspace_folder, desc = "Remove workspace folder" },
+    { "<leader>lwl", function()
+      print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
+    end, desc = "List workspace folders" },
+  })
+
+  wk.add({
+    mode = "n",
+    silent = true,
+    noremap = true,
+    nowait = true,
+
+    { "<leader>n", group = "Notifications" },
+    { "<leader>nd", function()
+      require("notify").dismiss({ pending = false, silent = false })
+    end, desc = "Dismiss notifications" },
+    { "<leader>nn", ":Telescope notify<CR>", desc = "Notifications" },
+
+    { "<leader>s", group = "Sessions | Search | Split" },
+    { "<leader>sb", ":Telescope git_branches<CR>", desc = "Checkout branch" },
+    { "<leader>sc", ":Telescope colorscheme<CR>", desc = "Colorscheme" },
+    { "<leader>sC", ":Telescope commands<CR>", desc = "Commands" },
+    { "<leader>sf", "<cmd>Telescope find_files<cr>", desc = "Find File" },
+    { "<leader>sh", ":Telescope help_tags<CR>", desc = "Find Help" },
+    { "<leader>sH", "<cmd>Telescope highlights<cr>", desc = "Find highlight groups" },
+    { "<leader>sk", ":Telescope keymaps<CR>", desc = "Keymaps" },
+    { "<leader>sm", ":Telescope man_pages<CR>", desc = "Man Pages" },
+    { "<leader>sn", ":Telescope notify<CR>", desc = "Notifications" },
+    { "<leader>sr", ":Telescope oldfiles<CR>", desc = "Open Recent File" },
+    { "<leader>st", ":Telescope live_grep theme=ivy<CR>", desc = "Find Text" },
+    { "<leader>sv", ":vnew<CR>", desc = "vsplit" },
+    { "<leader>ss", ":new<CR>", desc = "hsplit" },
+    { "<leader>sw", ":lua require('mini.sessions').write('Session.vim')<CR>", desc = "Write session" },
+    { "<leader>sl", ":lua require('mini.sessions').select()<CR>", desc = "List session" },
+    { "<leader>sR", ":lua require('mini.sessions').read('Session.vim')<CR>", desc = "Read session" },
+
+    { "<leader>t", group = "Toggle" },
+    { "<leader>tn", ":Telescope notify<CR>", desc = "Notifications" },
+  })
+
+  wk.add({
+    mode = "n",
+    silent = true,
+    noremap = true,
+    nowait = true,
+
+    { "<leader>o", group = "Open Trouble" },
+    { "<leader>od", function() require("trouble").toggle("document_diagnostics") end, desc = "Document Diagnostics" },
+    { "<leader>of", function() require("trouble").toggle("lsp_definitions") end, desc = "Lsp Definitions" },
+    { "<leader>ol", function() require("trouble").toggle("loclist") end, desc = "Location List" },
+    { "<leader>oi", function() require("trouble").toggle("lsp_implementations") end, desc = "Lsp Implementations" },
+    { "<leader>or", function() require("trouble").toggle("lsp_references") end, desc = "Lsp References" },
+    { "<leader>oo", function() require("trouble").toggle() end, desc = "Trouble Toggle" },
+    { "<leader>ow", function() require("trouble").toggle("workspace_diagnostics") end, desc = "Workspace Diagnostics" },
+    { "<leader>oq", function() require("trouble").toggle("quickfix") end, desc = "Quickfix list" },
+  })
+
+  wk.add({
+    mode = "n",
+    silent = true,
+    noremap = true,
+    nowait = true,
+
+    { "<leader>w", group = "windows" },
+    { "<leader>we", ":WindowsEqualize<CR>", desc = "Equalize windows" },
+    { "<leader>wh", "<C-W>H", desc = "Move window to far left" },
+    { "<leader>wl", "<C-W>L", desc = "Move window to far right" },
+    { "<leader>wj", "<C-W>J", desc = "Move window to very top" },
+    { "<leader>wk", "<C-W>K", desc = "Move window to very bottom" },
+    { "<leader>wK", "<C-w>t<C-w>H", desc = "Move window to very bottom" },
+    { "<leader>wm", ":WindowsMaximize<CR>", desc = "Toggle maximize" },
+    { "<leader>w\\", ":WindowsMaximizeHorizontally<CR>", desc = "Maximize horizontally" },
+    { "<leader>w|", ":WindowsMaximizeHorizontally<CR>", desc = "Maximize horizontally" },
+    { "<leader>w_", ":WindowsMaximizeVertically<CR>", desc = "Maximize vertically" },
+    { "<leader>w-", ":WindowsMaximizeVertically<CR>", desc = "Maximize vertically" },
+    { "<leader>wr", ":lua require('smart-splits').start_resize_mode()<CR>", desc = "Resize mode" },
+    { "<leader>ws", "<C-W>x", desc = "Swap with closest to right" },
+    { "<leader>ww", "<C-W>r", desc = "Rotate windows to down/right" },
+    { "<leader>wW", "<C-W>R", desc = "Rotate windows to up/left" },
+  })
+
+  wk.add({
+    mode = "v",
+    silent = true,
+    noremap = true,
+    nowait = true,
+
+    { "<leader>lv", function() require("refactoring").debug.print_var({ below = true }) end, desc = "Print var" },
+    { "<leader>lr", group = "Refactor" },
+    { "<leader>lre", function() require("refactoring").refactor("Extract Function") end, desc = "Extract function" },
+    { "<leader>lrf", function() require("refactoring").refactor("Extract Function To File") end, desc = "Extract function to file" },
+    { "<leader>lrv", function() require("refactoring").refactor("Extract Variable") end, desc = "Extract variable" },
+    { "<leader>lri", function() require("refactoring").refactor("Inline Variable") end, desc = "Inline variable" },
+    { "<leader>lrr", function() require("telescope").extensions.refactoring.refactors() end, desc = "Refactor" },
+
+    { "<leader>d", group = "Debug" },
+    { "<leader>de", ":lua require('dapui').eval()<CR>", desc = "Evaluate expression" },
+
+    { "<leader>g", group = "Git" },
+    { "<leader>gr", function()
+      require("gitsigns").reset_hunk({ vim.fn.line("."), vim.fn.line("v") })
+    end, desc = "Reset Hunk" },
+    { "<leader>gs", function()
+      require("gitsigns").stage_hunk({ vim.fn.line("."), vim.fn.line("v") })
+    end, desc = "Stage Hunk" },
+  })
 end
 
 M.noice = function()
@@ -1895,6 +1825,7 @@ M.lsp_config = function()
   local util = M._lsp_utils
   require("mason").setup()
 
+  local capabilities = util.mkcaps(true)
   local on_attach = util.on_attach
 
 

@@ -55,16 +55,6 @@ M.text_case = {
   { "ga.", "<cmd>TextCaseOpenTelescope<CR>", mode = { "n", "v" }, desc = "Telescope" },
 }
 
-M.which_key = {
-  { "<Leader>", mode = { "n", "v" } },
-  { "z",        mode = { "n", "v" } },
-  { "y",        mode = { "n", "v" } },
-  { "c",        mode = { "n", "v" } },
-  { "g",        mode = { "n", "v" } },
-  { "d",        mode = { "n", "v" } },
-  { "]",        mode = { "n", "v" } },
-  { "[",        mode = { "n", "v" } }
-}
 M.vimwiki = { "<Space>ww" }
 M.neoscroll = { '<C-u>', '<C-d>', '<C-b>', '<C-f>', '<C-y>', '<C-e>', 'zt', 'zz', 'zb' }
 
