@@ -624,6 +624,7 @@ M.which_key = function()
     show_help = true,                 -- show help message on the command line when the popup is visible
     triggers = {
       { "<auto>", mode = "nixsotc" },
+      { "<localleader>", mode = "n" },
     }
   })
 
@@ -644,6 +645,7 @@ M.which_key = function()
     { "<leader>q", ":q<CR>", hidden = true },
     { "<leader>u", ":UndotreeToggle<CR>", desc = "Toggle undotree" },
     { "<leader>m", ":WindowsMaximize<CR>", desc = "Toggle maximize" },
+    { "<leader>r", group = "Replace" },
   })
 
   wk.add({

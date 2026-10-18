@@ -4,6 +4,42 @@ if vim.g.neovide then
   vim.g.neovide_cursor_vfx_mode = "torpedo"
 end
 
+local rot13_enabled = {}
+
+local function rot13_char(c)
+  local b = string.byte(c)
+
+  if b >= string.byte("a") and b <= string.byte("z") then
+    return string.char((b - string.byte("a") + 13) % 26 + string.byte("a"))
+  elseif b >= string.byte("A") and b <= string.byte("Z") then
+    return string.char((b - string.byte("A") + 13) % 26 + string.byte("A"))
+  end
+
+  return c
+end
+
+local group = vim.api.nvim_create_augroup("Rot13Typing", { clear = true })
+
+vim.api.nvim_create_autocmd("InsertCharPre", {
+  group = group,
+  callback = function()
+    local buf = vim.api.nvim_get_current_buf()
+
+    if rot13_enabled[buf] then
+      vim.v.char = rot13_char(vim.v.char)
+    end
+  end,
+})
+
+vim.api.nvim_create_user_command("Rot13", function()
+  local buf = vim.api.nvim_get_current_buf()
+  rot13_enabled[buf] = not rot13_enabled[buf]
+
+  vim.notify(
+    "ROT13 typing: " .. (rot13_enabled[buf] and "ON" or "OFF")
+  )
+end, {})
+
 
 vim.g.transparent_enabled = false
 local fn = vim.fn
@@ -243,7 +279,11 @@ M.autocmds.last_location = {
 }
 
 M.autocmds.auto_reload_config = { -- reload programs when their config changes
-  { "BufWritePost", config .. "kitty/kitty.conf", "silent !kill -USR1 $KITTY_PID" },
+  {
+    "BufWritePost",
+    config .. "kitty/kitty.conf",
+    "silent !kitten @ --to unix:/tmp/mykitty-$KITTY_PID load-config --no-response",
+  },
   { "BufWritePost", config .. "tmux/tmux.conf",   "silent !tmux source-file ~/.config/tmux/tmux.conf" },
 }
 
@@ -436,62 +476,34 @@ require("lazy").setup({
           })
         end,
       },
-      {
-        "mrjones2014/smart-splits.nvim",
-        config = function()
-          require('smart-splits').setup({
-            -- Ignored filetypes (only while resizing)
-            ignored_filetypes = {
-              'nofile',
-              'quickfix',
-              'prompt',
-            },
-            -- Ignored buffer types (only while resizing)
-            ignored_buftypes = { 'NvimTree', 'neo-tree', 'undotree' },
-            -- the default number of lines/columns to resize by at a time
-            default_amount = 3,
-            -- whether to wrap to opposite side when cursor is at an edge
-            -- e.g. by default, moving left at the left edge will jump
-            -- to the rightmost window, and vice versa, same for up/down.
-            wrap_at_edge = 'split',
-            -- when moving cursor between splits left or right,
-            -- place the cursor on the same row of the *screen*
-            -- regardless of line numbers. False by default.
-            -- Can be overridden via function parameter, see Usage.
-            move_cursor_same_row = false,
-            -- resize mode options
-            resize_mode = {
-              -- key to exit persistent resize mode
-              quit_key = '<ESC>',
-              -- keys to use for moving in resize mode
-              -- in order of left, down, up' right
-              resize_keys = { 'h', 'j', 'k', 'l' },
-              -- set to true to silence the notifications
-              -- when entering/exiting persistent resize mode
-              silent = false,
-              -- must be functions, they will be executed when
-              -- entering or exiting the resize mode
-              hooks = {
-                -- on_enter = function() vim.notify('Entering resize mode') end,
-                -- on_leave = function() vim.notify('Exiting resize mode, bye') end
-                on_enter = nil,
-                on_leave = nil
-              }
-            },
-            -- ignore these autocmd events (via :h eventignore) while processing
-            -- smart-splits.nvim computations, which involve visiting different
-            -- buffers and windows. These events will be ignored during processing,
-            -- and un-ignored on completed. This only applies to resize events,
-            -- not cursor movement events.
-            ignored_events = {
-              'BufEnter',
-              'WinEnter',
-            },
-            -- enable or disable the tmux integration
-            tmux_integration = false,
-          })
-        end,
-      },
+      -- {
+      --   "mrjones2014/smart-splits.nvim",
+      --   build="./kitty/install-kittens.bash",
+      --   lazy = false,
+      --   config = function()
+      --     require('smart-splits').setup()
+      --   end,
+      --   keys = {
+      --     { "<C-h>", require('smart-splits').move_cursor_left,  desc = "Move left a Split",  mode = { "n" } },
+      --     { "<C-j>", require('smart-splits').move_cursor_down,  desc = "Move down a Split",  mode = { "n" } },
+      --     { "<C-k>", require('smart-splits').move_cursor_up,    desc = "Move up a Split",    mode = { "n" } },
+      --     { "<C-l>", require('smart-splits').move_cursor_right, desc = "Move right a Split", mode = { "n" } }
+      --   }
+      -- },
+      -- {
+      --   "MunsMan/kitty-navigator.nvim",
+      --   build = function()
+      --     vim.fn.system("cp navigate_kitty.py ~/.config/kitty")
+      --     -- vim.fn.system("cp pass_keys.py ~/.config/kitty")
+      --     -- using my custom pass_keys.py which allows me to resize
+      --   end,
+      --   keys = {
+      --     { "<C-h>", function() require("kitty-navigator").navigateLeft() end,  desc = "Move left a Split",  mode = { "n" } },
+      --     { "<C-j>", function() require("kitty-navigator").navigateDown() end,  desc = "Move down a Split",  mode = { "n" } },
+      --     { "<C-k>", function() require("kitty-navigator").navigateUp() end,    desc = "Move up a Split",    mode = { "n" } },
+      --     { "<C-l>", function() require("kitty-navigator").navigateRight() end, desc = "Move right a Split", mode = { "n" } }
+      --   }
+      -- },
       {
         'kevinhwang91/nvim-ufo',
         dependencies = 'kevinhwang91/promise-async',
@@ -906,7 +918,13 @@ require("lazy").setup({
       },
       {
         "MagicDuck/grug-far.nvim",
-        opts = { headerMaxWidth = 80 },
+        opts = {
+          headerMaxWidth = 80,
+          keymaps = {
+            close = { n = "<localleader>q" },
+            qflist = { n = "<localleader>Q" },
+          },
+        },
         cmd = "GrugFar",
         keys = keys.grug_far,
       },
@@ -1269,6 +1287,12 @@ require("lazy").setup({
         },
         -- event = "VeryLazy",
         config = setup_plugins.telescope,
+      },
+      { -- there is also integration with rainbow-delimiters. check read me if you want
+        "lukas-reineke/indent-blankline.nvim",
+        event = "VeryLazy",
+        opts = options.indent_blankline,
+        main = "ibl",
       },
       {
         "hiphish/rainbow-delimiters.nvim",

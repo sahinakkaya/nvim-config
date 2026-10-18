@@ -16,31 +16,114 @@ M.comment = {
   { "gb", mode = { "n", "v" } },
 }
 
--- M.spectre = {
---   { '<leader>rr', '<cmd>lua require("spectre").toggle()<CR>',                             desc = "Toggle Spectre" },
---   { '<leader>rw', '<cmd>lua require("spectre").open_visual({select_word=true})<CR>',      desc = "Search current word" },
---   { '<leader>rw', '<esc><cmd>lua require("spectre").open_visual()<CR>',                   mode = "v",                     desc = "Search current word" },
---   { '<leader>rp', '<cmd>lua require("spectre").open_file_search({select_word=true})<CR>', desc = "Search on current file" }
--- }
-
 M.grug_far = {
+  {
+    "<leader>rr",
+    function()
+      require("grug-far").toggle_instance({
+        instanceName = "find-and-replace",
+        staticTitle = "Find and Replace",
+      })
+    end,
+    desc = "Toggle find and replace",
+  },
   {
     "<leader>rw",
     function()
-      local is_visual = vim.fn.mode():lower():find("v")
-      if is_visual then     -- needed to make visual selection work
-        vim.cmd([[normal! v]])
-      end
-      local grug = require("grug-far");
-      (is_visual and grug.with_visual_selection or grug.grug_far)({
-            prefills = { filesFilter = "*." .. vim.fn.expand("%:e") },
-          })
+      require("grug-far").open({
+        prefills = { search = vim.fn.expand("<cword>") },
+      })
     end,
-    mode = { "n", "v" },
-    desc = "Search and Replace",
+    desc = "Current word",
   },
-  { '<leader>rr', '<cmd>lua require("spectre").toggle()<CR>',                             desc = "Toggle Spectre" },
-  { '<leader>rp', '<cmd>lua require("spectre").open_file_search({select_word=true})<CR>', desc = "Search on current file" }
+  {
+    "<leader>rw",
+    function()
+      require("grug-far").open()
+    end,
+    mode = "x",
+    desc = "Visual selection",
+  },
+  {
+    "<leader>rf",
+    function()
+      local path = vim.fn.expand("%")
+      if path == "" then
+        vim.notify("Current buffer has no file path", vim.log.levels.WARN)
+        return
+      end
+
+      require("grug-far").open({
+        prefills = { paths = path },
+      })
+    end,
+    mode = { "n", "x" },
+    desc = "Current file",
+  },
+  {
+    "<leader>ri",
+    function()
+      require("grug-far").open({
+        visualSelectionUsage = "auto-detect",
+      })
+    end,
+    mode = "x",
+    desc = "Within selected range",
+  },
+  {
+    "<leader>rs",
+    function()
+      local search = vim.fn.getreg("/")
+      if search ~= "" and vim.startswith(search, "\\<") and vim.endswith(search, "\\>") then
+        search = "\\b" .. search:sub(3, -3) .. "\\b"
+      elseif search ~= "" and vim.startswith(search, "\\V") then
+        search = search:sub(3)
+      end
+
+      local instance = require("grug-far").open({
+        prefills = { search = search },
+      })
+      instance:when_ready(function()
+        instance:goto_input("replacement")
+      end)
+    end,
+    mode = { "n", "x" },
+    desc = "Last search or selection",
+  },
+  {
+    "<leader>rh",
+    function()
+      local grug = require("grug-far")
+      local entry = grug.get_last_history_entry()
+      local options = {}
+
+      if entry then
+        options.prefills = entry
+        options.engine = entry.engine
+        options.replacementInterpreter = entry.replacementInterpreter
+      end
+
+      grug.open(options)
+    end,
+    mode = { "n", "x" },
+    desc = "Last history entry",
+  },
+  {
+    "<leader>ra",
+    function()
+      require("grug-far").open({ engine = "astgrep" })
+    end,
+    mode = { "n", "x" },
+    desc = "AST-grep",
+  },
+  {
+    "<leader>rt",
+    function()
+      require("grug-far").open({ transient = true })
+    end,
+    mode = { "n", "x" },
+    desc = "Transient search",
+  },
 }
 
 M.nvim_dap_python = { "<leader>ds", "<leader>dt" }
