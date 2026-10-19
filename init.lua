@@ -1045,6 +1045,7 @@ require("lazy").setup({
       {
         "cormacrelf/dark-notify",
         event = "VeryLazy",
+        enabled = vim.uv.os_uname().sysname == "Darwin",
         config = function()
           require("dark_notify").run()
         end,
